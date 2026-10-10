@@ -23,6 +23,10 @@ const _expectedMotionAssets = <int, String>{
   20: 'assets/art/characters/firtina_avcisi_motion.png',
   21: 'assets/art/characters/ruzgar_seyircisi_motion.png',
   22: 'assets/art/characters/kiyi_orakcisi_motion.png',
+  23: 'assets/art/characters/gelgit_yargici_motion.png',
+  25: 'assets/art/characters/tac_muhafizi_motion.png',
+  26: 'assets/art/characters/golge_duellocu_motion.png',
+  27: 'assets/art/characters/sancak_cadisi_motion.png',
 };
 
 void main() {
@@ -32,7 +36,8 @@ void main() {
     for (final entry in _expectedMotionAssets.entries) {
       expect(rivalMotionAtlasAssetForEncounter(entry.key), entry.value);
     }
-    expect(rivalMotionAtlasAssetForEncounter(23), isNull);
+    expect(rivalMotionAtlasAssetForEncounter(24), contains('observatory_priest'));
+    expect(rivalMotionAtlasAssetForEncounter(28), isNull);
     expect(rivalMotionAtlasAssetForEncounter(8), contains('fener_champion'));
   });
 
@@ -72,30 +77,32 @@ void main() {
         final rgba = (await frame.image.toByteData(
           format: ui.ImageByteFormat.rawRgba,
         ))!;
-        final cornerAlphas = <int>[
-          rgba.getUint8(3),
-          rgba.getUint8((size.width.toInt() - 1) * 4 + 3),
-          rgba.getUint8(
-            ((size.height.toInt() - 1) * size.width.toInt()) * 4 + 3,
-          ),
-          rgba.getUint8(
-            (((size.height.toInt() - 1) * size.width.toInt()) +
-                        size.width.toInt() -
-                        1) *
-                    4 +
-                3,
-          ),
-        ];
+        final cellCornerAlphas = <int>[];
+        for (var row = 0; row < 2; row++) {
+          for (var column = 0; column < 3; column++) {
+            final left = column * 512;
+            final right = left + 511;
+            final top = row * 512;
+            final bottom = top + 511;
+            for (final y in [top, bottom]) {
+              for (final x in [left, right]) {
+                cellCornerAlphas.add(
+                  rgba.getUint8((y * size.width.toInt() + x) * 4 + 3),
+                );
+              }
+            }
+          }
+        }
         frame.image.dispose();
         codec.dispose();
-        return (size, cornerAlphas);
+        return (size, cellCornerAlphas);
       });
 
       expect(decoded?.$1, const Size(1536, 1024), reason: asset);
       expect(
         decoded?.$2,
         everyElement(lessThan(8)),
-        reason: '$asset outer corners should be transparent',
+        reason: '$asset outer corners of all six cells should be transparent',
       );
       expect(find.byType(FighterArt), findsOneWidget, reason: asset);
       expect(tester.takeException(), isNull, reason: asset);

@@ -80,8 +80,40 @@ void main() {
       rivalMotionAtlasAssetForEncounter(18),
       'assets/art/characters/ayna_kilic_motion.png',
     );
+    expect(
+      rivalMotionAtlasAssetForEncounter(19),
+      'assets/art/characters/gelgit_muhurcusu_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(20),
+      'assets/art/characters/firtina_avcisi_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(21),
+      'assets/art/characters/ruzgar_seyircisi_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(22),
+      'assets/art/characters/kiyi_orakcisi_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(23),
+      'assets/art/characters/gelgit_yargici_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(25),
+      'assets/art/characters/tac_muhafizi_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(26),
+      'assets/art/characters/golge_duellocu_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(27),
+      'assets/art/characters/sancak_cadisi_motion.png',
+    );
     expect(rivalMotionAtlasAssetForEncounter(0), isNull);
-    expect(rivalMotionAtlasAssetForEncounter(19), isNull);
+    expect(rivalMotionAtlasAssetForEncounter(28), isNull);
     expect(rivalMotionAtlasFrame(FighterMotion.attack, 0.1), 1);
     expect(rivalMotionAtlasFrame(FighterMotion.attack, 0.5), 2);
     expect(rivalMotionAtlasFrame(FighterMotion.hit, 0.5), 3);

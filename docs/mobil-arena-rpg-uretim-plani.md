@@ -1,7 +1,7 @@
 # Mobil Arena RPG — Oyun ve Üretim Planı
 
 **Belge türü:** Ürün tanımı, oyun tasarım belgesi ve üretim yol haritası  
-**Sürüm:** 1.29
+**Sürüm:** 1.30
 **Tarih:** 10 Ekim 2026  
 **Durum:** Tam oyun üretim planı; Flutter uygulaması geniş kapsamlı oynanabilir içerik içeriyor ve yayın kapılarını kapatma çalışması sürüyor  
 **Çalışma adı:** Kül Çemberi  
@@ -792,6 +792,14 @@ Tek kişi birden çok rol üstlenebilir; ancak tasarım kartı, asset manifesti 
 - `rivalMotionAtlasAssetsByEncounter` artık 32 ana karşılaşmanın 20’sine (#1–18, #24, #32) özel atlas bağlıyor. #19–23 ve #25–31 için 12 rig daha gerekiyor.
 - Harita/test güncellemesinden sonra `flutter test --no-pub --reporter compact`: **163/163 test geçti**; `dart analyze` çıkış kodu 0, 29 bilgi düzeyi lint notu. Release build bu atlas grubundan sonra henüz yeniden alınmadı.
 - Poz-özel kahraman aksiyon kareleri katmanlı özelleştirme ve kuşanılan teçhizatla hâlâ birlikte kullanılmıyor. Mevcut varlıklar bu pozlarda teçhizatı doğru hizalamak için yeterli değil; poz-özel katmanlı karakter varlıkları gerekir. UI glyph kapsamı, silah/arena VFX varyantları ve önceki kayıttaki mağaza/yayın/cihaz QA kapıları da açık.
+
+### 13.7 Ek doğrulama kaydı (10 Ekim 2026)
+
+- #19 Gelgit Mührücüsü, #20 Fırtına Avcısı, #21 Rüzgâr Seyircisi ve #22 Kıyı Orakçısı için dört hareket atlası eklendi. 1536×1024 RGBA dosyalarının her biri 3×2 düzende altı 512×512 poza sahiptir; runtime dosyaları kaynak master’larıyla bayt bayt aynı, hücre köşelerindeki alfa değerleri 0–1 aralığında. Atlaslar ayrıca görsel olarak incelendi.
+- `test/rival_motion_assets_test.dart` 19–22 eşlemelerini ve #23’ün henüz eşlenmediğini doğrulayacak şekilde güncellendi. İki odaklı test dosyası birlikte **4/4 test** geçti.
+- #19–22 eklemesinden sonra `flutter test --no-pub --reporter compact`: **163/163 test geçti**. `dart format --output=none --set-exit-if-changed` üç değişen Dart dosyasında temiz; `dart analyze` çıkış kodu 0, 29 bilgi düzeyi lint notu.
+- `rivalMotionAtlasAssetsByEncounter` şu anda 32 ana karşılaşmanın 24’üne (#1–22, #24, #32) atlas bağlıyor. #23 ve #25–31 için sekiz rig gerekiyor. Bu batch’ten sonra web/Android release build yeniden alınmadı.
+- Katmanlı oyuncu görünüşü ve kuşanılan teçhizatın poz-özel aksiyon atlaslarıyla hizalanması, kalan UI glyph/VFX kapsamı ve Android/iOS yayın kimliği, imza, mağaza, gizlilik, yaş derecelendirmesi, destek kanalı ile gerçek cihaz QA kapıları hâlâ açık.
 
 ## 14. Riskler ve azaltma planı
 
