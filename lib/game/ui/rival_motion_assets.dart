@@ -30,6 +30,10 @@ const Map<int, String> rivalMotionAtlasAssetsByEncounter = <int, String>{
   25: 'assets/art/characters/tac_muhafizi_motion.png',
   26: 'assets/art/characters/golge_duellocu_motion.png',
   27: 'assets/art/characters/sancak_cadisi_motion.png',
+  28: 'assets/art/characters/demir_cellat_motion.png',
+  29: 'assets/art/characters/tahtsiz_varis_motion.png',
+  30: 'assets/art/characters/kul_komutani_motion.png',
+  31: 'assets/art/characters/muhur_kirici_motion.png',
   32: 'assets/art/characters/circle_master_motion.png',
 };
 

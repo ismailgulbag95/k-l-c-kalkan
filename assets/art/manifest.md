@@ -221,3 +221,25 @@ These four original, transparent masters continue the 1536×1024 RGBA, 3×2 atla
 | 20 → `characters/firtina_avcisi_motion.png` | `characters/firtina_avcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-38f15028-c64b-46d9-b94b-5e07ed1c5ae3.png` | Fırtına Avcısı; charcoal-armored storm boss with a forked spear and phase-two lightning | 1536×1024 RGBA; 2,175,462 bytes |
 | 21 → `characters/ruzgar_seyircisi_motion.png` | `characters/ruzgar_seyircisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-8653c2b2-32b5-42de-ad22-b005916e2c2a.png` | Rüzgâr Seyircisi; agile hooded wind duelist with one curved short sword | 1536×1024 RGBA; 2,159,004 bytes |
 | 22 → `characters/kiyi_orakcisi_motion.png` | `characters/kiyi_orakcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-bb0e8a73-b4bc-4e19-a9b3-c5272591dcf0.png` | Kıyı Orakçısı; elite masked coastal champion with shell seals and a hooked spear-polearm | 1536×1024 RGBA; 2,424,238 bytes |
+
+## Rival motion atlases, encounters 23 and 25–27
+
+Four original transparent PNG masters extend the 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell shows the same full-body rival in this pose order: idle, wind-up, attack/cast, hit recoil, guard, defeat. Each runtime atlas is a byte-for-byte copy of its generated master and is registered under the listed encounter ID in `lib/game/ui/rival_motion_assets.dart`. Encounter 24 retains its dedicated Observatory High Priest champion portrait.
+
+| Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
+|---|---|---|---|---:|
+| 23 → `characters/gelgit_yargici_motion.png` | `characters/gelgit_yargici_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-07c45991-b294-48e9-a75f-ded31de449ae.png` | Gelgit Yargıcı; armored tidal judge with a crystal spear-scepter and a clearly awakened phase-two tide aura | 1536×1024 RGBA; 2,617,318 bytes |
+| 25 → `characters/tac_muhafizi_motion.png` | `characters/tac_muhafizi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-8262a8d5-df4a-4e1f-a28c-45bb4d2051cf.png` | Taç Muhafızı; crown-crested armored sentinel with a broad shield and heavy iron maul | 1536×1024 RGBA; 2,467,031 bytes |
+| 26 → `characters/golge_duellocu_motion.png` | `characters/golge_duellocu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-be615e90-9910-4728-98db-a7f70dff90ad.png` | Gölge Düellocu; agile hooded shadow fighter with a short sword and parrying dagger | 1536×1024 RGBA; 2,327,797 bytes |
+| 27 → `characters/sancak_cadisi_motion.png` | `characters/sancak_cadisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-24c0e17c-dd3d-45d6-baef-23b541d67fd3.png` | Sancak Cadısı; arcana-heavy spear mage with a torn burgundy pennant and teal banner-sigil magic | 1536×1024 RGBA; 2,648,476 bytes |
+
+## Rival motion atlases, encounters 28–31
+
+Four original transparent masters extend the shared 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell contains one full-body pose in this order: idle, wind-up, attack, hit recoil, guard, defeat. Runtime PNGs are byte-for-byte copies of the generated masters and are registered by stable encounter ID in `lib/game/ui/rival_motion_assets.dart`. Encounter 24 keeps the Observatory High Priest atlas, and encounter 32 keeps the Circle Master champion atlas.
+
+| Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
+|---|---|---|---|---:|
+| 28 → `characters/demir_cellat_motion.png` | `characters/demir_cellat_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8698792c-9559-47a7-89a9-dd41b1ab5d4e.png` | Demir Cellat; broad iron executioner with a rust-red tabard and oversized two-handed cleaver | 1536×1024 RGBA; 2,402,631 bytes |
+| 29 → `characters/tahtsiz_varis_motion.png` | `characters/tahtsiz_varis_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-26360c8c-ceab-41bb-96e1-bf1c09cdd0a0.png` | Tahtsız Varis; lean displaced heir duelist in worn teal court cloth with a slender curved sword | 1536×1024 RGBA; 2,377,992 bytes |
+| 30 → `characters/kul_komutani_motion.png` | `characters/kul_komutani_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8b3e9587-8d4c-4278-8dd9-9467748ce9e0.png` | Kül Komutanı; soot-armored officer with burgundy command pennon and a long poleaxe | 1536×1024 RGBA; 2,198,052 bytes |
+| 31 → `characters/muhur_kirici_motion.png` | `characters/muhur_kirici_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-68339330-49d6-4018-8838-656bb0137065.png` | Mühür Kırıcı; compact slate-armored breaker with a broad ring-faced breach hammer | 1536×1024 RGBA; 2,483,789 bytes |

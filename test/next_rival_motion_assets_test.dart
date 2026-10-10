@@ -27,6 +27,10 @@ const _expectedMotionAssets = <int, String>{
   25: 'assets/art/characters/tac_muhafizi_motion.png',
   26: 'assets/art/characters/golge_duellocu_motion.png',
   27: 'assets/art/characters/sancak_cadisi_motion.png',
+  28: 'assets/art/characters/demir_cellat_motion.png',
+  29: 'assets/art/characters/tahtsiz_varis_motion.png',
+  30: 'assets/art/characters/kul_komutani_motion.png',
+  31: 'assets/art/characters/muhur_kirici_motion.png',
 };
 
 void main() {
@@ -36,8 +40,14 @@ void main() {
     for (final entry in _expectedMotionAssets.entries) {
       expect(rivalMotionAtlasAssetForEncounter(entry.key), entry.value);
     }
-    expect(rivalMotionAtlasAssetForEncounter(24), contains('observatory_priest'));
-    expect(rivalMotionAtlasAssetForEncounter(28), isNull);
+    expect(
+      rivalMotionAtlasAssetForEncounter(24),
+      'assets/art/characters/observatory_priest_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(32),
+      'assets/art/characters/circle_master_motion.png',
+    );
     expect(rivalMotionAtlasAssetForEncounter(8), contains('fener_champion'));
   });
 
@@ -66,9 +76,21 @@ void main() {
 
       final decoded = await tester.runAsync(() async {
         final data = await rootBundle.load(asset);
-        final codec = await ui.instantiateImageCodec(
-          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+        final bytes = data.buffer.asUint8List(
+          data.offsetInBytes,
+          data.lengthInBytes,
         );
+        expect(bytes.sublist(0, 8), const [
+          137,
+          80,
+          78,
+          71,
+          13,
+          10,
+          26,
+          10,
+        ], reason: '$asset should be a PNG');
+        final codec = await ui.instantiateImageCodec(bytes);
         final frame = await codec.getNextFrame();
         final size = Size(
           frame.image.width.toDouble(),

@@ -3768,6 +3768,70 @@ class _BattleMotionPulse {
   final HeroActionPose? actionPose;
 }
 
+class CombatStatusBadge extends StatelessWidget {
+  const CombatStatusBadge({super.key, required this.status});
+  final StatusKind status;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizedLabel = gameText(context, 'label.status.${status.name}');
+    final color = switch (status) {
+      StatusKind.stagger => GamePalette.gold,
+      StatusKind.bleed => GamePalette.rust,
+      StatusKind.burn => const Color(0xFFE57338),
+      StatusKind.brokenGuard => GamePalette.effort,
+    };
+    final glyph = glyphForStatusKind(status);
+
+    return Semantics(
+      container: true,
+      label: localizedLabel,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+        decoration: BoxDecoration(
+          color: const Color(0xEE101719),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withValues(alpha: 0.75), width: 1),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 4,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: ExcludeSemantics(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GameGlyph(
+                glyph,
+                size: 13,
+                color: color,
+                excludeFromSemantics: true,
+              ),
+              const SizedBox(width: 3.5),
+              Flexible(
+                child: Text(
+                  localizedLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: GamePalette.parchment,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: .3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _BattleMotionCue {
   const _BattleMotionCue(this.actor, this.motion, {this.actionPose});
 
@@ -4186,30 +4250,47 @@ class _BattlePageState extends State<BattlePage> {
                     const SizedBox(height: 8),
                     for (final rule in result.audienceReport.rules)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              rule.completed
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              color: rule.completed
-                                  ? GamePalette.teal
-                                  : GamePalette.muted,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                gameText(context, rule.message.id),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  height: 1.3,
+                        padding: const EdgeInsets.symmetric(vertical: 2.5),
+                        child: Semantics(
+                          container: true,
+                          checked: rule.completed,
+                          label: gameText(context, rule.message.id),
+                          child: ExcludeSemantics(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GameGlyph(
+                                  audienceGlyphForMessageId(rule.message.id),
+                                  size: 14,
+                                  color: rule.completed
+                                      ? GamePalette.teal
+                                      : GamePalette.muted,
+                                  selected: rule.completed,
+                                  excludeFromSemantics: true,
                                 ),
-                              ),
+                                const SizedBox(width: 5),
+                                Icon(
+                                  rule.completed
+                                      ? Icons.check_circle
+                                      : Icons.radio_button_unchecked,
+                                  color: rule.completed
+                                      ? GamePalette.teal
+                                      : GamePalette.muted,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    gameText(context, rule.message.id),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                   ],
@@ -4617,6 +4698,7 @@ class _BattlePageState extends State<BattlePage> {
                     child: Column(
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Column(
@@ -4665,6 +4747,18 @@ class _BattlePageState extends State<BattlePage> {
                                     color: GamePalette.mana,
                                     compact: true,
                                   ),
+                                  if (engine.player.statuses.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: [
+                                        for (final status
+                                            in engine.player.statuses.keys)
+                                          CombatStatusBadge(status: status),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -4714,6 +4808,19 @@ class _BattlePageState extends State<BattlePage> {
                                     color: GamePalette.mana,
                                     compact: true,
                                   ),
+                                  if (engine.opponent.statuses.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      alignment: WrapAlignment.end,
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: [
+                                        for (final status
+                                            in engine.opponent.statuses.keys)
+                                          CombatStatusBadge(status: status),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

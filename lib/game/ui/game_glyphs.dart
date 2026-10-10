@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../domain/models.dart';
 import '../l10n/game_localizations.dart';
 import 'design.dart';
 
@@ -21,6 +22,14 @@ enum GameGlyphKind {
   guard,
   magic,
   supply,
+  statusStagger,
+  statusBleed,
+  statusBurn,
+  statusBrokenGuard,
+  audienceTactics,
+  audienceAnswerAttack,
+  audienceAvoidHazard,
+  audienceChangeRange,
 }
 
 /// Resolves a stable default semantic label for [kind], using localized game
@@ -42,6 +51,14 @@ String defaultGlyphSemanticLabel(BuildContext? context, GameGlyphKind kind) {
         GameGlyphKind.guard => 'label.stat.guard',
         GameGlyphKind.supply => 'ui.filter.supplies',
         GameGlyphKind.coin => null,
+        GameGlyphKind.statusStagger => 'label.status.stagger',
+        GameGlyphKind.statusBleed => 'label.status.bleed',
+        GameGlyphKind.statusBurn => 'label.status.burn',
+        GameGlyphKind.statusBrokenGuard => 'label.status.brokenGuard',
+        GameGlyphKind.audienceTactics => 'battle.audience.tactics',
+        GameGlyphKind.audienceAnswerAttack => 'battle.audience.answerAttack',
+        GameGlyphKind.audienceAvoidHazard => 'battle.audience.avoidHazard',
+        GameGlyphKind.audienceChangeRange => 'battle.audience.changeRange',
       };
       if (key != null) {
         return gameText(context, key);
@@ -66,8 +83,86 @@ String defaultGlyphSemanticLabel(BuildContext? context, GameGlyphKind kind) {
     GameGlyphKind.guard => 'Savunma',
     GameGlyphKind.magic => 'MANA',
     GameGlyphKind.supply => 'Sarf',
+    GameGlyphKind.statusStagger => 'Sendeleme',
+    GameGlyphKind.statusBleed => 'Kanama',
+    GameGlyphKind.statusBurn => 'Yanma',
+    GameGlyphKind.statusBrokenGuard => 'Kırık gard',
+    GameGlyphKind.audienceTactics => 'En az iki farklı taktik yaklaşım kullan',
+    GameGlyphKind.audienceAnswerAttack =>
+      'Gösterilen saldırı niyetine gardla karşılık ver',
+    GameGlyphKind.audienceAvoidHazard =>
+      'Arena tehlikesinden hasar almadan çık',
+    GameGlyphKind.audienceChangeRange => 'Mesafeyi en az bir kez değiştir',
   };
 }
+
+/// Maps a [StatusKind] to its corresponding [GameGlyphKind].
+GameGlyphKind glyphForStatusKind(
+  StatusKind? status, {
+  GameGlyphKind fallback = GameGlyphKind.statusStagger,
+}) {
+  return switch (status) {
+    StatusKind.stagger => GameGlyphKind.statusStagger,
+    StatusKind.bleed => GameGlyphKind.statusBleed,
+    StatusKind.burn => GameGlyphKind.statusBurn,
+    StatusKind.brokenGuard => GameGlyphKind.statusBrokenGuard,
+    null => fallback,
+  };
+}
+
+/// Maps a status enum name or identifier string to its corresponding [GameGlyphKind].
+GameGlyphKind glyphForStatusId(
+  String? id, {
+  GameGlyphKind fallback = GameGlyphKind.statusStagger,
+}) {
+  return switch (id) {
+    'stagger' || 'label.status.stagger' => GameGlyphKind.statusStagger,
+    'bleed' || 'label.status.bleed' => GameGlyphKind.statusBleed,
+    'burn' || 'label.status.burn' => GameGlyphKind.statusBurn,
+    'brokenGuard' ||
+    'label.status.brokenGuard' => GameGlyphKind.statusBrokenGuard,
+    _ => fallback,
+  };
+}
+
+/// Generic status-to-glyph resolver accepting either a [StatusKind] or a [String].
+GameGlyphKind glyphForStatus(
+  Object? status, {
+  GameGlyphKind fallback = GameGlyphKind.statusStagger,
+}) {
+  if (status is StatusKind) {
+    return glyphForStatusKind(status, fallback: fallback);
+  }
+  if (status is String) {
+    return glyphForStatusId(status, fallback: fallback);
+  }
+  return fallback;
+}
+
+/// Returns the specific audience glyph if [id] is known, or null if unknown.
+GameGlyphKind? tryAudienceGlyphForMessageId(String? id) {
+  return switch (id) {
+    'battle.audience.tactics' => GameGlyphKind.audienceTactics,
+    'battle.audience.answerAttack' => GameGlyphKind.audienceAnswerAttack,
+    'battle.audience.avoidHazard' => GameGlyphKind.audienceAvoidHazard,
+    'battle.audience.changeRange' => GameGlyphKind.audienceChangeRange,
+    _ => null,
+  };
+}
+
+/// Maps an audience criterion message ID to its corresponding [GameGlyphKind].
+///
+/// Returns [fallback] (defaults to [GameGlyphKind.arena]) for unknown message IDs.
+GameGlyphKind audienceGlyphForMessageId(
+  String? id, {
+  GameGlyphKind fallback = GameGlyphKind.arena,
+}) => tryAudienceGlyphForMessageId(id) ?? fallback;
+
+/// Alias for [audienceGlyphForMessageId] for callers resolving by rule ID.
+GameGlyphKind glyphForAudienceRule(
+  String? messageId, {
+  GameGlyphKind fallback = GameGlyphKind.arena,
+}) => audienceGlyphForMessageId(messageId, fallback: fallback);
 
 /// A focused, original vector glyph drawn with [CustomPainter].
 ///
@@ -193,6 +288,22 @@ class _GameGlyphPainter extends CustomPainter {
         _paintMagic(canvas, strokePaint, fillPaint);
       case GameGlyphKind.supply:
         _paintSupply(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.statusStagger:
+        _paintStatusStagger(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.statusBleed:
+        _paintStatusBleed(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.statusBurn:
+        _paintStatusBurn(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.statusBrokenGuard:
+        _paintStatusBrokenGuard(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.audienceTactics:
+        _paintAudienceTactics(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.audienceAnswerAttack:
+        _paintAudienceAnswerAttack(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.audienceAvoidHazard:
+        _paintAudienceAvoidHazard(canvas, strokePaint, fillPaint);
+      case GameGlyphKind.audienceChangeRange:
+        _paintAudienceChangeRange(canvas, strokePaint, fillPaint);
     }
 
     canvas.restore();
@@ -579,6 +690,277 @@ class _GameGlyphPainter extends CustomPainter {
       height: 3.5,
     );
     canvas.drawRect(buckle, stroke);
+  }
+
+  void _paintStatusStagger(Canvas canvas, Paint stroke, Paint fill) {
+    // Central impact diamond / dazed spark
+    final star = Path()
+      ..moveTo(12, 7)
+      ..lineTo(13.8, 10.2)
+      ..lineTo(17, 12)
+      ..lineTo(13.8, 13.8)
+      ..lineTo(12, 17)
+      ..lineTo(10.2, 13.8)
+      ..lineTo(7, 12)
+      ..lineTo(10.2, 10.2)
+      ..close();
+    if (selected) {
+      canvas.drawPath(star, fill);
+    }
+    canvas.drawPath(star, stroke);
+
+    // Orbiting dizzy / dazed arcs
+    canvas.drawArc(
+      Rect.fromCircle(center: const Offset(12, 12), radius: 8.5),
+      -math.pi * 0.85,
+      math.pi * 0.65,
+      false,
+      stroke,
+    );
+    canvas.drawCircle(const Offset(18.5, 7.5), 1.3, stroke);
+
+    canvas.drawArc(
+      Rect.fromCircle(center: const Offset(12, 12), radius: 8.5),
+      math.pi * 0.15,
+      math.pi * 0.65,
+      false,
+      stroke,
+    );
+    canvas.drawCircle(const Offset(5.5, 16.5), 1.3, stroke);
+
+    // Concussive shock accents
+    canvas.drawLine(const Offset(5, 7), const Offset(7.5, 8.5), stroke);
+    canvas.drawLine(const Offset(19, 17), const Offset(16.5, 15.5), stroke);
+  }
+
+  void _paintStatusBleed(Canvas canvas, Paint stroke, Paint fill) {
+    // Primary blood droplet
+    final drop = Path()
+      ..moveTo(12, 3.5)
+      ..cubicTo(12, 3.5, 5.5, 11.5, 5.5, 15.5)
+      ..cubicTo(5.5, 19.5, 8.4, 21.5, 12, 21.5)
+      ..cubicTo(15.6, 21.5, 18.5, 19.5, 18.5, 15.5)
+      ..cubicTo(18.5, 11.5, 12, 3.5, 12, 3.5)
+      ..close();
+
+    if (selected) {
+      canvas.drawPath(drop, fill);
+    }
+    canvas.drawPath(drop, stroke);
+
+    // Curved blood slit / specular reflection
+    final slit = Path()
+      ..moveTo(9, 13)
+      ..cubicTo(8.5, 15.5, 10, 18.5, 12, 19);
+    canvas.drawPath(slit, stroke);
+
+    // Trailing dripping droplet
+    canvas.drawCircle(const Offset(18, 7.5), 1.5, stroke);
+  }
+
+  void _paintStatusBurn(Canvas canvas, Paint stroke, Paint fill) {
+    // Outer flame silhouette
+    final flame = Path()
+      ..moveTo(12, 2.5)
+      ..cubicTo(13.5, 5.5, 16.5, 7.5, 16.5, 10.5)
+      ..cubicTo(16.5, 12.0, 15.5, 13.0, 14.5, 13.5)
+      ..cubicTo(17.5, 14.5, 19.0, 17.0, 18.5, 19.5)
+      ..cubicTo(18.0, 21.5, 15.5, 22.5, 12, 22.5)
+      ..cubicTo(8.5, 22.5, 5.5, 21.0, 5.5, 18.0)
+      ..cubicTo(5.5, 15.0, 8.0, 13.0, 9.5, 10.5)
+      ..cubicTo(10.5, 9.0, 10.5, 6.5, 12, 2.5)
+      ..close();
+
+    if (selected) {
+      canvas.drawPath(flame, fill);
+    }
+    canvas.drawPath(flame, stroke);
+
+    // Inner ember core
+    final inner = Path()
+      ..moveTo(12, 11)
+      ..cubicTo(14, 13, 14.5, 15, 14.5, 17)
+      ..cubicTo(14.5, 19.5, 13.2, 20.5, 12, 20.5)
+      ..cubicTo(10.8, 20.5, 9.5, 19.5, 9.5, 17)
+      ..cubicTo(9.5, 14.5, 11, 13, 12, 11)
+      ..close();
+    canvas.drawPath(inner, stroke);
+
+    // Floating spark
+    canvas.drawCircle(const Offset(7, 6.5), 1.1, stroke);
+  }
+
+  void _paintStatusBrokenGuard(Canvas canvas, Paint stroke, Paint fill) {
+    // Fractured shield split into two jagged halves
+    final leftHalf = Path()
+      ..moveTo(5, 4.5)
+      ..lineTo(10.5, 4.5)
+      ..lineTo(13, 8.5)
+      ..lineTo(9.5, 12.5)
+      ..lineTo(13.5, 16.5)
+      ..lineTo(11, 21.2)
+      ..cubicTo(8.5, 20.2, 5, 17.5, 5, 12.0)
+      ..close();
+
+    final rightHalf = Path()
+      ..moveTo(13.5, 4.5)
+      ..lineTo(19, 4.5)
+      ..lineTo(19, 12.0)
+      ..cubicTo(19, 17.5, 15.5, 20.2, 13, 21.2)
+      ..lineTo(15.5, 16.5)
+      ..lineTo(11.5, 12.5)
+      ..lineTo(15, 8.5)
+      ..lineTo(12.5, 4.5)
+      ..close();
+
+    if (selected) {
+      canvas.drawPath(leftHalf, fill);
+      canvas.drawPath(rightHalf, fill);
+    }
+    canvas.drawPath(leftHalf, stroke);
+    canvas.drawPath(rightHalf, stroke);
+
+    // Impact crack shards
+    canvas.drawLine(const Offset(16.5, 9.5), const Offset(18.5, 7.5), stroke);
+    canvas.drawLine(const Offset(6, 14), const Offset(8, 16), stroke);
+  }
+
+  void _paintAudienceTactics(Canvas canvas, Paint stroke, Paint fill) {
+    const pivot = Offset(12, 19.5);
+    if (selected) {
+      canvas.drawCircle(pivot, 2.0, fill);
+    }
+    canvas.drawCircle(pivot, 2.0, stroke);
+
+    // Center direct tactical arrow
+    canvas.drawLine(const Offset(12, 17.5), const Offset(12, 4.5), stroke);
+    final topHead = Path()
+      ..moveTo(9.5, 7.5)
+      ..lineTo(12, 3.5)
+      ..lineTo(14.5, 7.5);
+    canvas.drawPath(topHead, stroke);
+
+    // Left diverging tactical route
+    final leftPath = Path()
+      ..moveTo(10.5, 18)
+      ..cubicTo(7, 16, 5.5, 12, 5.5, 7.5);
+    canvas.drawPath(leftPath, stroke);
+    final leftHead = Path()
+      ..moveTo(3.5, 10)
+      ..lineTo(5.5, 6.5)
+      ..lineTo(8.5, 9);
+    canvas.drawPath(leftHead, stroke);
+
+    // Right diverging tactical route
+    final rightPath = Path()
+      ..moveTo(13.5, 18)
+      ..cubicTo(17, 16, 18.5, 12, 18.5, 7.5);
+    canvas.drawPath(rightPath, stroke);
+    final rightHead = Path()
+      ..moveTo(15.5, 9)
+      ..lineTo(18.5, 6.5)
+      ..lineTo(20.5, 10);
+    canvas.drawPath(rightHead, stroke);
+  }
+
+  void _paintAudienceAnswerAttack(Canvas canvas, Paint stroke, Paint fill) {
+    // Incoming attack blade/spear thrust from top-left
+    canvas.drawLine(const Offset(3.5, 3.5), const Offset(11, 11), stroke);
+    canvas.drawLine(const Offset(4, 7), const Offset(7, 4), stroke);
+    final bladeTip = Path()
+      ..moveTo(9, 12.5)
+      ..lineTo(12, 12)
+      ..lineTo(12.5, 9);
+    canvas.drawPath(bladeTip, stroke);
+
+    // Defensive ward / parrying shield arc
+    final ward = Path()
+      ..moveTo(10.5, 20)
+      ..cubicTo(14.5, 19, 19, 14.5, 20, 10.5)
+      ..lineTo(17.5, 8)
+      ..cubicTo(16.5, 12, 12, 16.5, 8, 17.5)
+      ..close();
+    if (selected) {
+      canvas.drawPath(ward, fill);
+    }
+    canvas.drawPath(ward, stroke);
+
+    // Parry deflection sparks
+    canvas.drawLine(const Offset(11.5, 8.5), const Offset(11.5, 6), stroke);
+    canvas.drawLine(const Offset(15, 12), const Offset(17.5, 12), stroke);
+    canvas.drawLine(const Offset(8.5, 11.5), const Offset(6, 11.5), stroke);
+    canvas.drawCircle(const Offset(12, 12), 1.2, stroke);
+  }
+
+  void _paintAudienceAvoidHazard(Canvas canvas, Paint stroke, Paint fill) {
+    // Floor baseline
+    canvas.drawLine(const Offset(3, 21), const Offset(21, 21), stroke);
+
+    // Arena hazard spikes
+    final spikes = Path()
+      ..moveTo(3.5, 21)
+      ..lineTo(6.5, 15.5)
+      ..lineTo(9.5, 21)
+      ..lineTo(12.5, 14)
+      ..lineTo(15.5, 21)
+      ..lineTo(18.5, 16)
+      ..lineTo(20.5, 21);
+    canvas.drawPath(spikes, stroke);
+
+    // Overhead evasion leap arc
+    final leap = Path()
+      ..moveTo(3.5, 14)
+      ..cubicTo(6, 4, 18, 4, 20.5, 14);
+    if (selected) {
+      final leapFill = Path.from(leap)
+        ..lineTo(3.5, 14)
+        ..close();
+      canvas.drawPath(leapFill, fill);
+    }
+    canvas.drawPath(leap, stroke);
+
+    // Evasion arrow / agile landing
+    final landingArrow = Path()
+      ..moveTo(17.5, 12.5)
+      ..lineTo(20.5, 14)
+      ..lineTo(19.5, 10);
+    canvas.drawPath(landingArrow, stroke);
+    canvas.drawCircle(const Offset(12, 6.5), 1.4, stroke);
+  }
+
+  void _paintAudienceChangeRange(Canvas canvas, Paint stroke, Paint fill) {
+    // Range axis line
+    canvas.drawLine(const Offset(3.5, 12), const Offset(20.5, 12), stroke);
+
+    // Left range arrow (close distance)
+    final leftArrow = Path()
+      ..moveTo(6.5, 8.5)
+      ..lineTo(3.0, 12)
+      ..lineTo(6.5, 15.5);
+    canvas.drawPath(leftArrow, stroke);
+
+    // Right range arrow (open distance)
+    final rightArrow = Path()
+      ..moveTo(17.5, 8.5)
+      ..lineTo(21.0, 12)
+      ..lineTo(17.5, 15.5);
+    canvas.drawPath(rightArrow, stroke);
+
+    // Distance band marker posts: Close, Medium, Far
+    canvas.drawLine(const Offset(8, 8), const Offset(8, 16), stroke);
+    canvas.drawLine(const Offset(12, 5.5), const Offset(12, 18.5), stroke);
+    canvas.drawLine(const Offset(16, 8), const Offset(16, 16), stroke);
+
+    // Range transition arc
+    final shiftArc = Path()
+      ..moveTo(8, 8)
+      ..cubicTo(8, 4.5, 16, 4.5, 16, 8);
+    canvas.drawPath(shiftArc, stroke);
+
+    if (selected) {
+      canvas.drawCircle(const Offset(12, 12), 2.5, fill);
+    }
+    canvas.drawCircle(const Offset(12, 12), 1.8, stroke);
   }
 
   @override

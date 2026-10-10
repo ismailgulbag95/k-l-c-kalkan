@@ -19,6 +19,10 @@ void main() {
         8,
         16,
         24,
+        28,
+        29,
+        30,
+        31,
         32,
       ].map(rivalMotionAtlasAssetForEncounter).toList(),
       const [
@@ -29,6 +33,10 @@ void main() {
         'assets/art/characters/fener_champion_motion.png',
         'assets/art/characters/brass_guardian_motion.png',
         'assets/art/characters/observatory_priest_motion.png',
+        'assets/art/characters/demir_cellat_motion.png',
+        'assets/art/characters/tahtsiz_varis_motion.png',
+        'assets/art/characters/kul_komutani_motion.png',
+        'assets/art/characters/muhur_kirici_motion.png',
         'assets/art/characters/circle_master_motion.png',
       ],
     );
@@ -113,7 +121,14 @@ void main() {
       'assets/art/characters/sancak_cadisi_motion.png',
     );
     expect(rivalMotionAtlasAssetForEncounter(0), isNull);
-    expect(rivalMotionAtlasAssetForEncounter(28), isNull);
+    expect(
+      rivalMotionAtlasAssetForEncounter(24),
+      'assets/art/characters/observatory_priest_motion.png',
+    );
+    expect(
+      rivalMotionAtlasAssetForEncounter(32),
+      'assets/art/characters/circle_master_motion.png',
+    );
     expect(rivalMotionAtlasFrame(FighterMotion.attack, 0.1), 1);
     expect(rivalMotionAtlasFrame(FighterMotion.attack, 0.5), 2);
     expect(rivalMotionAtlasFrame(FighterMotion.hit, 0.5), 3);
