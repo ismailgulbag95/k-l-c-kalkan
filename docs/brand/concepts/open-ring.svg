@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>A — Açık Çember</title>
+  <desc>Open arena ring with a centered ember marker.</desc>
+  <circle cx="128" cy="128" r="86" fill="none" stroke="#000" stroke-width="22" stroke-dasharray="438 103" stroke-linecap="butt" transform="rotate(-42 128 128)"/>
+  <path d="M128 83 154 128 128 173 102 128Z" fill="#000"/>
+</svg>

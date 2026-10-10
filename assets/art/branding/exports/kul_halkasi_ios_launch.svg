@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366 1024" width="1366" height="1024" role="img" aria-labelledby="title">
+  <title id="title">Kül Çemberi — iOS açılış görseli</title>
+  <defs>
+    <radialGradient id="launch-bg" cx="50%" cy="48%" r="72%">
+      <stop offset="0" stop-color="#1E292B"/>
+      <stop offset="0.58" stop-color="#151E20"/>
+      <stop offset="1" stop-color="#101719"/>
+    </radialGradient>
+  </defs>
+  <rect width="1366" height="1024" fill="url(#launch-bg)"/><g fill="#D6AD68" transform="translate(601.8050 430.8050) scale(0.63433628)"><path d="M128 15 A113 113 0 1 0 207.9 48.1 L191 65.1 A89 89 0 1 1 128 39 Z"/>
+    <circle cx="128" cy="27" r="12"/>
+    <circle cx="199.4" cy="55.6" r="12"/>
+    <path d="M128 79 L143 113 L177 128 L143 143 L128 177 L113 143 L79 128 L113 113 Z"/></g>
+</svg>
