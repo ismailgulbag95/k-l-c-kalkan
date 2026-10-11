@@ -301,10 +301,7 @@ void main() {
                     name: 'Kuzeyli',
                     isPlayer: true,
                     customization: const HeroAppearanceSelection(
-                      headOptionId: 'head_03',
-                      skinToneId: 'skin_05',
                       bodyProportionId: 'body_02',
-                      facialHairId: 'facial_hair_02',
                     ),
                     gear: const EquippedGearAppearance(
                       head: 'helm_3',

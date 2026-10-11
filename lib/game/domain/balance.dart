@@ -29,6 +29,25 @@ class GameBalance {
   static int maxEffort(int stamina) => 24 + 8 * stamina;
   static int maxMana(int arcana) => 16 + 8 * arcana;
 
+  /// One Arcana point adds one flat point to magic defense.
+  static int magicResistanceFromArcana(int arcana) => max(0, arcana);
+
+  static int magicEffectiveArmor({
+    required int physicalArmor,
+    required int arcana,
+  }) =>
+      (physicalArmor * magicArmorMultiplier).round() +
+      magicResistanceFromArcana(arcana);
+
+  /// Applies Arcana-based resistance to an already-computed elemental tick.
+  static int damageAfterArcanaResistance({
+    required int damage,
+    required int arcana,
+  }) => max(
+    1,
+    (damage * 100 / (100 + magicResistanceFromArcana(arcana))).round(),
+  );
+
   static int movementEffortCost(int agility) =>
       max(1, 4 - ((agility - 2) / 6).floor());
 
@@ -38,6 +57,10 @@ class GameBalance {
 
   static int hitChance(double chance) =>
       chance.round().clamp(minHitChance, maxHitChance);
+
+  /// Resistance subtracts percentage points from a status effect's proc chance.
+  static int statusChance(int baseChance, int resistance) =>
+      (baseChance - resistance.clamp(0, 30)).clamp(0, 100).toInt();
 
   static int armorFromGuard(int itemArmor, int guard) =>
       itemArmor + (guard * .7).floor();

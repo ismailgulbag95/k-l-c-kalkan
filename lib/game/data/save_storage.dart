@@ -39,10 +39,70 @@ class PreferencesSaveStorage implements SaveStorage {
   Future<void> write(GameSave save) async {
     final prefs = await _prefs;
     final current = prefs.getString(_key);
+    final previousBackup = prefs.getString(_backupKey);
+    var backupUpdated = false;
     if (current != null && _isValidSave(current)) {
-      await prefs.setString(_backupKey, current);
+      bool backupWritten;
+      try {
+        backupWritten = await prefs.setString(_backupKey, current);
+      } on Object {
+        await _reloadAfterFailedWrite(prefs);
+        rethrow;
+      }
+      if (!backupWritten) {
+        await _reloadAfterFailedWrite(prefs);
+        throw StateError('Failed to write save backup.');
+      }
+      backupUpdated = true;
     }
-    await prefs.setString(_key, save.encode());
+    bool primaryWritten;
+    try {
+      primaryWritten = await prefs.setString(_key, save.encode());
+    } on Object {
+      await _restoreBackupAfterFailedWrite(prefs, previousBackup);
+      await _reloadAfterFailedWrite(prefs);
+      rethrow;
+    }
+    if (!primaryWritten) {
+      var backupRestored = true;
+      if (backupUpdated) {
+        backupRestored = await _restoreBackupAfterFailedWrite(
+          prefs,
+          previousBackup,
+        );
+      }
+      await _reloadAfterFailedWrite(prefs);
+      throw StateError(
+        backupRestored
+            ? 'Failed to write save.'
+            : 'Failed to write save and restore save backup.',
+      );
+    }
+  }
+
+  Future<bool> _restoreBackupAfterFailedWrite(
+    SharedPreferences prefs,
+    String? previousBackup,
+  ) async {
+    try {
+      if (previousBackup == null) {
+        return await prefs.remove(_backupKey);
+      }
+      return await prefs.setString(_backupKey, previousBackup);
+    } on Object {
+      // The primary write failure remains the error reported to the caller.
+      return false;
+    }
+  }
+
+  Future<void> _reloadAfterFailedWrite(SharedPreferences prefs) async {
+    // SharedPreferences updates its in-process cache before the platform write
+    // completes, so discard a failed write's value before exposing its error.
+    try {
+      await prefs.reload();
+    } on Object {
+      // Preserve the storage write failure as the reported error.
+    }
   }
 
   bool _isValidSave(String raw) {
@@ -59,8 +119,53 @@ class PreferencesSaveStorage implements SaveStorage {
   @override
   Future<void> clear() async {
     final prefs = await _prefs;
-    await prefs.remove(_key);
-    await prefs.remove(_backupKey);
+    final previousPrimary = prefs.getString(_key);
+    final previousBackup = prefs.getString(_backupKey);
+
+    bool backupRemoved;
+    try {
+      backupRemoved = await prefs.remove(_backupKey);
+    } on Object {
+      await _restoreBackupAfterFailedWrite(prefs, previousBackup);
+      await _reloadAfterFailedWrite(prefs);
+      rethrow;
+    }
+    if (!backupRemoved) {
+      final backupRestored = await _restoreBackupAfterFailedWrite(
+        prefs,
+        previousBackup,
+      );
+      await _reloadAfterFailedWrite(prefs);
+      throw StateError(
+        backupRestored
+            ? 'Failed to clear save backup.'
+            : 'Failed to clear and restore save backup.',
+      );
+    }
+
+    bool primaryRemoved;
+    try {
+      primaryRemoved = await prefs.remove(_key);
+    } on Object {
+      await _restoreBackupAfterFailedWrite(
+        prefs,
+        previousPrimary ?? previousBackup,
+      );
+      await _reloadAfterFailedWrite(prefs);
+      rethrow;
+    }
+    if (!primaryRemoved) {
+      final recoveryValue = previousPrimary ?? previousBackup;
+      final backupRestored = recoveryValue == null
+          ? true
+          : await _restoreBackupAfterFailedWrite(prefs, recoveryValue);
+      await _reloadAfterFailedWrite(prefs);
+      throw StateError(
+        backupRestored
+            ? 'Failed to clear save.'
+            : 'Failed to clear save and restore save backup.',
+      );
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:ash_circuit/game/ui/design.dart';
+import 'package:ash_circuit/game/ui/hero_weapon_art.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -10,114 +11,136 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('appearance IDs map to unique in-bounds atlas cells', () {
-    const headAtlasSize = Size(1774, 887);
-    const bodyAtlasSize = Size(1536, 1024);
-    const facialHairAtlasSize = Size(1536, 1024);
-
-    final headFrames = heroHeadOptionIds
-        .map((id) => heroHeadAtlasCell(id, headAtlasSize))
-        .toList();
-    final bodyFrames = heroBodyProportionIds
-        .map((id) => heroBodyAtlasCell(id, bodyAtlasSize))
-        .toList();
-    final facialHairFrames = heroFacialHairIds
-        .map((id) => heroFacialHairAtlasCell(id, facialHairAtlasSize))
+  test('body proportion IDs map to unique in-bounds atlas cells', () {
+    const atlasSize = Size(1536, 1024);
+    final frames = heroBodyProportionIds
+        .map((id) => heroBodyAtlasCell(id, atlasSize))
         .toList();
 
-    expect(heroHeadOptionIds, hasLength(8));
-    expect(heroSkinToneIds, hasLength(8));
     expect(heroBodyProportionIds, hasLength(3));
-    expect(heroFacialHairIds, hasLength(5));
-    expect(headFrames.toSet(), hasLength(heroHeadOptionIds.length));
-    expect(bodyFrames.toSet(), hasLength(heroBodyProportionIds.length));
-    expect(facialHairFrames.toSet(), hasLength(heroFacialHairIds.length));
-    expect(
-      heroSkinToneIds.map(heroSkinToneColor).toSet(),
-      hasLength(heroSkinToneIds.length),
-    );
-
-    _expectFramesInBounds(headFrames, headAtlasSize);
-    _expectFramesInBounds(bodyFrames, bodyAtlasSize);
-    _expectFramesInBounds(facialHairFrames, facialHairAtlasSize);
-    expect(heroHeadOptionIndex('head_01'), 0);
+    expect(frames.toSet(), hasLength(heroBodyProportionIds.length));
     expect(heroBodyProportionIndex('body_01'), 0);
-    expect(heroFacialHairIndex('facial_hair_00'), 0);
-    expect(heroSkinToneColor('skin_01'), heroSkinToneColors['skin_01']);
+    _expectFramesInBounds(frames, atlasSize);
   });
 
-  test('appearance atlas PNGs are bundled and decodable', () async {
-    const paths = [
-      'assets/art/characters/hero_head_layers.png',
-      'assets/art/characters/hero_body_layers.png',
-      'assets/art/characters/hero_facial_hair_layers.png',
-    ];
-
-    for (final path in paths) {
-      final data = await rootBundle.load(path);
-      final codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-      );
-      final frame = await codec.getNextFrame();
-      expect(frame.image.width, greaterThan(0), reason: path);
-      expect(frame.image.height, greaterThan(0), reason: path);
-      frame.image.dispose();
-      codec.dispose();
-    }
-  });
-
-  testWidgets('every appearance choice composes as a distinct render', (
-    tester,
-  ) async {
-    final headRenders = await _renderSelections(
-      tester,
-      heroHeadOptionIds.map((id) => HeroAppearanceSelection(headOptionId: id)),
-    );
-    final skinRenders = await _renderSelections(
-      tester,
-      heroSkinToneIds.map((id) => HeroAppearanceSelection(skinToneId: id)),
-    );
-    final bodyRenders = await _renderSelections(
-      tester,
-      heroBodyProportionIds.map(
-        (id) => HeroAppearanceSelection(bodyProportionId: id),
-      ),
-    );
-    final facialHairRenders = await _renderSelections(
-      tester,
-      heroFacialHairIds.map((id) => HeroAppearanceSelection(facialHairId: id)),
-    );
-
-    _expectDistinctRenders(headRenders, heroHeadOptionIds, 'head');
-    _expectDistinctRenders(skinRenders, heroSkinToneIds, 'skin');
-    _expectDistinctRenders(bodyRenders, heroBodyProportionIds, 'body');
-    _expectDistinctRenders(facialHairRenders, heroFacialHairIds, 'facial hair');
-    final cleanShaven = base64Decode(facialHairRenders.first);
-    for (var index = 1; index < facialHairRenders.length; index++) {
+  test(
+    'removed color and hair choices are absent from the active selection',
+    () {
+      const defaultSelection = HeroAppearanceSelection();
+      expect(defaultSelection.isDefault, isTrue);
       expect(
-        _regionDiffers(cleanShaven, base64Decode(facialHairRenders[index])),
-        isTrue,
-        reason: '${heroFacialHairIds[index]} must be visible on the face',
+        const HeroAppearanceSelection(bodyProportionId: 'body_02').isDefault,
+        isFalse,
+      );
+    },
+  );
+
+  test(
+    'four origins resolve to separate bundled transparent atlases',
+    () async {
+      const origins = ['Kıyı', 'Ocak', 'Fırtına', 'Taç'];
+      final paths = origins.map(heroCombatBaseAssetForOrigin).toList();
+      expect(paths.toSet(), hasLength(origins.length));
+
+      for (final path in paths) {
+        final data = await rootBundle.load(path);
+        final codec = await ui.instantiateImageCodec(
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+        );
+        final frame = await codec.getNextFrame();
+        expect(frame.image.width, 1536, reason: path);
+        expect(frame.image.height, 1024, reason: path);
+        final pixels = await frame.image.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        );
+        expect(pixels, isNotNull, reason: path);
+        expect(
+          pixels!.getUint8(3),
+          0,
+          reason: 'atlas background should remain transparent: $path',
+        );
+        frame.image.dispose();
+        codec.dispose();
+      }
+    },
+  );
+
+  testWidgets('origin selection paints distinct character art', (tester) async {
+    final origins = ['Kıyı', 'Ocak', 'Fırtına', 'Taç'];
+    final renders = <String>[];
+    for (final origin in origins) {
+      renders.addAll(
+        await _renderSelections(
+          tester,
+          const [HeroAppearanceSelection()],
+          origin: origin,
+          size: const Size(180, 190),
+        ),
+      );
+    }
+    _expectDistinctRenders(renders, origins, 'origin');
+  });
+
+  testWidgets('body proportions paint distinctly for each origin', (
+    tester,
+  ) async {
+    for (final origin in ['Kıyı', 'Ocak', 'Fırtına', 'Taç']) {
+      final bodyRenders = await _renderSelections(
+        tester,
+        heroBodyProportionIds.map(
+          (id) => HeroAppearanceSelection(bodyProportionId: id),
+        ),
+        origin: origin,
+      );
+      _expectDistinctRenders(
+        bodyRenders,
+        heroBodyProportionIds,
+        '$origin body',
       );
     }
   });
 
-  testWidgets('appearance option previews paint every atlas crop', (
+  testWidgets('all weapon families paint distinctly at battle scale', (
     tester,
   ) async {
-    for (final (kind, ids) in [
-      (HeroAppearanceOptionKind.head, heroHeadOptionIds),
-      (HeroAppearanceOptionKind.body, heroBodyProportionIds),
-      (HeroAppearanceOptionKind.facialHair, heroFacialHairIds),
-    ]) {
-      for (final id in ids) {
+    final families = HeroWeaponArt.supportedFamilies.toList();
+    for (final size in [const Size(126, 156), const Size(180, 190)]) {
+      final familyRenders = <String>[];
+      for (final family in families) {
+        familyRenders.addAll(
+          await _renderSelections(
+            tester,
+            const [HeroAppearanceSelection()],
+            family: family,
+            size: size,
+          ),
+        );
+      }
+      expect(familyRenders, hasLength(families.length));
+      _expectDistinctRenders(
+        familyRenders,
+        families,
+        'weapon family at ${size.width}x${size.height}',
+      );
+    }
+  });
+
+  testWidgets('body proportion previews paint all origin atlas crops', (
+    tester,
+  ) async {
+    for (final origin in ['Kıyı', 'Ocak', 'Fırtına', 'Taç']) {
+      for (final id in heroBodyProportionIds) {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: Center(
                 child: SizedBox.square(
                   dimension: 64,
-                  child: HeroAppearanceOptionPreview(kind: kind, optionId: id),
+                  child: HeroAppearanceOptionPreview(
+                    kind: HeroAppearanceOptionKind.body,
+                    optionId: id,
+                    origin: origin,
+                  ),
                 ),
               ),
             ),
@@ -126,9 +149,8 @@ void main() {
         final preview = find.byType(CustomPaint);
         await _waitForCustomPaint(tester, preview);
         await tester.pumpAndSettle();
-
-        expect(preview, findsOneWidget, reason: id);
-        expect(tester.takeException(), isNull, reason: id);
+        expect(preview, findsOneWidget, reason: '$origin/$id');
+        expect(tester.takeException(), isNull, reason: '$origin/$id');
       }
     }
   });
@@ -154,23 +176,6 @@ void _expectDistinctRenders(
   );
 }
 
-bool _regionDiffers(List<int> first, List<int> second) {
-  const imageWidth = 504;
-  const left = 168;
-  const top = 0;
-  const width = 168;
-  const height = 136;
-  for (var y = top; y < top + height; y++) {
-    for (var x = left; x < left + width; x++) {
-      final offset = (y * imageWidth + x) * 4;
-      for (var channel = 0; channel < 4; channel++) {
-        if (first[offset + channel] != second[offset + channel]) return true;
-      }
-    }
-  }
-  return false;
-}
-
 Future<void> _waitForCustomPaint(WidgetTester tester, Finder finder) async {
   for (var attempt = 0; attempt < 25 && finder.evaluate().isEmpty; attempt++) {
     await tester.runAsync(
@@ -194,8 +199,11 @@ void _expectFramesInBounds(List<Rect> frames, Size atlasSize) {
 
 Future<List<String>> _renderSelections(
   WidgetTester tester,
-  Iterable<HeroAppearanceSelection> selections,
-) async {
+  Iterable<HeroAppearanceSelection> selections, {
+  String family = 'shortSword',
+  String origin = 'Kıyı',
+  Size size = const Size(126, 156),
+}) async {
   final rendered = <String>[];
   for (final selection in selections) {
     final key = UniqueKey();
@@ -205,10 +213,13 @@ Future<List<String>> _renderSelections(
           body: Center(
             child: RepaintBoundary(
               key: key,
-              child: SizedBox(
-                width: 126,
-                height: 156,
-                child: HeroCustomizationArt(selection: selection),
+              child: SizedBox.fromSize(
+                size: size,
+                child: HeroCustomizationArt(
+                  selection: selection,
+                  family: family,
+                  origin: origin,
+                ),
               ),
             ),
           ),
@@ -221,9 +232,7 @@ Future<List<String>> _renderSelections(
     );
     await _waitForCustomPaint(tester, composedArt);
     await tester.pumpAndSettle();
-
-    final exception = tester.takeException();
-    expect(exception, isNull, reason: selection.toString());
+    expect(tester.takeException(), isNull, reason: '$origin/$selection');
     final boundary =
         tester.renderObject(find.byKey(key)) as RenderRepaintBoundary;
     final image = await tester.runAsync(() => boundary.toImage(pixelRatio: 4));

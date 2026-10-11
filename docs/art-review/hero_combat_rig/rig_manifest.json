@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 2,
+  "integrationStatus": "blocked_after_correction_pass",
+  "statusReason": "The modular composition still has visible seams and floating gear at 126x156. A new full-figure concept candidate is not a stable 14-cell atlas and bakes one appearance into each pose. No battle customization, gear placements, pivots, sockets, masks, or occlusion layers are approved.",
+  "coordinateSystem": {
+    "origin": "top_left",
+    "units": "source_pixels",
+    "battleTarget": [126, 156],
+    "poseSampling": "single_atlas_cell",
+    "neutralFallback": {
+      "atlas": "assets/art/characters/hero_battle_atlas.png",
+      "frameIndex": 0,
+      "pose": "idle"
+    }
+  },
+  "atlases": {
+    "motion": {
+      "asset": "assets/art/characters/hero_battle_atlas.png",
+      "width": 1536,
+      "height": 1024,
+      "columns": 3,
+      "rows": 2,
+      "cellSize": [512, 512]
+    },
+    "actions": {
+      "asset": "assets/art/characters/hero_battle_actions.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rowSplitY": 459,
+      "cellWidth": 443.5,
+      "rowHeights": [459, 428],
+      "cropRule": "Use fractional source bounds. Top row is y=0..459; bottom row is y=459..887. Preserve the existing bottom-centered contain fit."
+    },
+    "fullPoseConceptCandidate": {
+      "asset": "docs/art-review/hero_combat_rig/hero_full_pose_atlas_candidate.png",
+      "width": 1382,
+      "height": 1138,
+      "format": "RGBA",
+      "promptRequestedLayout": "4x4, first 14 cells intended as row-major poses",
+      "observedLayoutStatus": "No stable cell boundaries; figures, weapon silhouettes and effects cross implied crop regions. No sourceRects are published.",
+      "use": "Review-only full-figure concept sheet; not an atlas, not runtime, and not separated into customization/equipment layers."
+    },
+    "headBase": {
+      "asset": "docs/art-review/hero_combat_rig/hero_head_base.png",
+      "width": 512,
+      "height": 512,
+      "skinMask": "docs/art-review/hero_combat_rig/hero_head_skin_mask.png",
+      "use": "Standalone hairless face source for a future fitted rig; head placement is not validated against any of the 14 battle cells."
+    },
+    "headOptions": {
+      "asset": "assets/art/characters/hero_head_layers.png",
+      "width": 1774,
+      "height": 887,
+      "columns": 4,
+      "rows": 2,
+      "ids": ["head_01", "head_02", "head_03", "head_04", "head_05", "head_06", "head_07", "head_08"]
+    },
+    "facialHair": {
+      "asset": "assets/art/characters/hero_facial_hair_layers.png",
+      "width": 1536,
+      "height": 1024,
+      "columns": 3,
+      "rows": 2,
+      "ids": ["facial_hair_00", "facial_hair_01", "facial_hair_02", "facial_hair_03", "facial_hair_04"]
+    },
+    "equipment": {
+      "asset": "docs/art-review/hero_combat_rig/hero_equipment_layers.png",
+      "width": 1086,
+      "height": 1448,
+      "columns": 3,
+      "rows": 4,
+      "cellSize": [362, 362],
+      "use": "Standalone transparent equipment art. It is not fitted to the player body or any battle pose."
+    },
+    "anatomyCandidate": {
+      "asset": "docs/art-review/hero_combat_rig/hero_modular_parts_master.png",
+      "width": 1536,
+      "height": 1024,
+      "columns": 4,
+      "rows": 4,
+      "use": "Unaccepted art source only; do not load as a runtime atlas."
+    }
+  },
+  "poseMap": [
+    {"id": "idle", "source": "motion", "frameIndex": 0, "sourceRect": [0, 0, 512, 512], "holdDuration": "runtime motion profile"},
+    {"id": "windUp", "source": "motion", "frameIndex": 1, "sourceRect": [512, 0, 512, 512], "holdDuration": "runtime attack profile; progress < 0.34"},
+    {"id": "attack", "source": "motion", "frameIndex": 2, "sourceRect": [1024, 0, 512, 512], "holdDuration": "runtime attack profile; progress 0.34..0.82"},
+    {"id": "hit", "source": "motion", "frameIndex": 3, "sourceRect": [0, 512, 512, 512], "holdDuration": "runtime hit profile"},
+    {"id": "guard", "source": "motion", "frameIndex": 4, "sourceRect": [512, 512, 512, 512], "holdDuration": "runtime guard profile"},
+    {"id": "victory", "source": "motion", "frameIndex": 5, "sourceRect": [1024, 512, 512, 512], "holdDuration": "runtime victory profile"},
+    {"id": "strongAttack", "source": "actions", "frameIndex": 0, "sourceRect": [0, 0, 443.5, 459], "holdDuration": "runtime attack profile"},
+    {"id": "bowDraw", "source": "actions", "frameIndex": 1, "sourceRect": [443.5, 0, 443.5, 459], "holdDuration": "runtime action profile"},
+    {"id": "bowRelease", "source": "actions", "frameIndex": 2, "sourceRect": [887, 0, 443.5, 459], "holdDuration": "runtime action profile"},
+    {"id": "dodge", "source": "actions", "frameIndex": 3, "sourceRect": [1330.5, 0, 443.5, 459], "holdDuration": "runtime dodge profile"},
+    {"id": "consumable", "source": "actions", "frameIndex": 4, "sourceRect": [0, 459, 443.5, 428], "holdDuration": "runtime action profile"},
+    {"id": "stagger", "source": "actions", "frameIndex": 5, "sourceRect": [443.5, 459, 443.5, 428], "holdDuration": "runtime hit profile"},
+    {"id": "spell", "source": "actions", "frameIndex": 6, "sourceRect": [887, 459, 443.5, 428], "holdDuration": "runtime spell profile"},
+    {"id": "defeat", "source": "actions", "frameIndex": 7, "sourceRect": [1330.5, 459, 443.5, 428], "holdDuration": "runtime defeat profile"}
+  ],
+  "conceptCandidatePoseIntent": {
+    "status": "requested_order_only_not_frame_mapping",
+    "poseOrder": ["idle", "windUp", "attack", "hit", "guard", "victory", "strongAttack", "bowDraw", "bowRelease", "dodge", "consumable", "stagger", "spell", "defeat"],
+    "reason": "The generated image has no dependable cell bounds, so these names cannot be tied to reliable sourceRects. The poseMap above remains the accepted motion/action selector mapping."
+  },
+  "customization": {
+    "headIds": ["head_01", "head_02", "head_03", "head_04", "head_05", "head_06", "head_07", "head_08"],
+    "skinToneIds": ["skin_01", "skin_02", "skin_03", "skin_04", "skin_05", "skin_06", "skin_07", "skin_08"],
+    "skinToneColors": {
+      "skin_01": "#E8B98F", "skin_02": "#DCA273", "skin_03": "#C98558", "skin_04": "#AD6B48",
+      "skin_05": "#E6C4AA", "skin_06": "#965A3E", "skin_07": "#754733", "skin_08": "#55352B"
+    },
+    "bodyProportionIds": ["body_01", "body_02", "body_03"],
+    "facialHairIds": ["facial_hair_00", "facial_hair_01", "facial_hair_02", "facial_hair_03", "facial_hair_04"],
+    "battleFitStatus": "Existing portrait layers and IDs remain available, but no body, skin mask, hair transform or facial-hair transform has passed the 8-action-pose battle-size fit review."
+  },
+  "equipment": {
+    "battleFitStatus": "The atlas is transparent runtime art, but its items are not battle-pose overlays and have no approved per-pose sockets or z-order.",
+    "items": {
+      "helm_1": {"slot": "head", "cell": [0, 0], "sourceRect": [0, 0, 362, 362]},
+      "helm_2": {"slot": "head", "cell": [0, 1], "sourceRect": [0, 362, 362, 362]},
+      "helm_3": {"slot": "head", "cell": [0, 2], "sourceRect": [0, 724, 362, 362]},
+      "helm_4": {"slot": "head", "cell": [0, 3], "sourceRect": [0, 1086, 362, 362]},
+      "coat_1": {"slot": "body", "cell": [1, 0], "sourceRect": [362, 0, 362, 362]},
+      "coat_2": {"slot": "body", "cell": [1, 1], "sourceRect": [362, 362, 362, 362]},
+      "coat_3": {"slot": "body", "cell": [1, 2], "sourceRect": [362, 724, 362, 362]},
+      "coat_4": {"slot": "body", "cell": [1, 3], "sourceRect": [362, 1086, 362, 362]},
+      "boots_1": {"slot": "boots", "cell": [2, 0], "sourceRect": [724, 0, 362, 362]},
+      "boots_2": {"slot": "boots", "cell": [2, 1], "sourceRect": [724, 362, 362, 362]},
+      "boots_3": {"slot": "boots", "cell": [2, 2], "sourceRect": [724, 724, 362, 362]},
+      "boots_4": {"slot": "boots", "cell": [2, 3], "sourceRect": [724, 1086, 362, 362]}
+    }
+  },
+  "validatedRigMetadata": {
+    "status": "none_validated_for_battle_poses",
+    "jointPivots": null,
+    "exposedSkinMasks": null,
+    "headHairFacialHairTransforms": null,
+    "equipmentSockets": null,
+    "layerOrder": null,
+    "frontBackOcclusionMasks": null,
+    "targetSizeFitSamples": null,
+    "note": "Do not infer placements from standalone fixed-standing assets or any generated full-figure concept candidate."
+  },
+  "fitAudit": {
+    "preview": "docs/art-review/hero_combat_rig/hero_14_pose_fit_preview_round2_126x156.png",
+    "idleEnlarged": "docs/art-review/hero_combat_rig/preview_idle_4x.png",
+    "result": "blocked_after_two_full_figure_candidates",
+    "targetSize": [126, 156],
+    "candidateAtlas": "docs/art-review/hero_combat_rig/hero_14_pose_atlas_candidate_round2.png",
+    "candidateAtlasFit": "failed: 1285x1224 RGBA candidate has alpha on crop edges in all 16 nominal cells; intended blank cells 14 and 15 contain fragments; target-size crops show cross-cell debris/clipping",
+    "customizationCoverage": "none: candidate bakes a single head, skin tone, body proportion, facial hair and gear look into each figure",
+    "currentRuntimeAtlasesUnchanged": true,
+    "acceptedActionFrameContract": {
+      "asset": "assets/art/characters/hero_battle_actions.png",
+      "size": [1774, 887],
+      "columns": 4,
+      "cellWidth": 443.5,
+      "rowSplitY": 459,
+      "rowHeights": [459, 428],
+      "presentationViewport": [126, 156],
+      "destinationFit": "bottom-centered 126x126 square"
+    },
+    "reviewRounds": [
+      {
+        "candidateAtlas": "docs/art-review/hero_combat_rig/hero_8_pose_full_figure_candidate_round1.png",
+        "preview": "docs/art-review/hero_combat_rig/hero_8_pose_full_figure_preview_round1_126x156.png",
+        "size": [1774, 887],
+        "format": "RGBA",
+        "alphaBounds": [23, 4, 1764, 873],
+        "sourceSampling": "accepted action atlas crop contract: four columns, y split at 459",
+        "edgeContactFrames": [0, 1, 2, 3, 4, 5, 6, 7],
+        "fitResult": "failed: all eight pose crops touch a cell edge; 126x156 preview shows clipped/cross-cell props; single full-figure appearance is baked in"
+      },
+      {
+        "candidateAtlas": "docs/art-review/hero_combat_rig/hero_14_pose_atlas_candidate_round2.png",
+        "preview": "docs/art-review/hero_combat_rig/hero_14_pose_fit_preview_round2_126x156.png",
+        "size": [1285, 1224],
+        "format": "RGBA",
+        "alphaBounds": [0, 0, 1284, 1224],
+        "equalFractionGrid": {
+          "columns": 4,
+          "rows": 4,
+          "cellSize": [321.25, 306],
+          "xEdges": [0, 321.25, 642.5, 963.75, 1285],
+          "yEdges": [0, 306, 612, 918, 1224],
+          "roundedRasterXEdges": [0, 321, 642, 964, 1285]
+        },
+        "nonEmptyCells": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        "edgeContactCells": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        "expectedBlankCells": [14, 15],
+        "fitResult": "failed: all 16 cells contain edge-touching alpha; expected blank cells contain visible fragments; crop preview shows detached props/gear and clipped silhouettes; no modular layers"
+      }
+    ],
+    "requiredArtwork": [
+      "A complete skin-safe player body base for each of the 8 action poses; author all 3 body proportions per pose or provide a validated proportion transform, with exposed-skin masks.",
+      "Pose-aligned head/hair art for all 8 head IDs, facial-hair art for all 5 IDs, skin recolor masks for all 8 skin IDs, and explicit transforms/occlusion.",
+      "Independent pose-fitted overlays for 4 helmets, 4 body-gear items and 4 boot items, with front/back masks wherever body parts cross gear.",
+      "Separate current weapon-family art and hand/grip anchors per action pose, plus separate potion art/hand-to-mouth anchor for consumable.",
+      "Eight pose records with exact source/destination rectangles, normalized pivots/sockets for head, helmet, body gear, both boots, hands and props, explicit z-order, front/back occlusion masks, and alpha-safe source bounds.",
+      "In-engine target-size review at 126x156 for default and varied appearance/equipment selections in all 8 poses before publishing placement data."
+    ]
+  }
+}

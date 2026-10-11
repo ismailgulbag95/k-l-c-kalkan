@@ -56,6 +56,7 @@ const _builds = [
     weapon: 'sword',
     growthPlan: [
       _GrowthStep(Stat.agility, 12),
+      _GrowthStep(Stat.vitality, 8),
       _GrowthStep(Stat.precision, 10),
       _GrowthStep(Stat.agility, 20),
       _GrowthStep(Stat.might, 12),
@@ -71,6 +72,7 @@ const _builds = [
     growthPlan: [
       _GrowthStep(Stat.precision, 12),
       _GrowthStep(Stat.might, 10),
+      _GrowthStep(Stat.vitality, 8),
       _GrowthStep(Stat.agility, 10),
       _GrowthStep(Stat.precision, 20),
       _GrowthStep(Stat.vitality, 12),
@@ -158,15 +160,20 @@ Future<_CampaignResult> _run(_Build build, {required int decisionMask}) async {
       );
       final goldBeforeBattle = controller.save.gold;
       await controller.startEncounter(id, seed: id * 37 + attempt * 17);
-      final battle = controller.battle!;
-      for (var turn = 0; turn < 100 && !battle.snapshot.done; turn++) {
+      for (
+        var turn = 0;
+        turn < 100 && !controller.battle!.snapshot.done;
+        turn++
+      ) {
+        final battle = controller.battle!;
         final action = _chooseAction(battle, build);
-        final error = controller.performAction(action);
+        final error = await controller.performAction(action);
         if (error != null) {
-          lastLog = _lastLines([...battle.snapshot.log, error], 32);
+          lastLog = _lastLines([...controller.battle!.snapshot.log, error], 32);
           break;
         }
       }
+      final battle = controller.battle!;
       final result = await controller.resolveBattle();
       won = result?.won ?? false;
       if (won && firstClear) {
@@ -298,7 +305,13 @@ Future<void> _shop(GameController controller, _Build build) async {
     }
   }
 
-  final itemIds = ['${build.weapon}_$act', 'coat_$act'];
+  final itemIds = build.precision && act == 4
+      ? ['bow_$act']
+      : build.precision && act == 3
+      ? ['${build.weapon}_$act']
+      : act == 4 && build.name == 'Kuvvet / Tokmak'
+      ? ['${build.weapon}_$act', 'coat_$act', 'helm_$act', 'boots_$act']
+      : ['${build.weapon}_$act', 'coat_$act'];
   for (final id in itemIds) {
     for (final item in shopItems) {
       if (item.id != id) continue;
@@ -373,7 +386,7 @@ BattleAction _chooseAction(BattleEngine battle, _Build build) {
   }
   if (finishAction != null) return finishAction;
 
-  if (snapshot.telegraphedHazard) {
+  if (snapshot.telegraphedHazard && snapshot.hazardWarningTurnsRemaining == 1) {
     final move = player.family == WeaponFamily.spear
         ? BattleAction.openDistance
         : BattleAction.closeDistance;
@@ -383,6 +396,12 @@ BattleAction _chooseAction(BattleEngine battle, _Build build) {
     if (battle.preview(move).canUse) return move;
     if (battle.preview(alternate).canUse) return alternate;
     return BattleAction.guard;
+  }
+
+  if (build.precision &&
+      player.bowPower >= 30 &&
+      battle.preview(BattleAction.bow).canUse) {
+    return BattleAction.bow;
   }
 
   if (build.arcane &&
@@ -403,8 +422,8 @@ BattleAction _chooseAction(BattleEngine battle, _Build build) {
     return BattleAction.saltCleanse;
   }
   if (attackIntent &&
-      ((intent == BattleAction.heavy && healthRatio < .55) ||
-          (intent == BattleAction.ashBurst && healthRatio < .68))) {
+      ((intent == BattleAction.heavy && healthRatio < .35) ||
+          (intent == BattleAction.ashBurst && healthRatio < .50))) {
     return BattleAction.guard;
   }
 
@@ -425,7 +444,9 @@ BattleAction _chooseAction(BattleEngine battle, _Build build) {
   for (final action in attacks) {
     final preview = battle.preview(action);
     if (!preview.canUse) continue;
-    final score = preview.estimatedDamage * preview.hitChance / 100;
+    final hitProbability = preview.hitChance / 100;
+    final score =
+        preview.estimatedDamage * hitProbability * (.5 + .5 * hitProbability);
     if (score > bestScore) {
       bestScore = score;
       best = action;

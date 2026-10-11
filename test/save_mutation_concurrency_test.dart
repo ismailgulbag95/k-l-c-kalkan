@@ -46,7 +46,7 @@ void main() {
       'purchase and concurrent spendStat both survive in memory and storage',
       () async {
         const initial = GameSave(
-          schemaVersion: 9,
+          schemaVersion: 10,
           hasHero: true,
           gold: 300,
           ownedItems: {},
@@ -96,7 +96,7 @@ void main() {
 
     test('purchase and concurrent updateHeroAppearance both survive in memory and storage', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 300,
         ownedItems: {},
@@ -121,10 +121,7 @@ void main() {
       await writeEntered.future;
 
       final appearanceFuture = controller.updateHeroAppearance(
-        headOptionId: 'head_02',
-        skinToneId: 'skin_02',
         bodyProportionId: 'body_02',
-        facialHairId: 'facial_hair_01',
       );
 
       writeGate.complete();
@@ -136,22 +133,22 @@ void main() {
 
       expect(controller.save.gold, 140);
       expect(controller.save.ownedItems, contains('sword_1'));
-      expect(controller.save.headOptionId, 'head_02');
-      expect(controller.save.skinToneId, 'skin_02');
+      expect(controller.save.headOptionId, 'head_01');
+      expect(controller.save.skinToneId, 'skin_01');
 
       final reloaded = await storage.read();
       expect(reloaded, isNotNull);
       expect(reloaded!.gold, 140);
       expect(reloaded.ownedItems, contains('sword_1'));
-      expect(reloaded.headOptionId, 'head_02');
-      expect(reloaded.skinToneId, 'skin_02');
+      expect(reloaded.headOptionId, 'head_01');
+      expect(reloaded.skinToneId, 'skin_01');
 
       controller.dispose();
     });
 
     test('purchase interleavings with buySpell, buyConsumable, and equip all survive and agree', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 500,
         level: 5,
@@ -215,7 +212,7 @@ void main() {
 
     test('shop pending plus startEncounter serializes and battle context has shop change', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 300,
         ownedItems: {},
@@ -265,7 +262,7 @@ void main() {
 
     test('failed purchase preserves economy rollback and allows queue recovery for next mutation', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 300,
         unspentStatPoints: 2,
@@ -299,43 +296,46 @@ void main() {
       controller.dispose();
     });
 
-    test('storage failure on non-shop mutation throws and queue recovers for next mutation', () async {
-      const initial = GameSave(
-        schemaVersion: 9,
-        hasHero: true,
-        gold: 300,
-        unspentStatPoints: 2,
-        stats: Stats(might: 2),
-      );
-      final storage = GatedSaveStorage(value: initial);
-      final controller = GameController(storage: storage);
-      await controller.initialize();
+    test(
+      'failed non-shop mutation rolls back and queue recovers for retry',
+      () async {
+        const initial = GameSave(
+          schemaVersion: 10,
+          hasHero: true,
+          gold: 300,
+          unspentStatPoints: 2,
+          stats: Stats(might: 2),
+        );
+        final storage = GatedSaveStorage(value: initial);
+        final controller = GameController(storage: storage);
+        await controller.initialize();
 
-      storage.shouldFail = true;
-      await expectLater(
-        controller.spendStat(Stat.might),
-        throwsA(isA<Exception>()),
-      );
+        storage.shouldFail = true;
+        await expectLater(
+          controller.spendStat(Stat.might),
+          throwsA(isA<Exception>()),
+        );
 
-      expect(controller.save.stats[Stat.might], 3);
-      expect(controller.save.unspentStatPoints, 1);
+        expect(controller.save.stats[Stat.might], 2);
+        expect(controller.save.unspentStatPoints, 2);
 
-      final uncommitted = await storage.read();
-      expect(uncommitted, isNotNull);
-      expect(uncommitted!.stats[Stat.might], 2);
-      expect(uncommitted.unspentStatPoints, 2);
+        final uncommitted = await storage.read();
+        expect(uncommitted, isNotNull);
+        expect(uncommitted!.stats[Stat.might], 2);
+        expect(uncommitted.unspentStatPoints, 2);
 
-      final statResult = await controller.spendStat(Stat.might);
-      expect(statResult, isTrue);
-      expect(controller.save.stats[Stat.might], 4);
-      expect(controller.save.unspentStatPoints, 0);
+        final statResult = await controller.spendStat(Stat.might);
+        expect(statResult, isTrue);
+        expect(controller.save.stats[Stat.might], 3);
+        expect(controller.save.unspentStatPoints, 1);
 
-      final reloaded = await storage.read();
-      expect(reloaded, isNotNull);
-      expect(reloaded!.stats[Stat.might], 4);
-      expect(reloaded.unspentStatPoints, 0);
+        final reloaded = await storage.read();
+        expect(reloaded, isNotNull);
+        expect(reloaded!.stats[Stat.might], 3);
+        expect(reloaded.unspentStatPoints, 1);
 
-      controller.dispose();
-    });
+        controller.dispose();
+      },
+    );
   });
 }

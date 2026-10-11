@@ -158,7 +158,7 @@ class GameAudioService {
   }
 
   Future<void> playIntermissionStinger(int chapter) async {
-    if (_disposed || _save.musicVolume <= 0) return;
+    if (_disposed || !_foreground || _save.musicVolume <= 0) return;
     final player = _stingerPlayer ??= AudioPlayer();
     final cue = ((chapter - 1) % 4) + 1;
     try {
@@ -175,10 +175,15 @@ class GameAudioService {
   }
 
   Future<void> _playSfx(String cue) async {
-    if (_disposed || !_save.sfxEnabled || _save.sfxVolume <= 0) return;
+    if (_disposed ||
+        !_foreground ||
+        !_save.sfxEnabled ||
+        _save.sfxVolume <= 0) {
+      return;
+    }
     final pending = _poolLoads.putIfAbsent(cue, () => _loadPool(cue));
     final pool = await pending;
-    if (_disposed || pool == null || !_save.sfxEnabled) return;
+    if (_disposed || !_foreground || pool == null || !_save.sfxEnabled) return;
     try {
       await pool.start(volume: _save.sfxVolume);
     } on Object {

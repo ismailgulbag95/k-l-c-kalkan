@@ -44,7 +44,7 @@ void main() {
   group('shop and settings persistence concurrency', () {
     test('purchase and concurrent updateSettings both survive in memory and storage', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 300,
         ownedItems: {},
@@ -103,7 +103,7 @@ void main() {
       'sale and concurrent updateSettings both survive in memory and storage',
       () async {
         const initial = GameSave(
-          schemaVersion: 9,
+          schemaVersion: 10,
           hasHero: true,
           gold: 50,
           ownedItems: {'coat_1'},
@@ -154,7 +154,7 @@ void main() {
 
     test('failed purchase with concurrent updateSettings preserves economy rollback while saving settings', () async {
       const initial = GameSave(
-        schemaVersion: 9,
+        schemaVersion: 10,
         hasHero: true,
         gold: 300,
         ownedItems: {},

@@ -151,15 +151,20 @@ _runRoad(_RoadBuild build) async {
     final attempts = <String>[];
     for (var attempt = 0; attempt < 3 && !won; attempt++) {
       await controller.startChampionsRoad(stage, seed: stage * 1000 + attempt);
-      final battle = controller.battle!;
-      for (var turn = 0; turn < 120 && !battle.snapshot.done; turn++) {
+      for (
+        var turn = 0;
+        turn < 120 && !controller.battle!.snapshot.done;
+        turn++
+      ) {
+        final battle = controller.battle!;
         final action = _chooseRoadAction(battle, build);
-        final error = controller.performAction(action);
+        final error = await controller.performAction(action);
         if (error != null) {
           attempts.add('turn $turn: $error');
           break;
         }
       }
+      final battle = controller.battle!;
       final result = await controller.resolveBattle();
       won = result?.won ?? false;
       attempts.add(

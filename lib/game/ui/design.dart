@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'audio_service.dart';
+import 'hero_weapon_art.dart';
 
 class GamePalette {
   static const ink = Color(0xFF101719);
@@ -24,6 +25,10 @@ class GamePalette {
 
 enum BattleEffectFrame { impact, dust, block, arrow, healing, wind, fire, tide }
 
+enum BattleWeaponEffectMotif { blade, impact, thrust, volley, neutral }
+
+enum BattleArenaEffectMotif { ash, ember, storm, tide, crown, circuit, neutral }
+
 const battleEffectsAtlasAsset = 'assets/art/effects/combat_effects_atlas.png';
 const battleEffectsAtlasFrames = <Rect>[
   Rect.fromLTWH(0, 0, 443.5, 443.5),
@@ -36,6 +41,464 @@ const battleEffectsAtlasFrames = <Rect>[
   Rect.fromLTWH(1330.5, 443.5, 443.5, 443.5),
 ];
 
+class BattleEffectMotionProfile {
+  const BattleEffectMotionProfile({
+    required this.duration,
+    required this.curve,
+    required this.startScale,
+    required this.endScale,
+    required this.peakOpacity,
+  });
+
+  final Duration duration;
+  final Curve curve;
+  final double startScale;
+  final double endScale;
+  final double peakOpacity;
+
+  double scaleAt(double progress) {
+    final normalizedProgress = progress.clamp(0.0, 1.0).toDouble();
+    return startScale +
+        (endScale - startScale) * curve.transform(normalizedProgress);
+  }
+
+  double opacityAt(double progress) {
+    final normalizedProgress = progress.clamp(0.0, 1.0).toDouble();
+    if (normalizedProgress == 0 || normalizedProgress == 1) return 0;
+    return (math.sin(math.pi * normalizedProgress) * peakOpacity)
+        .clamp(0.0, 1.0)
+        .toDouble();
+  }
+}
+
+const _fallbackBattleEffectMotionProfile = BattleEffectMotionProfile(
+  duration: Duration(milliseconds: 360),
+  curve: Curves.easeOutCubic,
+  startScale: .72,
+  endScale: 1.25,
+  peakOpacity: .96,
+);
+
+const _battleEffectMotionProfiles =
+    <BattleEffectFrame, BattleEffectMotionProfile>{
+      BattleEffectFrame.impact: _fallbackBattleEffectMotionProfile,
+      BattleEffectFrame.dust: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 620),
+        curve: Curves.easeOutQuad,
+        startScale: .56,
+        endScale: 1.18,
+        peakOpacity: .58,
+      ),
+      BattleEffectFrame.block: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        startScale: .82,
+        endScale: .96,
+        peakOpacity: .88,
+      ),
+      BattleEffectFrame.arrow: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 360),
+        curve: Curves.easeOutQuart,
+        startScale: .94,
+        endScale: 1.08,
+        peakOpacity: .9,
+      ),
+      BattleEffectFrame.healing: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 680),
+        curve: Curves.easeInOutSine,
+        startScale: .72,
+        endScale: 1.12,
+        peakOpacity: .78,
+      ),
+      BattleEffectFrame.wind: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 560),
+        curve: Curves.easeOutSine,
+        startScale: .68,
+        endScale: 1.18,
+        peakOpacity: .82,
+      ),
+      BattleEffectFrame.fire: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+        startScale: .78,
+        endScale: 1.1,
+        peakOpacity: 1,
+      ),
+      BattleEffectFrame.tide: BattleEffectMotionProfile(
+        duration: Duration(milliseconds: 720),
+        curve: Curves.easeInOutCubic,
+        startScale: .62,
+        endScale: 1.14,
+        peakOpacity: .8,
+      ),
+    };
+
+BattleEffectMotionProfile battleEffectMotionProfileFor(
+  BattleEffectFrame frame,
+) => _battleEffectMotionProfiles[frame] ?? _fallbackBattleEffectMotionProfile;
+
+Duration scaledBattleAnimationDuration(Duration duration, double speed) {
+  final normalizedSpeed = speed.isFinite ? speed.clamp(1.0, 2.0) : 1.0;
+  return Duration(
+    microseconds: (duration.inMicroseconds / normalizedSpeed).round(),
+  );
+}
+
+BattleEffectMotionProfile battleEffectMotionProfileForAtlasIndex(int frame) {
+  if (frame < 0 || frame >= BattleEffectFrame.values.length) {
+    return _fallbackBattleEffectMotionProfile;
+  }
+  return battleEffectMotionProfileFor(BattleEffectFrame.values[frame]);
+}
+
+class BattleEffectVisualVariant {
+  const BattleEffectVisualVariant({
+    required this.tint,
+    this.blendMode = BlendMode.modulate,
+    this.arenaId,
+    this.weaponFamily,
+    this.frame,
+  });
+
+  final Color tint;
+  final BlendMode blendMode;
+  final String? arenaId;
+  final String? weaponFamily;
+  final BattleEffectFrame? frame;
+
+  BattleWeaponEffectMotif get weaponMotif =>
+      battleWeaponEffectMotifFor(weaponFamily);
+
+  BattleArenaEffectMotif get arenaMotif => battleArenaEffectMotifFor(arenaId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BattleEffectVisualVariant &&
+          runtimeType == other.runtimeType &&
+          tint == other.tint &&
+          blendMode == other.blendMode &&
+          arenaId == other.arenaId &&
+          weaponFamily == other.weaponFamily &&
+          frame == other.frame;
+
+  @override
+  int get hashCode =>
+      Object.hash(tint, blendMode, arenaId, weaponFamily, frame);
+
+  @override
+  String toString() =>
+      'BattleEffectVisualVariant(tint: $tint, blendMode: $blendMode, arenaId: $arenaId, weaponFamily: $weaponFamily, frame: $frame)';
+}
+
+BattleWeaponEffectMotif battleWeaponEffectMotifFor(String? weaponFamily) {
+  if (weaponFamily == null) return BattleWeaponEffectMotif.neutral;
+  return switch (weaponFamily.trim().toLowerCase()) {
+    'shortsword' => BattleWeaponEffectMotif.blade,
+    'maul' => BattleWeaponEffectMotif.impact,
+    'spear' => BattleWeaponEffectMotif.thrust,
+    'bow' => BattleWeaponEffectMotif.volley,
+    _ => BattleWeaponEffectMotif.neutral,
+  };
+}
+
+BattleArenaEffectMotif battleArenaEffectMotifFor(String? arenaId) {
+  if (arenaId == null) return BattleArenaEffectMotif.neutral;
+  return switch (arenaId.trim().toLowerCase()) {
+    'kul' => BattleArenaEffectMotif.ash,
+    'kor' => BattleArenaEffectMotif.ember,
+    'firtina' => BattleArenaEffectMotif.storm,
+    'gelgit' => BattleArenaEffectMotif.tide,
+    'tac' => BattleArenaEffectMotif.crown,
+    'halka' => BattleArenaEffectMotif.circuit,
+    _ => BattleArenaEffectMotif.neutral,
+  };
+}
+
+class BattleEffectMotifPainter extends CustomPainter {
+  const BattleEffectMotifPainter(this.variant);
+
+  final BattleEffectVisualVariant? variant;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final activeVariant = variant;
+    if (activeVariant == null || size.isEmpty) return;
+
+    canvas.save();
+    canvas.scale(size.width / 100, size.height / 100);
+    final weaponPaint = Paint()
+      ..color = Color.lerp(
+        activeVariant.tint,
+        Colors.white,
+        .38,
+      )!.withValues(alpha: .78)
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 1.7;
+    final arenaPaint = Paint()
+      ..color = Color.lerp(
+        activeVariant.tint,
+        Colors.white,
+        .7,
+      )!.withValues(alpha: .65)
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = 1.2;
+
+    final frame = activeVariant.frame ?? BattleEffectFrame.impact;
+    if (isWeaponProminentEffectFrame(frame)) {
+      _paintWeaponMotif(canvas, activeVariant.weaponMotif, weaponPaint);
+    }
+    _paintArenaMotif(canvas, activeVariant.arenaMotif, arenaPaint);
+    canvas.restore();
+  }
+
+  void _paintWeaponMotif(
+    Canvas canvas,
+    BattleWeaponEffectMotif motif,
+    Paint paint,
+  ) {
+    switch (motif) {
+      case BattleWeaponEffectMotif.blade:
+        final slash = Path()
+          ..moveTo(20, 68)
+          ..cubicTo(33, 47, 58, 31, 81, 25);
+        canvas.drawPath(slash, paint);
+        canvas.drawLine(const Offset(31, 72), const Offset(76, 38), paint);
+      case BattleWeaponEffectMotif.impact:
+        for (final shard in const <(Offset, Offset)>[
+          (Offset(20, 31), Offset(28, 23)),
+          (Offset(78, 30), Offset(70, 22)),
+          (Offset(17, 67), Offset(26, 73)),
+          (Offset(82, 65), Offset(74, 73)),
+        ]) {
+          canvas.drawLine(shard.$1, shard.$2, paint);
+        }
+      case BattleWeaponEffectMotif.thrust:
+        canvas.drawLine(const Offset(13, 50), const Offset(82, 50), paint);
+        canvas.drawLine(const Offset(72, 42), const Offset(84, 50), paint);
+        canvas.drawLine(const Offset(72, 58), const Offset(84, 50), paint);
+      case BattleWeaponEffectMotif.volley:
+        canvas.drawLine(const Offset(16, 52), const Offset(82, 52), paint);
+        canvas.drawLine(const Offset(70, 45), const Offset(83, 52), paint);
+        canvas.drawLine(const Offset(70, 59), const Offset(83, 52), paint);
+        canvas.drawLine(const Offset(21, 46), const Offset(13, 52), paint);
+        canvas.drawLine(const Offset(21, 58), const Offset(13, 52), paint);
+      case BattleWeaponEffectMotif.neutral:
+        canvas.drawLine(const Offset(34, 50), const Offset(43, 50), paint);
+        canvas.drawLine(const Offset(57, 50), const Offset(66, 50), paint);
+    }
+  }
+
+  void _paintArenaMotif(
+    Canvas canvas,
+    BattleArenaEffectMotif motif,
+    Paint paint,
+  ) {
+    switch (motif) {
+      case BattleArenaEffectMotif.ash:
+        for (final point in const <Offset>[
+          Offset(28, 26),
+          Offset(72, 35),
+          Offset(25, 72),
+          Offset(74, 68),
+        ]) {
+          canvas.drawCircle(point, 1.35, paint);
+        }
+      case BattleArenaEffectMotif.ember:
+        for (final spark in const <(Offset, Offset)>[
+          (Offset(29, 29), Offset(33, 22)),
+          (Offset(72, 31), Offset(69, 23)),
+          (Offset(27, 71), Offset(31, 64)),
+          (Offset(75, 69), Offset(71, 62)),
+        ]) {
+          canvas.drawLine(spark.$1, spark.$2, paint);
+        }
+      case BattleArenaEffectMotif.storm:
+        final bolt = Path()
+          ..moveTo(73, 21)
+          ..lineTo(66, 39)
+          ..lineTo(73, 39)
+          ..lineTo(62, 59);
+        canvas.drawPath(bolt, paint);
+        canvas.drawLine(const Offset(27, 73), const Offset(35, 62), paint);
+      case BattleArenaEffectMotif.tide:
+        canvas.drawArc(
+          const Rect.fromLTRB(21, 29, 39, 47),
+          math.pi * .1,
+          math.pi * 1.35,
+          false,
+          paint,
+        );
+        canvas.drawArc(
+          const Rect.fromLTRB(64, 55, 82, 73),
+          math.pi * 1.1,
+          math.pi * 1.25,
+          false,
+          paint,
+        );
+        canvas.drawCircle(const Offset(76, 27), 1.5, paint);
+      case BattleArenaEffectMotif.crown:
+        for (final point in const <Offset>[
+          Offset(26, 36),
+          Offset(76, 36),
+          Offset(31, 72),
+          Offset(70, 70),
+        ]) {
+          canvas.drawLine(
+            Offset(point.dx - 2.5, point.dy),
+            Offset(point.dx + 2.5, point.dy),
+            paint,
+          );
+          canvas.drawLine(
+            Offset(point.dx, point.dy - 2.5),
+            Offset(point.dx, point.dy + 2.5),
+            paint,
+          );
+        }
+      case BattleArenaEffectMotif.circuit:
+        final circuit = Path()
+          ..moveTo(22, 37)
+          ..lineTo(30, 37)
+          ..lineTo(30, 30)
+          ..lineTo(38, 30)
+          ..moveTo(62, 70)
+          ..lineTo(70, 70)
+          ..lineTo(70, 63)
+          ..lineTo(78, 63);
+        canvas.drawPath(circuit, paint);
+        canvas.drawCircle(const Offset(39, 30), 1.6, paint);
+        canvas.drawCircle(const Offset(79, 63), 1.6, paint);
+      case BattleArenaEffectMotif.neutral:
+        canvas.drawCircle(const Offset(24, 24), 1.4, paint);
+        canvas.drawCircle(const Offset(76, 76), 1.4, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(BattleEffectMotifPainter oldDelegate) =>
+      variant != oldDelegate.variant;
+}
+
+const _arenaPalettes = <String, Color>{
+  'kul': Color(0xFFA5B0B5),
+  'kor': Color(0xFFE26D48),
+  'firtina': Color(0xFF63B4E6),
+  'gelgit': Color(0xFF4DBDA2),
+  'tac': Color(0xFFE8B652),
+  'halka': Color(0xFFB85D6B),
+};
+
+const _defaultArenaColor = Color(0xFFD6CEBF);
+
+const _weaponPalettes = <String, Color>{
+  'shortSword': Color(0xFFE8EEF5),
+  'maul': Color(0xFFD99B57),
+  'spear': Color(0xFFE88A6E),
+  'bow': Color(0xFFA6C987),
+};
+
+const _defaultWeaponColor = Color(0xFFE0D8CB);
+
+const _effectFrameAccents = <BattleEffectFrame, Color>{
+  BattleEffectFrame.impact: Color(0xFFFFFFFF),
+  BattleEffectFrame.dust: Color(0xFFDDD2C2),
+  BattleEffectFrame.block: Color(0xFFE2E7ED),
+  BattleEffectFrame.arrow: Color(0xFFFFF2DF),
+  BattleEffectFrame.healing: Color(0xFFC7EBC4),
+  BattleEffectFrame.wind: Color(0xFFD2EFF7),
+  BattleEffectFrame.fire: Color(0xFFFFD1AD),
+  BattleEffectFrame.tide: Color(0xFFB5ECE3),
+};
+
+bool isWeaponProminentEffectFrame(BattleEffectFrame frame) => switch (frame) {
+  BattleEffectFrame.impact ||
+  BattleEffectFrame.dust ||
+  BattleEffectFrame.block ||
+  BattleEffectFrame.arrow => true,
+  BattleEffectFrame.healing ||
+  BattleEffectFrame.wind ||
+  BattleEffectFrame.fire ||
+  BattleEffectFrame.tide => false,
+};
+
+BattleEffectFrame _resolveBattleEffectFrame(
+  int? frameIndex, [
+  BattleEffectFrame? frameEnum,
+]) {
+  if (frameEnum != null) return frameEnum;
+  if (frameIndex != null &&
+      frameIndex >= 0 &&
+      frameIndex < BattleEffectFrame.values.length) {
+    return BattleEffectFrame.values[frameIndex];
+  }
+  return BattleEffectFrame.impact;
+}
+
+Color _lookupArenaColor(String? arenaId) {
+  if (arenaId == null) return _defaultArenaColor;
+  final key = arenaId.trim().toLowerCase();
+  return _arenaPalettes[key] ?? _defaultArenaColor;
+}
+
+Color _lookupWeaponColor(String? weaponFamily) {
+  if (weaponFamily == null) return _defaultWeaponColor;
+  final key = weaponFamily.trim().toLowerCase();
+  return switch (key) {
+    'shortsword' => _weaponPalettes['shortSword']!,
+    'maul' => _weaponPalettes['maul']!,
+    'spear' => _weaponPalettes['spear']!,
+    'bow' => _weaponPalettes['bow']!,
+    _ => _defaultWeaponColor,
+  };
+}
+
+Color battleEffectTintFor({
+  String? arenaId,
+  String? weaponFamily,
+  BattleEffectFrame? effectFrame,
+  int? frame,
+}) {
+  final resolvedFrame = _resolveBattleEffectFrame(frame, effectFrame);
+  final arenaColor = _lookupArenaColor(arenaId);
+  final weaponColor = _lookupWeaponColor(weaponFamily);
+  final frameAccent =
+      _effectFrameAccents[resolvedFrame] ?? const Color(0xFFFFFFFF);
+
+  if (isWeaponProminentEffectFrame(resolvedFrame)) {
+    final weaponToned = Color.lerp(weaponColor, frameAccent, 0.12)!;
+    return Color.lerp(weaponToned, arenaColor, 0.28)!;
+  } else {
+    final arenaToned = Color.lerp(arenaColor, frameAccent, 0.16)!;
+    return Color.lerp(arenaToned, weaponColor, 0.28)!;
+  }
+}
+
+BattleEffectVisualVariant battleEffectVisualVariantFor({
+  String? arenaId,
+  String? weaponFamily,
+  BattleEffectFrame? effectFrame,
+  int? frame,
+  BlendMode blendMode = BlendMode.modulate,
+}) {
+  final resolvedFrame = _resolveBattleEffectFrame(frame, effectFrame);
+  final tint = battleEffectTintFor(
+    arenaId: arenaId,
+    weaponFamily: weaponFamily,
+    effectFrame: resolvedFrame,
+  );
+  return BattleEffectVisualVariant(
+    tint: tint,
+    blendMode: blendMode,
+    arenaId: arenaId,
+    weaponFamily: weaponFamily,
+    frame: resolvedFrame,
+  );
+}
+
 class BattleImpactEffect extends StatelessWidget {
   const BattleImpactEffect({
     super.key,
@@ -43,27 +506,64 @@ class BattleImpactEffect extends StatelessWidget {
     required this.alignment,
     required this.reducedMotion,
     this.frame = 0,
+    this.animationSpeed = 1,
+    this.arenaId,
+    this.weaponFamily,
+    this.tint,
+    this.visualVariant,
   });
 
   final int sequence;
   final Alignment alignment;
   final bool reducedMotion;
   final int frame;
+  final double animationSpeed;
+  final String? arenaId;
+  final String? weaponFamily;
+  final Color? tint;
+  final BattleEffectVisualVariant? visualVariant;
+
+  BattleEffectVisualVariant? get resolvedVariant {
+    if (visualVariant != null) return visualVariant;
+    if (tint != null) {
+      return BattleEffectVisualVariant(
+        tint: tint!,
+        arenaId: arenaId,
+        weaponFamily: weaponFamily,
+        frame: _resolveBattleEffectFrame(frame),
+      );
+    }
+    if (arenaId != null || weaponFamily != null) {
+      return battleEffectVisualVariantFor(
+        arenaId: arenaId,
+        weaponFamily: weaponFamily,
+        frame: frame,
+      );
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     if (sequence <= 0 || reducedMotion) return const SizedBox.shrink();
+    final motion = battleEffectMotionProfileForAtlasIndex(frame);
+    final variant = resolvedVariant;
     return IgnorePointer(
       child: Align(
         alignment: alignment,
         child: TweenAnimationBuilder<double>(
           key: ValueKey(sequence),
           tween: Tween(begin: 0, end: 1),
-          duration: const Duration(milliseconds: 440),
-          curve: Curves.easeOutCubic,
+          duration: scaledBattleAnimationDuration(
+            motion.duration,
+            animationSpeed,
+          ),
           builder: (context, progress, child) => Opacity(
-            opacity: (math.sin(math.pi * progress) * .96).clamp(0, 1),
-            child: Transform.scale(scale: .62 + progress * .58, child: child),
+            opacity: motion.opacityAt(progress),
+            child: Transform.scale(
+              scale: motion.scaleAt(progress),
+              child: child,
+            ),
           ),
           child: FutureBuilder<ui.Image>(
             future: _AtlasPortrait._decodedImages.putIfAbsent(
@@ -75,12 +575,25 @@ class BattleImpactEffect extends StatelessWidget {
               child: snapshot.data == null
                   ? const SizedBox.shrink()
                   : ExcludeSemantics(
-                      child: CustomPaint(
-                        painter: _ItemAtlasPainter(
-                          snapshot.data!,
-                          frame,
-                          battleEffectsAtlasFrames,
-                        ),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CustomPaint(
+                            painter: BattleEffectAtlasPainter(
+                              snapshot.data!,
+                              frame,
+                              battleEffectsAtlasFrames,
+                              tint: variant?.tint,
+                              visualVariant: variant,
+                              blendMode:
+                                  variant?.blendMode ?? BlendMode.modulate,
+                            ),
+                          ),
+                          if (variant != null)
+                            CustomPaint(
+                              painter: BattleEffectMotifPainter(variant),
+                            ),
+                        ],
                       ),
                     ),
             ),
@@ -103,7 +616,7 @@ ThemeData buildGameTheme() => ThemeData(
     brightness: Brightness.dark,
     surface: GamePalette.panel,
   ),
-  fontFamily: 'serif',
+  fontFamily: 'Noto Sans',
   textTheme:
       const TextTheme(
         headlineLarge: TextStyle(
@@ -114,10 +627,22 @@ ThemeData buildGameTheme() => ThemeData(
           fontWeight: FontWeight.w800,
           letterSpacing: .6,
         ),
-        titleLarge: TextStyle(fontWeight: FontWeight.w800),
-        titleMedium: TextStyle(fontWeight: FontWeight.w700),
-        bodyLarge: TextStyle(height: 1.35),
-        bodyMedium: TextStyle(height: 1.3),
+        titleLarge: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontFeatures: <ui.FontFeature>[ui.FontFeature.tabularFigures()],
+        ),
+        titleMedium: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontFeatures: <ui.FontFeature>[ui.FontFeature.tabularFigures()],
+        ),
+        bodyLarge: TextStyle(
+          height: 1.35,
+          fontFeatures: <ui.FontFeature>[ui.FontFeature.tabularFigures()],
+        ),
+        bodyMedium: TextStyle(
+          height: 1.3,
+          fontFeatures: <ui.FontFeature>[ui.FontFeature.tabularFigures()],
+        ),
       ).apply(
         bodyColor: GamePalette.parchment,
         displayColor: GamePalette.parchment,
@@ -187,6 +712,57 @@ class ArenaPropSprite extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       AtlasCellSprite(atlas: atlas, index: index, columns: 2, rows: 2);
+}
+
+class ArenaFinalPhaseLighting extends StatelessWidget {
+  const ArenaFinalPhaseLighting({
+    super.key,
+    required this.arenaId,
+    required this.isFinalPhase,
+  });
+
+  final String arenaId;
+  final bool isFinalPhase;
+
+  @override
+  Widget build(BuildContext context) => isFinalPhase
+      ? IgnorePointer(
+          child: CustomPaint(painter: _ArenaFinalPhaseLightingPainter(arenaId)),
+        )
+      : const SizedBox.expand();
+}
+
+class _ArenaFinalPhaseLightingPainter extends CustomPainter {
+  const _ArenaFinalPhaseLightingPainter(this.arenaId);
+
+  final String arenaId;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final light = Color.lerp(
+      _lookupArenaColor(arenaId),
+      GamePalette.gold,
+      .28,
+    )!;
+    final lightPaint = Paint()
+      ..shader = ui.Gradient.radial(
+        Offset(size.width * .5, size.height * .08),
+        size.width * .82,
+        [
+          light.withValues(alpha: .075),
+          light.withValues(alpha: .035),
+          light.withValues(alpha: 0),
+        ],
+        const [0, .48, 1],
+      );
+    canvas.drawRect(Offset.zero & size, lightPaint);
+  }
+
+  @override
+  bool shouldRepaint(_ArenaFinalPhaseLightingPainter oldDelegate) =>
+      arenaId != oldDelegate.arenaId;
 }
 
 class AtlasCellSprite extends StatelessWidget {
@@ -480,6 +1056,89 @@ enum FighterMotion {
   defeat,
 }
 
+class FighterMotionProfile {
+  const FighterMotionProfile({
+    required this.duration,
+    required this.curve,
+    this.amplitude = 1,
+  });
+
+  final Duration duration;
+  final Curve curve;
+  final double amplitude;
+}
+
+const _fighterMotionProfiles = <FighterMotion, FighterMotionProfile>{
+  FighterMotion.idle: FighterMotionProfile(
+    duration: Duration.zero,
+    curve: Curves.linear,
+  ),
+  FighterMotion.attack: FighterMotionProfile(
+    duration: Duration(milliseconds: 420),
+    curve: Curves.easeOutCubic,
+    amplitude: 1,
+  ),
+  FighterMotion.hit: FighterMotionProfile(
+    duration: Duration(milliseconds: 360),
+    curve: Curves.easeOutQuart,
+    amplitude: .9,
+  ),
+  FighterMotion.dodge: FighterMotionProfile(
+    duration: Duration(milliseconds: 460),
+    curve: Curves.easeOutCubic,
+    amplitude: 1.15,
+  ),
+  FighterMotion.guard: FighterMotionProfile(
+    duration: Duration(milliseconds: 300),
+    curve: Curves.easeOutSine,
+    amplitude: .75,
+  ),
+  FighterMotion.spell: FighterMotionProfile(
+    duration: Duration(milliseconds: 680),
+    curve: Curves.easeInOutCubic,
+    amplitude: 1.1,
+  ),
+  FighterMotion.status: FighterMotionProfile(
+    duration: Duration(milliseconds: 520),
+    curve: Curves.easeInOutSine,
+    amplitude: .8,
+  ),
+  FighterMotion.heal: FighterMotionProfile(
+    duration: Duration(milliseconds: 700),
+    curve: Curves.easeOutCubic,
+    amplitude: 1.05,
+  ),
+  FighterMotion.resource: FighterMotionProfile(
+    duration: Duration(milliseconds: 560),
+    curve: Curves.easeOutSine,
+    amplitude: .9,
+  ),
+  FighterMotion.move: FighterMotionProfile(
+    duration: Duration(milliseconds: 320),
+    curve: Curves.easeOutQuad,
+    amplitude: 1,
+  ),
+  FighterMotion.phase: FighterMotionProfile(
+    duration: Duration(milliseconds: 620),
+    curve: Curves.easeInOutCubic,
+    amplitude: 1.15,
+  ),
+  FighterMotion.victory: FighterMotionProfile(
+    duration: Duration(milliseconds: 760),
+    curve: Curves.easeOutBack,
+    amplitude: 1.1,
+  ),
+  FighterMotion.defeat: FighterMotionProfile(
+    duration: Duration(milliseconds: 900),
+    curve: Curves.easeInCubic,
+    amplitude: 1,
+  ),
+};
+
+FighterMotionProfile fighterMotionProfileFor(FighterMotion motion) =>
+    _fighterMotionProfiles[motion] ??
+    _fighterMotionProfiles[FighterMotion.idle]!;
+
 enum HeroActionPose {
   strongAttack,
   bowDraw,
@@ -609,12 +1268,25 @@ class ItemAtlasIcon extends StatelessWidget {
   }
 }
 
-class _ItemAtlasPainter extends CustomPainter {
-  const _ItemAtlasPainter(this.image, this.frame, this.frames);
+class BattleEffectAtlasPainter extends CustomPainter {
+  const BattleEffectAtlasPainter(
+    this.image,
+    this.frame,
+    this.frames, {
+    this.tint,
+    this.visualVariant,
+    this.blendMode = BlendMode.modulate,
+  });
 
   final ui.Image image;
   final int frame;
   final List<Rect> frames;
+  final Color? tint;
+  final BattleEffectVisualVariant? visualVariant;
+  final BlendMode blendMode;
+
+  Color? get effectiveTint => tint ?? visualVariant?.tint;
+  BlendMode get effectiveBlendMode => visualVariant?.blendMode ?? blendMode;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -625,18 +1297,24 @@ class _ItemAtlasPainter extends CustomPainter {
       fit.destination,
       Offset.zero & size,
     );
-    canvas.drawImageRect(
-      image,
-      source,
-      destination,
-      Paint()..filterQuality = FilterQuality.medium,
-    );
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    final activeTint = effectiveTint;
+    if (activeTint != null) {
+      paint.colorFilter = ColorFilter.mode(activeTint, effectiveBlendMode);
+    }
+    canvas.drawImageRect(image, source, destination, paint);
   }
 
   @override
-  bool shouldRepaint(_ItemAtlasPainter oldDelegate) =>
-      !identical(image, oldDelegate.image) || frame != oldDelegate.frame;
+  bool shouldRepaint(BattleEffectAtlasPainter oldDelegate) =>
+      !identical(image, oldDelegate.image) ||
+      frame != oldDelegate.frame ||
+      effectiveTint != oldDelegate.effectiveTint ||
+      effectiveBlendMode != oldDelegate.effectiveBlendMode;
 }
+
+typedef _ItemAtlasPainter = BattleEffectAtlasPainter;
+typedef ItemAtlasPainter = BattleEffectAtlasPainter;
 
 const storyEvidenceAtlasAsset = 'assets/art/evidence/evidence_card_atlas.png';
 const storyEvidenceAtlasFrames = <Rect>[
@@ -683,77 +1361,11 @@ class StoryEvidenceCardArt extends StatelessWidget {
   );
 }
 
-const heroHeadOptionIds = <String>[
-  'head_01',
-  'head_02',
-  'head_03',
-  'head_04',
-  'head_05',
-  'head_06',
-  'head_07',
-  'head_08',
-];
-
-const heroSkinToneIds = <String>[
-  'skin_01',
-  'skin_02',
-  'skin_03',
-  'skin_04',
-  'skin_05',
-  'skin_06',
-  'skin_07',
-  'skin_08',
-];
-
 const heroBodyProportionIds = <String>['body_01', 'body_02', 'body_03'];
-
-const heroFacialHairIds = <String>[
-  'facial_hair_00',
-  'facial_hair_01',
-  'facial_hair_02',
-  'facial_hair_03',
-  'facial_hair_04',
-];
-
-const heroSkinToneColors = <String, Color>{
-  'skin_01': Color(0xFFE8B98F),
-  'skin_02': Color(0xFFDCA273),
-  'skin_03': Color(0xFFC98558),
-  'skin_04': Color(0xFFAD6B48),
-  'skin_05': Color(0xFFE6C4AA),
-  'skin_06': Color(0xFF965A3E),
-  'skin_07': Color(0xFF754733),
-  'skin_08': Color(0xFF55352B),
-};
-
-int heroHeadOptionIndex(String id) {
-  final index = heroHeadOptionIds.indexOf(id);
-  return index < 0 ? 0 : index;
-}
 
 int heroBodyProportionIndex(String id) {
   final index = heroBodyProportionIds.indexOf(id);
   return index < 0 ? 0 : index;
-}
-
-int heroFacialHairIndex(String id) {
-  final index = heroFacialHairIds.indexOf(id);
-  return index < 0 ? 0 : index;
-}
-
-Color heroSkinToneColor(String id) =>
-    heroSkinToneColors[id] ?? heroSkinToneColors['skin_01']!;
-
-Rect heroHeadAtlasCell(String id, Size atlasSize) {
-  final index = heroHeadOptionIndex(id);
-  final cellWidth = atlasSize.width / 4;
-  final cellHeight = atlasSize.height / 2;
-  return Rect.fromLTWH(
-    (index % 4) * cellWidth,
-    (index ~/ 4) * cellHeight,
-    cellWidth,
-    cellHeight,
-  );
 }
 
 Rect heroBodyAtlasCell(String id, Size atlasSize) {
@@ -762,36 +1374,12 @@ Rect heroBodyAtlasCell(String id, Size atlasSize) {
   return Rect.fromLTWH(index * cellWidth, 0, cellWidth, atlasSize.height);
 }
 
-Rect heroFacialHairAtlasCell(String id, Size atlasSize) {
-  final index = heroFacialHairIndex(id);
-  final cellWidth = atlasSize.width / 3;
-  final cellHeight = atlasSize.height / 2;
-  return Rect.fromLTWH(
-    (index % 3) * cellWidth,
-    (index ~/ 3) * cellHeight,
-    cellWidth,
-    cellHeight,
-  );
-}
-
 class HeroAppearanceSelection {
-  const HeroAppearanceSelection({
-    this.headOptionId = 'head_01',
-    this.skinToneId = 'skin_01',
-    this.bodyProportionId = 'body_01',
-    this.facialHairId = 'facial_hair_00',
-  });
+  const HeroAppearanceSelection({this.bodyProportionId = 'body_01'});
 
-  final String headOptionId;
-  final String skinToneId;
   final String bodyProportionId;
-  final String facialHairId;
 
-  bool get isDefault =>
-      headOptionId == 'head_01' &&
-      skinToneId == 'skin_01' &&
-      bodyProportionId == 'body_01' &&
-      facialHairId == 'facial_hair_00';
+  bool get isDefault => bodyProportionId == 'body_01';
 }
 
 bool isKnownHeadGearId(String? id) =>
@@ -857,26 +1445,31 @@ class EquippedGearAppearance {
       'EquippedGearAppearance(head: $head, body: $body, boots: $boots)';
 }
 
-enum HeroAppearanceOptionKind { head, body, facialHair }
+const heroCombatBaseAsset = 'assets/art/characters/hero_combat_base_layers.png';
+
+String heroCombatBaseAssetForOrigin(String origin) =>
+    switch (origin.trim().toLowerCase()) {
+      'ocak' => 'assets/art/characters/hero_ocak_combat_base_layers.png',
+      'fırtına' => 'assets/art/characters/hero_firtina_combat_base_layers.png',
+      'taç' => 'assets/art/characters/hero_tac_combat_base_layers.png',
+      _ => heroCombatBaseAsset,
+    };
+
+enum HeroAppearanceOptionKind { body }
 
 class HeroAppearanceOptionPreview extends StatelessWidget {
   const HeroAppearanceOptionPreview({
     super.key,
     required this.kind,
     required this.optionId,
+    this.origin = 'Kıyı',
   });
 
   final HeroAppearanceOptionKind kind;
   final String optionId;
+  final String origin;
 
-  String get _asset => switch (kind) {
-    HeroAppearanceOptionKind.head =>
-      'assets/art/characters/hero_head_layers.png',
-    HeroAppearanceOptionKind.body =>
-      'assets/art/characters/hero_body_layers.png',
-    HeroAppearanceOptionKind.facialHair =>
-      'assets/art/characters/hero_facial_hair_layers.png',
-  };
+  String get _asset => heroCombatBaseAssetForOrigin(origin);
 
   @override
   Widget build(BuildContext context) => FutureBuilder<ui.Image>(
@@ -904,15 +1497,7 @@ class _HeroAppearanceOptionPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final source = switch (kind) {
-      HeroAppearanceOptionKind.head => heroHeadAtlasCell(
-        optionId,
-        Size(image.width.toDouble(), image.height.toDouble()),
-      ),
       HeroAppearanceOptionKind.body => heroBodyAtlasCell(
-        optionId,
-        Size(image.width.toDouble(), image.height.toDouble()),
-      ),
-      HeroAppearanceOptionKind.facialHair => heroFacialHairAtlasCell(
         optionId,
         Size(image.width.toDouble(), image.height.toDouble()),
       ),
@@ -942,81 +1527,46 @@ class HeroCustomizationArt extends StatelessWidget {
     super.key,
     this.selection = const HeroAppearanceSelection(),
     this.gear = const EquippedGearAppearance(),
+    this.family = 'shortSword',
+    this.origin = 'Kıyı',
   });
 
   final HeroAppearanceSelection selection;
   final EquippedGearAppearance gear;
+  final String family;
+  final String origin;
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<ui.Image>(
-    future: _AtlasPortrait._decodedImages.putIfAbsent(
-      'assets/art/characters/hero_body_layers.png',
-      () =>
-          _AtlasPortrait._decode('assets/art/characters/hero_body_layers.png'),
-    ),
-    builder: (context, bodySnapshot) {
-      final body = bodySnapshot.data;
-      if (body == null) {
-        return Image.asset(
-          'assets/art/characters/hero_kulak.webp',
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => const SizedBox.expand(),
+  Widget build(BuildContext context) {
+    final baseAsset = heroCombatBaseAssetForOrigin(origin);
+    return FutureBuilder<ui.Image>(
+      future: _AtlasPortrait._decodedImages.putIfAbsent(
+        baseAsset,
+        () => _AtlasPortrait._decode(baseAsset),
+      ),
+      builder: (context, bodySnapshot) {
+        final body = bodySnapshot.data;
+        if (body == null) return const SizedBox.expand();
+        return CustomPaint(
+          painter: _HeroCustomizationPainter(body, selection, gear, family),
         );
-      }
-      return FutureBuilder<ui.Image>(
-        future: _AtlasPortrait._decodedImages.putIfAbsent(
-          'assets/art/characters/hero_head_layers.png',
-          () => _AtlasPortrait._decode(
-            'assets/art/characters/hero_head_layers.png',
-          ),
-        ),
-        builder: (context, headSnapshot) {
-          final head = headSnapshot.data;
-          if (head == null) {
-            return Image.asset(
-              'assets/art/characters/hero_kulak.webp',
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const SizedBox.expand(),
-            );
-          }
-          return FutureBuilder<ui.Image>(
-            future: _AtlasPortrait._decodedImages.putIfAbsent(
-              'assets/art/characters/hero_facial_hair_layers.png',
-              () => _AtlasPortrait._decode(
-                'assets/art/characters/hero_facial_hair_layers.png',
-              ),
-            ),
-            builder: (context, facialHairSnapshot) => CustomPaint(
-              painter: _HeroCustomizationPainter(
-                body,
-                head,
-                facialHairSnapshot.data,
-                selection,
-                gear,
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
+      },
+    );
+  }
 }
 
 class _HeroCustomizationPainter extends CustomPainter {
   const _HeroCustomizationPainter(
     this.bodyAtlas,
-    this.headAtlas,
-    this.facialHairAtlas,
     this.selection,
     this.gear,
+    this.family,
   );
 
   final ui.Image bodyAtlas;
-  final ui.Image headAtlas;
-  final ui.Image? facialHairAtlas;
   final HeroAppearanceSelection selection;
   final EquippedGearAppearance gear;
+  final String family;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1029,26 +1579,9 @@ class _HeroCustomizationPainter extends CustomPainter {
       bodyFit.destination,
       Offset.zero & size,
     );
+    HeroWeaponArt.paint(canvas, bodyDestination, family);
     final bodyPaint = Paint()..filterQuality = FilterQuality.medium;
     canvas.drawImageRect(bodyAtlas, bodySource, bodyDestination, bodyPaint);
-
-    if (selection.skinToneId != 'skin_01') {
-      final mask = _skinMask(bodyDestination);
-      canvas.save();
-      canvas.clipPath(mask);
-      canvas.drawImageRect(
-        bodyAtlas,
-        bodySource,
-        bodyDestination,
-        Paint()
-          ..filterQuality = FilterQuality.medium
-          ..colorFilter = ColorFilter.mode(
-            heroSkinToneColor(selection.skinToneId),
-            BlendMode.color,
-          ),
-      );
-      canvas.restore();
-    }
 
     if (gear.boots != null) {
       FighterGearPainter.paintBoots(canvas, bodyDestination, gear.boots!);
@@ -1057,10 +1590,6 @@ class _HeroCustomizationPainter extends CustomPainter {
       FighterGearPainter.paintBody(canvas, bodyDestination, gear.body!);
     }
 
-    final headSource = heroHeadAtlasCell(
-      selection.headOptionId,
-      Size(headAtlas.width.toDouble(), headAtlas.height.toDouble()),
-    );
     final headSize = bodyDestination.width * .43;
     final headDestination = Rect.fromCenter(
       center: Offset(
@@ -1070,105 +1599,16 @@ class _HeroCustomizationPainter extends CustomPainter {
       width: headSize,
       height: headSize,
     );
-    canvas.drawImageRect(
-      headAtlas,
-      headSource,
-      headDestination,
-      Paint()..filterQuality = FilterQuality.medium,
-    );
-    final facialHair = facialHairAtlas;
-    if (facialHair != null) {
-      final facialHairSource = heroFacialHairAtlasCell(
-        selection.facialHairId,
-        Size(facialHair.width.toDouble(), facialHair.height.toDouble()),
-      );
-      final faceOpening = Path()
-        ..moveTo(
-          headDestination.left + headSize * .36,
-          headDestination.top + headSize * .34,
-        )
-        ..quadraticBezierTo(
-          headDestination.left + headSize * .57,
-          headDestination.top + headSize * .27,
-          headDestination.left + headSize * .78,
-          headDestination.top + headSize * .39,
-        )
-        ..lineTo(
-          headDestination.left + headSize * .76,
-          headDestination.top + headSize * .70,
-        )
-        ..quadraticBezierTo(
-          headDestination.left + headSize * .59,
-          headDestination.top + headSize * .88,
-          headDestination.left + headSize * .40,
-          headDestination.top + headSize * .76,
-        )
-        ..close();
-      canvas.save();
-      canvas.clipPath(faceOpening);
-      canvas.drawImageRect(
-        facialHair,
-        facialHairSource,
-        headDestination,
-        Paint()..filterQuality = FilterQuality.medium,
-      );
-      canvas.restore();
-    }
-
     if (gear.head != null) {
       FighterGearPainter.paintHead(canvas, headDestination, gear.head!);
     }
   }
 
-  Path _skinMask(Rect rect) {
-    double x(double value) => rect.left + rect.width * value;
-    double y(double value) => rect.top + rect.height * value;
-    final path = Path()
-      // Face, ears and the small throat area above the scarf.
-      ..addOval(Rect.fromLTRB(x(.405), y(.035), x(.595), y(.155)))
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTRB(x(.435), y(.135), x(.575), y(.215)),
-          Radius.circular(rect.width * .025),
-        ),
-      )
-      // Bare upper arms and small hand openings around the bracers.
-      ..moveTo(x(.195), y(.215))
-      ..quadraticBezierTo(x(.155), y(.23), x(.16), y(.285))
-      ..lineTo(x(.18), y(.365))
-      ..quadraticBezierTo(x(.21), y(.39), x(.255), y(.37))
-      ..lineTo(x(.27), y(.27))
-      ..close()
-      ..moveTo(x(.70), y(.22))
-      ..quadraticBezierTo(x(.79), y(.22), x(.80), y(.30))
-      ..lineTo(x(.78), y(.375))
-      ..quadraticBezierTo(x(.75), y(.39), x(.70), y(.37))
-      ..close()
-      ..addOval(Rect.fromLTRB(x(.105), y(.455), x(.17), y(.505)))
-      ..addOval(Rect.fromLTRB(x(.79), y(.455), x(.855), y(.505)))
-      // Exposed skin beneath the split armor skirt.
-      ..moveTo(x(.365), y(.565))
-      ..lineTo(x(.47), y(.565))
-      ..lineTo(x(.465), y(.665))
-      ..quadraticBezierTo(x(.42), y(.68), x(.375), y(.655))
-      ..close()
-      ..moveTo(x(.525), y(.565))
-      ..lineTo(x(.63), y(.565))
-      ..lineTo(x(.625), y(.66))
-      ..quadraticBezierTo(x(.575), y(.68), x(.535), y(.655))
-      ..close();
-    return path;
-  }
-
   @override
   bool shouldRepaint(_HeroCustomizationPainter oldDelegate) =>
       !identical(bodyAtlas, oldDelegate.bodyAtlas) ||
-      !identical(headAtlas, oldDelegate.headAtlas) ||
-      !identical(facialHairAtlas, oldDelegate.facialHairAtlas) ||
-      selection.headOptionId != oldDelegate.selection.headOptionId ||
-      selection.skinToneId != oldDelegate.selection.skinToneId ||
       selection.bodyProportionId != oldDelegate.selection.bodyProportionId ||
-      selection.facialHairId != oldDelegate.selection.facialHairId ||
+      family != oldDelegate.family ||
       gear != oldDelegate.gear;
 }
 
@@ -1856,8 +2296,10 @@ class FighterArt extends StatelessWidget {
     this.motion = FighterMotion.idle,
     this.motionKey = 0,
     this.reducedMotion = false,
+    this.animationSpeed = 1,
     this.customization,
     this.gear = const EquippedGearAppearance(),
+    this.origin = 'Kıyı',
   });
   final int seed;
   final String name;
@@ -1873,14 +2315,18 @@ class FighterArt extends StatelessWidget {
   final FighterMotion motion;
   final int motionKey;
   final bool reducedMotion;
+  final double animationSpeed;
   final HeroAppearanceSelection? customization;
   final EquippedGearAppearance gear;
+  final String origin;
 
   @override
   Widget build(BuildContext context) {
     final fallbackArt = _fallbackArt();
+    final motionProfile = fighterMotionProfileFor(motion);
     final usesLayeredAppearance =
         (customization != null && !customization!.isDefault) ||
+        (isPlayer && origin.trim().toLowerCase() != 'kıyı') ||
         gear.hasVisibleGear;
     final fighter = Column(
       mainAxisSize: MainAxisSize.min,
@@ -1888,8 +2334,12 @@ class FighterArt extends StatelessWidget {
         SizedBox(
           width: 126,
           height: 156,
-          child: motionAtlasAsset != null && !usesLayeredAppearance
+          child:
+              motionAtlasAsset != null &&
+                  !usesLayeredAppearance &&
+                  (!isPlayer || family == 'shortSword')
               ? _FighterMotionAtlas(
+                  key: ValueKey(motionAtlasAsset!),
                   asset: motionAtlasAsset!,
                   isPlayer: isPlayer,
                   actionAsset: actionAtlasAsset,
@@ -1899,6 +2349,7 @@ class FighterArt extends StatelessWidget {
                   motion: motion,
                   motionKey: motionKey,
                   reducedMotion: reducedMotion,
+                  animationSpeed: animationSpeed,
                   fallback: fallbackArt,
                 )
               : fallbackArt,
@@ -1931,11 +2382,14 @@ class FighterArt extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey('$seed:$motionKey'),
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
+      duration: scaledBattleAnimationDuration(
+        motionProfile.duration,
+        animationSpeed,
+      ),
+      curve: motionProfile.curve,
       child: fighter,
       builder: (context, progress, child) {
-        final pulse = math.sin(math.pi * progress);
+        final pulse = math.sin(math.pi * progress) * motionProfile.amplitude;
         final direction = isPlayer ? 1.0 : -1.0;
         var dx = 0.0;
         var dy = 0.0;
@@ -1952,12 +2406,15 @@ class FighterArt extends StatelessWidget {
             dx = -direction * 7 * math.sin(math.pi * 8 * progress) * pulse;
             dy = -3 * pulse;
             scale -= .045 * pulse;
+            angle = direction * .025 * math.sin(math.pi * 8 * progress) * pulse;
           case FighterMotion.dodge:
             dx = -direction * 27 * pulse;
             dy = -4 * pulse;
+            angle = -direction * .045 * pulse;
           case FighterMotion.guard:
             dy = -4 * pulse;
             scale += .025 * pulse;
+            angle = direction * .018 * pulse;
           case FighterMotion.spell:
             angle = direction * .035 * pulse;
             dy = -7 * pulse;
@@ -1973,14 +2430,17 @@ class FighterArt extends StatelessWidget {
           case FighterMotion.move:
             dx = direction * 12 * pulse;
           case FighterMotion.phase:
+            angle = direction * .055 * pulse;
             dy = -8 * pulse;
             scale += .08 * pulse;
           case FighterMotion.victory:
             dy = -18 * pulse;
+            angle = direction * .025 * pulse;
             scale += .08 * pulse;
           case FighterMotion.defeat:
-            dy = 10 * progress;
-            scale -= .07 * progress;
+            dy = 10 * progress * motionProfile.amplitude;
+            angle = direction * .08 * progress * motionProfile.amplitude;
+            scale -= .07 * progress * motionProfile.amplitude;
         }
         return Transform.translate(
           offset: Offset(dx, dy),
@@ -1994,10 +2454,16 @@ class FighterArt extends StatelessWidget {
   }
 
   Widget _fallbackArt() {
-    if (customization != null || (isPlayer && gear.hasVisibleGear)) {
+    if (customization != null ||
+        (isPlayer &&
+            (origin.trim().toLowerCase() != 'kıyı' ||
+                gear.hasVisibleGear ||
+                family != 'shortSword'))) {
       return HeroCustomizationArt(
         selection: customization ?? const HeroAppearanceSelection(),
         gear: gear,
+        family: family,
+        origin: origin,
       );
     }
     if (portraitAsset != null) {
@@ -2031,6 +2497,7 @@ class FighterArt extends StatelessWidget {
 
 class _FighterMotionAtlas extends StatelessWidget {
   const _FighterMotionAtlas({
+    super.key,
     required this.asset,
     required this.isPlayer,
     required this.actionAsset,
@@ -2038,6 +2505,7 @@ class _FighterMotionAtlas extends StatelessWidget {
     required this.motion,
     required this.motionKey,
     required this.reducedMotion,
+    required this.animationSpeed,
     required this.fallback,
   });
 
@@ -2048,6 +2516,7 @@ class _FighterMotionAtlas extends StatelessWidget {
   final FighterMotion motion;
   final int motionKey;
   final bool reducedMotion;
+  final double animationSpeed;
   final Widget fallback;
 
   @override
@@ -2076,7 +2545,10 @@ class _FighterMotionAtlas extends StatelessWidget {
               return TweenAnimationBuilder<double>(
                 key: ValueKey('$asset:$motionKey:${motion.name}'),
                 tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 320),
+                duration: scaledBattleAnimationDuration(
+                  fighterMotionProfileFor(motion).duration,
+                  animationSpeed,
+                ),
                 curve: Curves.linear,
                 builder: (context, progress, _) => CustomPaint(
                   painter: _BattleMotionAtlasPainter(
@@ -2091,7 +2563,10 @@ class _FighterMotionAtlas extends StatelessWidget {
             return TweenAnimationBuilder<double>(
               key: ValueKey('$actionAsset:$motionKey:${motion.name}'),
               tween: Tween(begin: 0, end: 1),
-              duration: const Duration(milliseconds: 320),
+              duration: scaledBattleAnimationDuration(
+                fighterMotionProfileFor(motion).duration,
+                animationSpeed,
+              ),
               curve: Curves.linear,
               builder: (context, progress, _) => CustomPaint(
                 painter: progress < 1 || isDefeat
@@ -2105,7 +2580,10 @@ class _FighterMotionAtlas extends StatelessWidget {
       return TweenAnimationBuilder<double>(
         key: ValueKey('$asset:$motionKey:${motion.name}'),
         tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 320),
+        duration: scaledBattleAnimationDuration(
+          fighterMotionProfileFor(motion).duration,
+          animationSpeed,
+        ),
         curve: Curves.linear,
         builder: (context, progress, _) => CustomPaint(
           painter: _BattleMotionAtlasPainter(image, _motionFrame(progress)),
@@ -2201,9 +2679,12 @@ class _BattleMotionAtlasPainter extends CustomPainter {
       !identical(image, oldDelegate.image) || index != oldDelegate.index;
 }
 
+void clearDecodedImagesCache() => _AtlasPortrait.clearCache();
+
 class _AtlasPortrait extends StatelessWidget {
   const _AtlasPortrait({required this.asset, required this.index});
 
+  static void clearCache() => _decodedImages.clear();
   static final Map<String, Future<ui.Image>> _decodedImages = {};
 
   final String asset;

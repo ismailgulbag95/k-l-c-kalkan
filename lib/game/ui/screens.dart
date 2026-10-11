@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../data/content.dart';
 import '../data/intermission_decisions.dart';
@@ -11,6 +12,7 @@ import '../domain/models.dart';
 import '../l10n/game_localizations.dart';
 import 'contract_art.dart';
 import 'audio_service.dart';
+import 'audience_emblems.dart';
 import 'design.dart';
 import 'game_glyphs.dart';
 import 'rival_motion_assets.dart';
@@ -56,6 +58,9 @@ class _GameRootState extends State<GameRoot> with WidgetsBindingObserver {
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused) {
       unawaited(controller.persistActiveBattleCheckpoint());
+    } else if (state == AppLifecycleState.resumed &&
+        controller.battleCheckpointWritePending) {
+      unawaited(controller.persistActiveBattleCheckpoint());
     }
   }
 
@@ -89,7 +94,22 @@ class _GameRootState extends State<GameRoot> with WidgetsBindingObserver {
           child: MaterialApp(
             title: 'Kül Çemberi',
             debugShowCheckedModeBanner: false,
+            locale: Locale(controller.save.language == 'en' ? 'en' : 'tr'),
+            supportedLocales: const [Locale('tr'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
             theme: buildGameTheme(),
+            builder: (context, child) {
+              final media = MediaQuery.of(context);
+              final systemScale = media.textScaler.scale(14) / 14;
+              return MediaQuery(
+                data: media.copyWith(
+                  textScaler: TextScaler.linear(
+                    systemScale * controller.save.textScale,
+                  ),
+                ),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             navigatorObservers: [audioObserver],
             home: controller.save.hasHero
                 ? GameHub(controller: controller)
@@ -151,6 +171,10 @@ class GameTitle extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
+                  if (controller.schemaMigrationPending) ...[
+                    const SizedBox(height: 14),
+                    _SchemaMigrationNotice(controller: controller),
+                  ],
                   const Spacer(flex: 3),
                   GamePanel(
                     color: const Color(0xD8172021),
@@ -212,17 +236,10 @@ class _CharacterCreatorState extends State<CharacterCreator> {
   var stats = const Stats();
   int remaining = 6;
   String origin = 'Kıyı';
-  String headOptionId = 'head_01';
-  String skinToneId = 'skin_01';
   String bodyProportionId = 'body_01';
-  String facialHairId = 'facial_hair_00';
 
-  HeroAppearanceSelection get _appearanceSelection => HeroAppearanceSelection(
-    headOptionId: headOptionId,
-    skinToneId: skinToneId,
-    bodyProportionId: bodyProportionId,
-    facialHairId: facialHairId,
-  );
+  HeroAppearanceSelection get _appearanceSelection =>
+      HeroAppearanceSelection(bodyProportionId: bodyProportionId);
 
   @override
   void dispose() {
@@ -244,6 +261,7 @@ class _CharacterCreatorState extends State<CharacterCreator> {
     appBar: AppBar(
       title: Text(gameText(context, 'ui.creator.title')),
       leading: IconButton(
+        tooltip: gameText(context, 'ui.common.back'),
         onPressed: () => Navigator.pop(context),
         icon: const Icon(Icons.arrow_back),
       ),
@@ -264,6 +282,7 @@ class _CharacterCreatorState extends State<CharacterCreator> {
                         seed: 1,
                         name: gameText(context, 'ui.creator.newFighter'),
                         isPlayer: true,
+                        origin: origin,
                         portraitAsset: heroArtForAppearance(origin),
                         customization: _appearanceSelection,
                       ),
@@ -389,10 +408,7 @@ class _CharacterCreatorState extends State<CharacterCreator> {
                         name: _name.text,
                         stats: stats,
                         appearance: origin,
-                        headOptionId: headOptionId,
-                        skinToneId: skinToneId,
                         bodyProportionId: bodyProportionId,
-                        facialHairId: facialHairId,
                       );
                       if (context.mounted) Navigator.pop(context);
                     } on Object catch (error) {
@@ -418,86 +434,73 @@ class _CharacterCreatorState extends State<CharacterCreator> {
       child: Text(isEnglish ? english : turkish, style: labelStyle),
     );
 
-    ChoiceChip imageChoice({
+    Widget accessibleChoice({
+      required String group,
+      required String groupLabel,
+      required String optionId,
+      required int index,
+      required bool selected,
+      required Widget chip,
+      required VoidCallback onSelected,
+    }) {
+      final option = gameText(context, 'ui.appearance.option', {
+        'group': groupLabel,
+        'count': index + 1,
+      });
+      return Semantics(
+        key: ValueKey('creator.$group.$optionId'),
+        label: option,
+        selected: selected,
+        button: true,
+        onTap: onSelected,
+        child: ExcludeSemantics(child: chip),
+      );
+    }
+
+    Widget imageChoice({
+      required String group,
+      required String groupLabel,
       required String id,
       required bool selected,
       required HeroAppearanceOptionKind kind,
       required int displayIndex,
       required double previewHeight,
       required ValueChanged<bool> onSelected,
-    }) => ChoiceChip(
-      avatar: SizedBox(
-        width: 42,
-        height: previewHeight,
-        child: HeroAppearanceOptionPreview(kind: kind, optionId: id),
-      ),
-      label: Text('${displayIndex + 1}'),
+    }) => accessibleChoice(
+      group: group,
+      groupLabel: groupLabel,
+      optionId: id,
+      index: displayIndex,
       selected: selected,
-      onSelected: onSelected,
-      selectedColor: GamePalette.gold,
-      labelStyle: TextStyle(
-        color: selected ? GamePalette.ink : GamePalette.parchment,
-        fontWeight: FontWeight.w800,
+      onSelected: () => onSelected(true),
+      chip: ChoiceChip(
+        avatar: SizedBox(
+          width: 42,
+          height: previewHeight,
+          child: HeroAppearanceOptionPreview(
+            kind: kind,
+            optionId: id,
+            origin: origin,
+          ),
+        ),
+        label: Text('${displayIndex + 1}'),
+        selected: selected,
+        onSelected: onSelected,
+        selectedColor: GamePalette.gold,
+        labelStyle: TextStyle(
+          color: selected ? GamePalette.ink : GamePalette.parchment,
+          fontWeight: FontWeight.w800,
+        ),
+        visualDensity: VisualDensity.standard,
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       ),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
     );
 
     return GamePanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          selectorTitle('Saç ve başlık', 'Hair and headwear'),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final entry in heroHeadOptionIds.asMap().entries)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: imageChoice(
-                      id: entry.value,
-                      selected: headOptionId == entry.value,
-                      kind: HeroAppearanceOptionKind.head,
-                      displayIndex: entry.key,
-                      previewHeight: 42,
-                      onSelected: (_) =>
-                          setState(() => headOptionId = entry.value),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          selectorTitle('Ten tonu', 'Skin tone'),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              for (final entry in heroSkinToneIds.asMap().entries)
-                ChoiceChip(
-                  avatar: CircleAvatar(
-                    radius: 13,
-                    backgroundColor: heroSkinToneColor(entry.value),
-                  ),
-                  label: Text('${entry.key + 1}'),
-                  selected: skinToneId == entry.value,
-                  onSelected: (_) => setState(() => skinToneId = entry.value),
-                  selectedColor: GamePalette.gold,
-                  labelStyle: TextStyle(
-                    color: skinToneId == entry.value
-                        ? GamePalette.ink
-                        : GamePalette.parchment,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
           selectorTitle('Yapı', 'Build'),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -507,6 +510,8 @@ class _CharacterCreatorState extends State<CharacterCreator> {
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: imageChoice(
+                      group: 'body',
+                      groupLabel: gameText(context, 'ui.appearance.build'),
                       id: entry.value,
                       selected: bodyProportionId == entry.value,
                       kind: HeroAppearanceOptionKind.body,
@@ -514,28 +519,6 @@ class _CharacterCreatorState extends State<CharacterCreator> {
                       previewHeight: 48,
                       onSelected: (_) =>
                           setState(() => bodyProportionId = entry.value),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          selectorTitle('Yüz kılı', 'Facial hair'),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final entry in heroFacialHairIds.asMap().entries)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: imageChoice(
-                      id: entry.value,
-                      selected: facialHairId == entry.value,
-                      kind: HeroAppearanceOptionKind.facialHair,
-                      displayIndex: entry.key,
-                      previewHeight: 42,
-                      onSelected: (_) =>
-                          setState(() => facialHairId = entry.value),
                     ),
                   ),
               ],
@@ -678,7 +661,18 @@ class _GameHubState extends State<GameHub> {
     ),
     body: SafeArea(
       top: false,
-      child: IndexedStack(index: selected, children: pages),
+      child: Column(
+        children: [
+          if (widget.controller.schemaMigrationPending)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: _SchemaMigrationNotice(controller: widget.controller),
+            ),
+          Expanded(
+            child: IndexedStack(index: selected, children: pages),
+          ),
+        ],
+      ),
     ),
     bottomNavigationBar: NavigationBar(
       selectedIndex: selected,
@@ -742,6 +736,35 @@ class _GameHubState extends State<GameHub> {
             excludeFromSemantics: true,
           ),
           label: gameText(context, 'ui.nav.settings'),
+        ),
+      ],
+    ),
+  );
+}
+
+class _SchemaMigrationNotice extends StatelessWidget {
+  const _SchemaMigrationNotice({required this.controller});
+
+  final GameController controller;
+
+  @override
+  Widget build(BuildContext context) => GamePanel(
+    color: GamePalette.panelLight,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    child: Row(
+      children: [
+        const Icon(Icons.save_outlined, color: GamePalette.gold, size: 20),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            gameText(context, 'ui.error.schemaMigrationPending'),
+            style: const TextStyle(fontSize: 11, height: 1.25),
+          ),
+        ),
+        const SizedBox(width: 8),
+        TextButton(
+          onPressed: () => unawaited(controller.retrySchemaMigration()),
+          child: Text(gameText(context, 'ui.common.retry')),
         ),
       ],
     ),
@@ -1335,6 +1358,15 @@ String _battleMessageText(
       BattleAction action => gameText(context, 'label.action.${action.name}'),
       RangeBand range => gameText(context, 'label.range.${range.name}'),
       StatusKind status => gameText(context, 'label.status.${status.name}'),
+      CombatElement element => gameText(
+        context,
+        'label.element.${element.name}',
+      ),
+      List<Object?> tactics when entry.key == 'tactics' =>
+        tactics
+            .whereType<TaughtTactic>()
+            .map((tactic) => gameText(context, 'content.tactic.${tactic.name}'))
+            .join(' · '),
       String text when entry.key == 'archetype' => gameText(
         context,
         'content.archetype.$text',
@@ -1405,6 +1437,22 @@ class _ChapterHeader extends StatelessWidget {
   );
 }
 
+@visibleForTesting
+String audienceCrowdReactionText({
+  required bool won,
+  required bool isEnglish,
+  required String chapterTitle,
+}) {
+  if (isEnglish) {
+    return won
+        ? 'The $chapterTitle crowd erupts for your victory!'
+        : 'The $chapterTitle crowd falls silent after your defeat.';
+  }
+  return won
+      ? '$chapterTitle tribünleri zaferinle coştu!'
+      : '$chapterTitle tribünleri yenilginden sonra sessizliğe gömüldü.';
+}
+
 class _AudienceChapterScore extends StatelessWidget {
   const _AudienceChapterScore({
     required this.controller,
@@ -1417,17 +1465,20 @@ class _AudienceChapterScore extends StatelessWidget {
   Widget build(BuildContext context) {
     final score = controller.audienceScoreForChapter(chapter);
     final unlocked = controller.hasAudienceCrest(chapter);
+    final chapterTitle = gameText(context, 'ui.campaign.chapterTitle.$chapter');
+    final isEnglish = GameLocalizations.of(context).isEnglish;
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
       child: GamePanel(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
         child: Row(
           children: [
-            GameGlyph(
-              GameGlyphKind.guard,
-              size: 19,
-              color: unlocked ? chapterColor(chapter) : GamePalette.muted,
-              excludeFromSemantics: true,
+            AudienceChapterEmblem(
+              chapter: chapter,
+              size: 42,
+              semanticLabel: isEnglish
+                  ? '$chapterTitle crest'
+                  : '$chapterTitle arması',
             ),
             const SizedBox(width: 9),
             Expanded(
@@ -1557,6 +1608,17 @@ class EncounterTile extends StatelessWidget {
                           fontSize: 10,
                         ),
                       ),
+                      if (encounter.elementalImmunities.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          '${gameText(context, 'ui.encounter.immunity')}: ${encounter.elementalImmunities.map((element) => gameText(context, 'label.element.${element.name}')).join(' · ')}',
+                          style: const TextStyle(
+                            color: GamePalette.gold,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1612,15 +1674,13 @@ class FighterPage extends StatelessWidget {
                       seed: _originIndex(currentSave.appearance),
                       name: _heroDisplayName(context, currentSave.heroName),
                       isPlayer: true,
+                      origin: currentSave.appearance,
                       family: _familyName(currentSave.weaponId),
                       portraitAsset: heroArtForAppearance(
                         currentSave.appearance,
                       ),
                       customization: HeroAppearanceSelection(
-                        headOptionId: currentSave.headOptionId,
-                        skinToneId: currentSave.skinToneId,
                         bodyProportionId: currentSave.bodyProportionId,
-                        facialHairId: currentSave.facialHairId,
                       ),
                     );
                   },
@@ -1928,53 +1988,27 @@ class AppearanceEditorPage extends StatefulWidget {
 }
 
 class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
-  late String _headOptionId;
-  late String _skinToneId;
   late String _bodyProportionId;
-  late String _facialHairId;
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
     final save = widget.controller.save;
-    _headOptionId = save.headOptionId;
-    _skinToneId = save.skinToneId;
     _bodyProportionId = save.bodyProportionId;
-    _facialHairId = save.facialHairId;
   }
 
-  Future<void> _selectAppearance({
-    String? headOptionId,
-    String? skinToneId,
-    String? bodyProportionId,
-    String? facialHairId,
-  }) async {
+  Future<void> _selectAppearance({required String bodyProportionId}) async {
     if (_saving) return;
-    final nextHead = headOptionId ?? _headOptionId;
-    final nextSkin = skinToneId ?? _skinToneId;
-    final nextBody = bodyProportionId ?? _bodyProportionId;
-    final nextFacialHair = facialHairId ?? _facialHairId;
-    if (nextHead == _headOptionId &&
-        nextSkin == _skinToneId &&
-        nextBody == _bodyProportionId &&
-        nextFacialHair == _facialHairId) {
-      return;
-    }
+    if (bodyProportionId == _bodyProportionId) return;
 
     setState(() {
-      _headOptionId = nextHead;
-      _skinToneId = nextSkin;
-      _bodyProportionId = nextBody;
-      _facialHairId = nextFacialHair;
+      _bodyProportionId = bodyProportionId;
       _saving = true;
     });
     try {
       final updated = await widget.controller.updateHeroAppearance(
-        headOptionId: _headOptionId,
-        skinToneId: _skinToneId,
-        bodyProportionId: _bodyProportionId,
-        facialHairId: _facialHairId,
+        bodyProportionId: bodyProportionId,
       );
       if (!updated && mounted) {
         _showMessage(context, gameText(context, 'ui.appearance.saveFailed'));
@@ -1998,12 +2032,12 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
     required Widget avatar,
     required ValueChanged<String> onSelected,
   }) {
-    final semanticLabel = gameText(context, 'ui.appearance.option', {
+    final optionSemanticLabel = gameText(context, 'ui.appearance.option', {
       'group': groupLabel,
       'count': index + 1,
     });
     return Semantics(
-      label: semanticLabel,
+      label: optionSemanticLabel,
       selected: selected,
       button: true,
       enabled: !_saving,
@@ -2020,74 +2054,10 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
             color: selected ? GamePalette.ink : GamePalette.parchment,
             fontWeight: FontWeight.w800,
           ),
-          visualDensity: VisualDensity.compact,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.standard,
+          materialTapTargetSize: MaterialTapTargetSize.padded,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
         ),
-      ),
-    );
-  }
-
-  Widget _headOptions(BuildContext context) {
-    final groupLabel = gameText(context, 'ui.appearance.head');
-    return _appearanceGroup(
-      context,
-      title: groupLabel,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final entry in heroHeadOptionIds.asMap().entries)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: _optionChip(
-                  context: context,
-                  group: 'head',
-                  groupLabel: groupLabel,
-                  optionId: entry.value,
-                  index: entry.key,
-                  selected: _headOptionId == entry.value,
-                  avatar: SizedBox(
-                    width: 42,
-                    height: 42,
-                    child: HeroAppearanceOptionPreview(
-                      kind: HeroAppearanceOptionKind.head,
-                      optionId: entry.value,
-                    ),
-                  ),
-                  onSelected: (id) => _selectAppearance(headOptionId: id),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _skinOptions(BuildContext context) {
-    final groupLabel = gameText(context, 'ui.appearance.skin');
-    return _appearanceGroup(
-      context,
-      title: groupLabel,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        children: [
-          for (final entry in heroSkinToneIds.asMap().entries)
-            _optionChip(
-              context: context,
-              group: 'skin',
-              groupLabel: groupLabel,
-              optionId: entry.value,
-              index: entry.key,
-              selected: _skinToneId == entry.value,
-              avatar: CircleAvatar(
-                radius: 13,
-                backgroundColor: heroSkinToneColor(entry.value),
-              ),
-              onSelected: (id) => _selectAppearance(skinToneId: id),
-            ),
-        ],
       ),
     );
   }
@@ -2117,45 +2087,10 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
                     child: HeroAppearanceOptionPreview(
                       kind: HeroAppearanceOptionKind.body,
                       optionId: entry.value,
+                      origin: widget.controller.save.appearance,
                     ),
                   ),
                   onSelected: (id) => _selectAppearance(bodyProportionId: id),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _facialHairOptions(BuildContext context) {
-    final groupLabel = gameText(context, 'ui.appearance.facialHair');
-    return _appearanceGroup(
-      context,
-      title: groupLabel,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final entry in heroFacialHairIds.asMap().entries)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: _optionChip(
-                  context: context,
-                  group: 'facialHair',
-                  groupLabel: groupLabel,
-                  optionId: entry.value,
-                  index: entry.key,
-                  selected: _facialHairId == entry.value,
-                  avatar: SizedBox(
-                    width: 42,
-                    height: 42,
-                    child: HeroAppearanceOptionPreview(
-                      kind: HeroAppearanceOptionKind.facialHair,
-                      optionId: entry.value,
-                    ),
-                  ),
-                  onSelected: (id) => _selectAppearance(facialHairId: id),
                 ),
               ),
           ],
@@ -2180,15 +2115,13 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
   Widget build(BuildContext context) {
     final save = widget.controller.save;
     final appearance = HeroAppearanceSelection(
-      headOptionId: _headOptionId,
-      skinToneId: _skinToneId,
       bodyProportionId: _bodyProportionId,
-      facialHairId: _facialHairId,
     );
     return Scaffold(
       appBar: AppBar(
         title: Text(gameText(context, 'ui.appearance.title')),
         leading: IconButton(
+          tooltip: gameText(context, 'ui.common.back'),
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
@@ -2211,6 +2144,7 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
                           seed: _originIndex(save.appearance),
                           name: _heroDisplayName(context, save.heroName),
                           isPlayer: true,
+                          origin: save.appearance,
                           family: _familyName(save.weaponId),
                           portraitAsset: heroArtForAppearance(save.appearance),
                           customization: appearance,
@@ -2240,13 +2174,7 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _headOptions(context),
-                const SizedBox(height: 10),
-                _skinOptions(context),
-                const SizedBox(height: 10),
                 _bodyOptions(context),
-                const SizedBox(height: 10),
-                _facialHairOptions(context),
               ],
             ),
           ),
@@ -2345,7 +2273,15 @@ class _GearSlot extends StatelessWidget {
                   ),
               ],
               onChanged: (next) {
-                if (next != null) controller.equip(next);
+                if (next != null) {
+                  unawaited(
+                    _runShopOperation(
+                      context,
+                      controller,
+                      () => controller.equip(next),
+                    ),
+                  );
+                }
               },
             )
           else
@@ -2418,6 +2354,9 @@ class _MasteryTile extends StatelessWidget {
       trailing: unlocked
           ? const Icon(Icons.check, color: GamePalette.teal)
           : IconButton(
+              tooltip: gameText(context, 'ui.mastery.unlock', {
+                'name': localizedContent(context, 'mastery', item.id, 'name'),
+              }),
               onPressed: previous && controller.save.unspentMasteryPoints > 0
                   ? () => controller.unlockMastery(item.id)
                   : null,
@@ -2678,6 +2617,11 @@ class _ShopItemCard extends StatelessWidget {
     final power = item.weaponPower > 0
         ? gameText(context, 'ui.shop.power', {'power': item.weaponPower})
         : gameText(context, 'ui.shop.armorValue', {'armor': item.armor});
+    final statusResistance = item.statusResistance > 0
+        ? gameText(context, 'ui.shop.statusResistance', {
+            'value': item.statusResistance,
+          })
+        : null;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: GamePanel(
@@ -2731,6 +2675,15 @@ class _ShopItemCard extends StatelessWidget {
                       fontSize: 10,
                     ),
                   ),
+                  if (statusResistance != null)
+                    Text(
+                      statusResistance,
+                      style: const TextStyle(
+                        color: GamePalette.teal,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   if (minimumAttributeText != null)
                     Text(
                       minimumAttributeText,
@@ -2764,14 +2717,24 @@ class _ShopItemCard extends StatelessWidget {
                     ? null
                     : owned
                     ? meetsMinimumAttribute
-                          ? () => controller.equip(item.id)
+                          ? () {
+                              unawaited(
+                                _runShopOperation(
+                                  context,
+                                  controller,
+                                  () => controller.equip(item.id),
+                                ),
+                              );
+                            }
                           : null
                     : canBuy
-                    ? () async {
-                        final result = await controller.buyItem(item);
-                        if (context.mounted && result != null)
-                          _showMessage(context, result);
-                      }
+                    ? () => unawaited(
+                        _runShopOperation(
+                          context,
+                          controller,
+                          () => controller.buyItem(item),
+                        ),
+                      )
                     : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: owned
@@ -2883,10 +2846,14 @@ class _SpellCard extends StatelessWidget {
               child: FilledButton(
                 onPressed: known || !unlocked
                     ? null
-                    : () async {
-                        final result = await controller.buySpell(spell.action);
-                        if (context.mounted && result != null)
-                          _showMessage(context, result);
+                    : () {
+                        unawaited(
+                          _runShopOperation(
+                            context,
+                            controller,
+                            () => controller.buySpell(spell.action),
+                          ),
+                        );
                       },
                 style: FilledButton.styleFrom(
                   backgroundColor: known
@@ -2980,12 +2947,14 @@ class _ConsumableCard extends StatelessWidget {
               child: FilledButton(
                 onPressed: count >= 3 || controller.save.gold < price
                     ? null
-                    : () async {
-                        final result = await controller.buyConsumable(
-                          salve: salve,
+                    : () {
+                        unawaited(
+                          _runShopOperation(
+                            context,
+                            controller,
+                            () => controller.buyConsumable(salve: salve),
+                          ),
                         );
-                        if (context.mounted && result != null)
-                          _showMessage(context, result);
                       },
                 style: FilledButton.styleFrom(
                   backgroundColor: GamePalette.gold,
@@ -3414,6 +3383,69 @@ class _SettingsPageState extends State<SettingsPage> {
               const Divider(),
               ListTile(
                 contentPadding: EdgeInsets.zero,
+                title: Text(gameText(context, 'ui.settings.textScale')),
+                subtitle: Text('${(save.textScale * 100).round()}%'),
+              ),
+              Wrap(
+                spacing: 7,
+                runSpacing: 4,
+                children: [
+                  for (final scale in const [1.0, 1.25, 1.5, 1.75, 2.0])
+                    ChoiceChip(
+                      label: Text('${(scale * 100).round()}%'),
+                      selected: (save.textScale - scale).abs() < .01,
+                      onSelected: (_) =>
+                          controller.updateSettings(textScale: scale),
+                      selectedColor: GamePalette.gold,
+                    ),
+                ],
+              ),
+              const Divider(),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(gameText(context, 'ui.settings.battleSpeed')),
+                subtitle: Text(
+                  '${save.battleAnimationSpeed.toStringAsFixed(save.battleAnimationSpeed == 1 ? 0 : 1)}×',
+                ),
+              ),
+              Wrap(
+                spacing: 7,
+                runSpacing: 4,
+                children: [
+                  for (final speed in const [1.0, 1.5, 2.0])
+                    ChoiceChip(
+                      label: Text(
+                        '${speed.toStringAsFixed(speed == 1 ? 0 : 1)}×',
+                      ),
+                      selected: (save.battleAnimationSpeed - speed).abs() < .01,
+                      onSelected: (_) => controller.updateSettings(
+                        battleAnimationSpeed: speed,
+                      ),
+                      selectedColor: GamePalette.gold,
+                    ),
+                ],
+              ),
+              const Divider(),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  gameText(context, 'ui.settings.skipBattleAnimations'),
+                ),
+                subtitle: Text(
+                  gameText(
+                    context,
+                    'ui.settings.skipBattleAnimationsDescription',
+                  ),
+                  style: TextStyle(color: GamePalette.muted, fontSize: 11),
+                ),
+                value: save.skipBattleAnimations,
+                activeThumbColor: GamePalette.gold,
+                onChanged: (value) =>
+                    controller.updateSettings(skipBattleAnimations: value),
+              ),
+              const Divider(),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
                 title: Text(gameText(context, 'ui.settings.language')),
                 subtitle: Text(
                   save.language == 'tr'
@@ -3485,7 +3517,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                   );
-                  if (confirmed == true) await controller.resetCampaign();
+                  if (confirmed == true) {
+                    await _runCampaignReset(context, controller);
+                  }
                 },
               ),
             ],
@@ -3520,7 +3554,41 @@ Future<void> _openBattle(
   FutureOr<void> Function() begin, {
   bool resumeFromCheckpoint = false,
 }) async {
-  if (!resumeFromCheckpoint) await begin();
+  if (!resumeFromCheckpoint) {
+    try {
+      await begin();
+    } on Object catch (error) {
+      if (!context.mounted) return;
+      if (!error.toString().startsWith('Kayıt yazılamadı:')) {
+        _showMessage(context, error.toString());
+        return;
+      }
+      final retry = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: GamePalette.panel,
+          icon: const Icon(Icons.save_outlined, color: GamePalette.rust),
+          title: Text(gameText(dialogContext, 'ui.error.saveTitle')),
+          content: Text(gameText(dialogContext, 'ui.error.saveFailed')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(gameText(dialogContext, 'ui.common.cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(gameText(dialogContext, 'ui.common.retry')),
+            ),
+          ],
+        ),
+      );
+      if (retry == true && context.mounted) {
+        await _openBattle(context, controller, begin);
+      }
+      return;
+    }
+  }
   if (!context.mounted) return;
   final audio = GameAudioScope.maybeOf(context);
   final encounter = controller.activeEncounter;
@@ -3768,9 +3836,40 @@ class _BattleMotionPulse {
   final HeroActionPose? actionPose;
 }
 
+int? _statusRemainingTurns(
+  BattleEngine engine,
+  Combatant combatant,
+  StatusKind status,
+) {
+  final turns = combatant.statusTurnsRemaining[status];
+  if (turns != null) return turns;
+  if (status == StatusKind.brokenGuard) {
+    final expiresAfter = combatant.brokenGuardExpiresAfterTurn;
+    if (expiresAfter != null) {
+      final remaining = expiresAfter - engine.metrics.turn;
+      return remaining < 0 ? 0 : remaining;
+    }
+  }
+  return null;
+}
+
 class CombatStatusBadge extends StatelessWidget {
-  const CombatStatusBadge({super.key, required this.status});
+  const CombatStatusBadge({
+    super.key,
+    required this.status,
+    this.stacks,
+    int? stackCount,
+    this.remainingTurns,
+    int? turnsRemaining,
+  }) : stacks = stacks ?? stackCount,
+       remainingTurns = remainingTurns ?? turnsRemaining;
+
   final StatusKind status;
+  final int? stacks;
+  final int? remainingTurns;
+
+  int? get stackCount => stacks;
+  int? get turnsRemaining => remainingTurns;
 
   @override
   Widget build(BuildContext context) {
@@ -3783,9 +3882,44 @@ class CombatStatusBadge extends StatelessWidget {
     };
     final glyph = glyphForStatusKind(status);
 
+    final hasStacks = stacks != null && stacks! > 1;
+    final hasTurns = remainingTurns != null && remainingTurns! > 0;
+
+    final String semanticLabel;
+    if (hasTurns && hasStacks) {
+      semanticLabel = gameText(context, 'ui.battle.status.semantics.full', {
+        'status': localizedLabel,
+        'stacks': stacks!,
+        'turns': remainingTurns!,
+      });
+    } else if (hasTurns) {
+      semanticLabel = gameText(context, 'ui.battle.status.semantics.turns', {
+        'status': localizedLabel,
+        'turns': remainingTurns!,
+      });
+    } else {
+      semanticLabel = localizedLabel;
+    }
+
+    final String? detailsText;
+    if (hasStacks && hasTurns) {
+      final turnText = gameText(context, 'ui.battle.status.turns', {
+        'turns': remainingTurns!,
+      });
+      detailsText = '×$stacks · $turnText';
+    } else if (hasTurns) {
+      detailsText = gameText(context, 'ui.battle.status.turns', {
+        'turns': remainingTurns!,
+      });
+    } else if (hasStacks) {
+      detailsText = '×$stacks';
+    } else {
+      detailsText = null;
+    }
+
     return Semantics(
       container: true,
-      label: localizedLabel,
+      label: semanticLabel,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
         decoration: BoxDecoration(
@@ -3824,6 +3958,19 @@ class CombatStatusBadge extends StatelessWidget {
                   ),
                 ),
               ),
+              if (detailsText != null) ...[
+                const SizedBox(width: 3.5),
+                Text(
+                  detailsText,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: .2,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -3895,6 +4042,7 @@ class _BattlePageState extends State<BattlePage> {
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_handleControllerChanged);
     if (widget.resumeFromCheckpoint) {
       _started = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -3905,24 +4053,58 @@ class _BattlePageState extends State<BattlePage> {
     }
   }
 
+  @override
+  void didUpdateWidget(covariant BattlePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_handleControllerChanged);
+      widget.controller.addListener(_handleControllerChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_handleControllerChanged);
+    super.dispose();
+  }
+
+  void _handleControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
   Future<void> _act(BattleAction action) async {
     if (_working) return;
-    final engine = widget.controller.battle;
-    final firstNewEvent = engine?.snapshot.events.length ?? 0;
-    final errorMessageId = engine == null
+    final currentEngine = widget.controller.battle;
+    final firstNewEvent = currentEngine?.snapshot.events.length ?? 0;
+    final errorMessageId = currentEngine == null
         ? 'ui.battle.notFound'
-        : engine.snapshot.done
+        : currentEngine.snapshot.done
         ? 'ui.battle.error.done'
         : 'ui.battle.error.unavailable';
     setState(() => _working = true);
-    final error = widget.controller.performAction(action);
+    final error = await widget.controller.performAction(action);
+    if (!mounted) return;
     if (error != null) {
       setState(() => _working = false);
-      _showMessage(context, gameText(context, errorMessageId));
+      final saveFailed = error.startsWith('Kayıt yazılamadı:');
+      final message = saveFailed
+          ? gameText(context, 'ui.error.saveFailed')
+          : gameText(context, errorMessageId);
+      _showMessage(
+        context,
+        message,
+        actionLabel: saveFailed ? gameText(context, 'ui.common.retry') : null,
+        onAction: saveFailed ? () => unawaited(_act(action)) : null,
+      );
       return;
     }
     setState(() {});
-    final events = engine!.snapshot.events.skip(firstNewEvent).toList();
+    final engine = widget.controller.battle;
+    if (engine == null) {
+      setState(() => _working = false);
+      return;
+    }
+    final events = engine.snapshot.events.skip(firstNewEvent).toList();
     await _animateBattleEvents(events);
     if (!mounted) return;
     await _showResultWhenDone();
@@ -3940,7 +4122,10 @@ class _BattlePageState extends State<BattlePage> {
         unawaited(audio.playBattleEvent(event));
       }
     }
-    if (widget.controller.save.reducedMotion) return;
+    if (widget.controller.save.reducedMotion ||
+        widget.controller.save.skipBattleAnimations) {
+      return;
+    }
     final cues = <_BattleMotionCue>[];
     for (final event in events) {
       final actor = event.actor;
@@ -4092,7 +4277,12 @@ class _BattlePageState extends State<BattlePage> {
           _opponentMotion = pulse;
         }
       });
-      await Future<void>.delayed(const Duration(milliseconds: 190));
+      await Future<void>.delayed(
+        scaledBattleAnimationDuration(
+          const Duration(milliseconds: 190),
+          widget.controller.save.battleAnimationSpeed,
+        ),
+      );
     }
   }
 
@@ -4113,22 +4303,55 @@ class _BattlePageState extends State<BattlePage> {
     final contractWasCompleted =
         contract != null &&
         widget.controller.save.completedContracts.contains(contract.id);
-    final result = await widget.controller.resolveBattle();
-    if (result == null || !mounted) {
+    BattleResolution? result;
+    try {
+      result = await widget.controller.resolveBattle();
+    } catch (_) {
+      if (!mounted) {
+        _working = false;
+        _resultShown = false;
+        return;
+      }
+      final retry = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: GamePalette.panel,
+          icon: const Icon(Icons.save_outlined, color: GamePalette.rust),
+          title: Text(gameText(context, 'ui.error.saveTitle')),
+          content: Text(gameText(context, 'ui.result.saveFailed')),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(gameText(context, 'ui.common.retry')),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
       _working = false;
+      _resultShown = false;
+      if (retry == true) await _showResultWhenDone();
       return;
     }
+    if (result == null || !mounted) {
+      _working = false;
+      _resultShown = false;
+      return;
+    }
+    final BattleResolution battleResult = result;
     final goldAwarded = widget.controller.save.gold - previousGold;
     final xpAwarded = widget.controller.save.xp - previousXp;
     final audio = GameAudioScope.maybeOf(context);
-    if (result.won && audio != null) {
+    if (battleResult.won && audio != null) {
       unawaited(audio.playUiCue(contract == null ? 'reward' : 'contract'));
       if (widget.controller.save.level > previousLevel) {
         unawaited(audio.playUiCue('level_up'));
       }
     }
     final complete = contract == null
-        ? (result.won &&
+        ? (battleResult.won &&
               widget.controller.save.completedMatches.contains(encounter.key))
         : widget.controller.save.completedContracts.contains(contract.id);
     final rewardText = contract != null
@@ -4139,7 +4362,7 @@ class _BattlePageState extends State<BattlePage> {
               : contractWasCompleted
               ? gameText(context, 'ui.result.replayNoReward')
               : gameText(context, 'ui.result.contractFailed')
-        : result.won
+        : battleResult.won
         ? encounter.kind == EncounterKind.postgame
               ? gameText(context, 'ui.result.postgameNoReward')
               : goldAwarded == 0 && xpAwarded == 0
@@ -4161,6 +4384,19 @@ class _BattlePageState extends State<BattlePage> {
     final bestAudienceScore = campaignScore
         ? widget.controller.save.audienceBestScores[encounter.key]
         : null;
+    final localizations = GameLocalizations.of(context);
+    final isEnglish = localizations.isEnglish;
+    final chapterTitle = gameText(
+      context,
+      'ui.campaign.chapterTitle.${encounter.chapter}',
+    );
+    final crowdHeading = isEnglish ? 'Crowd reaction' : 'Seyirci tepkisi';
+    final crowdReaction = audienceCrowdReactionText(
+      won: battleResult.won,
+      isEnglish: isEnglish,
+      chapterTitle: chapterTitle,
+    );
+    final crowdColor = battleResult.won ? GamePalette.teal : GamePalette.rust;
     if (!mounted) return;
     final retry = await showDialog<bool>(
       context: context,
@@ -4168,14 +4404,14 @@ class _BattlePageState extends State<BattlePage> {
       builder: (dialogContext) => AlertDialog(
         backgroundColor: GamePalette.panel,
         icon: Icon(
-          result.won ? Icons.emoji_events : Icons.refresh,
-          color: result.won ? GamePalette.gold : GamePalette.rust,
+          battleResult.won ? Icons.emoji_events : Icons.refresh,
+          color: battleResult.won ? GamePalette.gold : GamePalette.rust,
           size: 34,
         ),
         title: Text(
           gameText(
             context,
-            result.won ? 'ui.result.victory' : 'ui.result.defeat',
+            battleResult.won ? 'ui.result.victory' : 'ui.result.defeat',
           ),
           textAlign: TextAlign.center,
           style: const TextStyle(fontWeight: FontWeight.w900),
@@ -4187,9 +4423,57 @@ class _BattlePageState extends State<BattlePage> {
               Text(
                 gameText(context, 'ui.result.encounterTurns', {
                   'encounter': _encounterName(context, encounter),
-                  'turns': result.turns,
+                  'turns': battleResult.turns,
                 }),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Semantics(
+                container: true,
+                liveRegion: true,
+                label: '$crowdHeading. $crowdReaction',
+                child: ExcludeSemantics(
+                  child: GamePanel(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 9,
+                    ),
+                    borderColor: crowdColor.withValues(alpha: .7),
+                    child: Row(
+                      children: [
+                        AudienceChapterEmblem(
+                          chapter: encounter.chapter,
+                          size: 54,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                crowdHeading,
+                                style: TextStyle(
+                                  color: crowdColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: .5,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                crowdReaction,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 9),
               Text(
@@ -4221,7 +4505,7 @@ class _BattlePageState extends State<BattlePage> {
                           ),
                         ),
                         Text(
-                          '${result.audienceReport.score} / 3',
+                          '${battleResult.audienceReport.score} / 3',
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 15,
@@ -4248,7 +4532,7 @@ class _BattlePageState extends State<BattlePage> {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    for (final rule in result.audienceReport.rules)
+                    for (final rule in battleResult.audienceReport.rules)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.5),
                         child: Semantics(
@@ -4296,7 +4580,7 @@ class _BattlePageState extends State<BattlePage> {
                   ],
                 ),
               ),
-              if (result.won && encounter.id == 32)
+              if (battleResult.won && encounter.id == 32)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
@@ -4314,7 +4598,7 @@ class _BattlePageState extends State<BattlePage> {
         ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
-          if (!result.won || !complete)
+          if (!battleResult.won || !complete)
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(gameText(context, 'ui.common.retry')),
@@ -4324,7 +4608,9 @@ class _BattlePageState extends State<BattlePage> {
             child: Text(
               gameText(
                 context,
-                result.won ? 'ui.result.returnLeague' : 'ui.result.leaveDuel',
+                battleResult.won
+                    ? 'ui.result.returnLeague'
+                    : 'ui.result.leaveDuel',
               ),
             ),
           ),
@@ -4332,7 +4618,7 @@ class _BattlePageState extends State<BattlePage> {
       ),
     );
     if (mounted &&
-        result.won &&
+        battleResult.won &&
         contract == null &&
         widget.controller.pendingIntermissionDecision != null) {
       await _showIntermissionChoice(context, widget.controller);
@@ -4417,6 +4703,7 @@ class _BattlePageState extends State<BattlePage> {
                   Row(
                     children: [
                       IconButton(
+                        tooltip: gameText(context, 'ui.common.back'),
                         onPressed: () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.arrow_back),
                       ),
@@ -4648,9 +4935,41 @@ class _BattlePageState extends State<BattlePage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(14, 4, 14, 18),
                 children: [
+                  if (controller.lastError != null)
+                    GamePanel(
+                      color: const Color(0xD94A2823),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: GamePalette.rust,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              gameText(
+                                context,
+                                controller.battleCheckpointWritePending
+                                    ? 'ui.error.checkpointSavePending'
+                                    : 'ui.error.saveFailed',
+                              ),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          if (controller.battleCheckpointWritePending)
+                            TextButton(
+                              onPressed: () => unawaited(
+                                controller.persistActiveBattleCheckpoint(),
+                              ),
+                              child: Text(gameText(context, 'ui.common.retry')),
+                            ),
+                        ],
+                      ),
+                    ),
                   Row(
                     children: [
                       IconButton(
+                        tooltip: gameText(context, 'ui.battle.leave'),
                         onPressed: _working ? null : _leave,
                         icon: const Icon(Icons.close),
                       ),
@@ -4753,9 +5072,18 @@ class _BattlePageState extends State<BattlePage> {
                                       spacing: 4,
                                       runSpacing: 4,
                                       children: [
-                                        for (final status
-                                            in engine.player.statuses.keys)
-                                          CombatStatusBadge(status: status),
+                                        for (final entry
+                                            in engine.player.statuses.entries)
+                                          CombatStatusBadge(
+                                            status: entry.key,
+                                            stacks: entry.value,
+                                            remainingTurns:
+                                                _statusRemainingTurns(
+                                                  engine,
+                                                  engine.player,
+                                                  entry.key,
+                                                ),
+                                          ),
                                       ],
                                     ),
                                   ],
@@ -4815,9 +5143,18 @@ class _BattlePageState extends State<BattlePage> {
                                       spacing: 4,
                                       runSpacing: 4,
                                       children: [
-                                        for (final status
-                                            in engine.opponent.statuses.keys)
-                                          CombatStatusBadge(status: status),
+                                        for (final entry
+                                            in engine.opponent.statuses.entries)
+                                          CombatStatusBadge(
+                                            status: entry.key,
+                                            stacks: entry.value,
+                                            remainingTurns:
+                                                _statusRemainingTurns(
+                                                  engine,
+                                                  engine.opponent,
+                                                  entry.key,
+                                                ),
+                                          ),
                                       ],
                                     ),
                                   ],
@@ -4846,6 +5183,14 @@ class _BattlePageState extends State<BattlePage> {
                                 colors: [Color(0x22101719), Color(0xBB101719)],
                                 stops: [0, 1],
                               ),
+                            ),
+                          ),
+                          Positioned.fill(
+                            child: ArenaFinalPhaseLighting(
+                              arenaId: arena.id,
+                              isFinalPhase:
+                                  encounter.phaseCount > 1 &&
+                                  state.phase >= encounter.phaseCount,
                             ),
                           ),
                           if (arena.propAtlas != null) ...[
@@ -4889,7 +5234,18 @@ class _BattlePageState extends State<BattlePage> {
                                       BattleActor.opponent
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
-                              reducedMotion: controller.save.reducedMotion,
+                              reducedMotion:
+                                  controller.save.reducedMotion ||
+                                  controller.save.skipBattleAnimations,
+                              animationSpeed:
+                                  controller.save.battleAnimationSpeed,
+                              arenaId: arena.id,
+                              weaponFamily:
+                                  effectEvent?.action == BattleAction.bow
+                                  ? 'bow'
+                                  : effectEvent?.actor == BattleActor.player
+                                  ? _familyName(controller.save.weaponId)
+                                  : encounter.weaponFamily.name,
                             ),
                           ),
                           Positioned(
@@ -4904,16 +5260,14 @@ class _BattlePageState extends State<BattlePage> {
                               ),
                               isPlayer: true,
                               family: _familyName(controller.save.weaponId),
+                              origin: controller.save.appearance,
                               status: playerStatus,
                               portraitAsset: heroArtForAppearance(
                                 controller.save.appearance,
                               ),
                               customization: HeroAppearanceSelection(
-                                headOptionId: controller.save.headOptionId,
-                                skinToneId: controller.save.skinToneId,
                                 bodyProportionId:
                                     controller.save.bodyProportionId,
-                                facialHairId: controller.save.facialHairId,
                               ),
                               gear: EquippedGearAppearance.fromMap(
                                 controller.save.equippedItems,
@@ -4925,7 +5279,11 @@ class _BattlePageState extends State<BattlePage> {
                               motion:
                                   _playerMotion?.motion ?? FighterMotion.idle,
                               motionKey: _playerMotion?.sequence ?? 0,
-                              reducedMotion: controller.save.reducedMotion,
+                              reducedMotion:
+                                  controller.save.reducedMotion ||
+                                  controller.save.skipBattleAnimations,
+                              animationSpeed:
+                                  controller.save.battleAnimationSpeed,
                             ),
                           ),
                           Positioned(
@@ -4951,7 +5309,11 @@ class _BattlePageState extends State<BattlePage> {
                               motion:
                                   _opponentMotion?.motion ?? FighterMotion.idle,
                               motionKey: _opponentMotion?.sequence ?? 0,
-                              reducedMotion: controller.save.reducedMotion,
+                              reducedMotion:
+                                  controller.save.reducedMotion ||
+                                  controller.save.skipBattleAnimations,
+                              animationSpeed:
+                                  controller.save.battleAnimationSpeed,
                             ),
                           ),
                           Positioned(
@@ -5001,68 +5363,107 @@ class _BattlePageState extends State<BattlePage> {
                   ),
                   const SizedBox(height: 10),
                   GamePanel(
-                    color: state.telegraphedHazard
-                        ? const Color(0xDD473D2B)
-                        : const Color(0xD9172021),
+                    color: const Color(0xD9172021),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 12,
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          state.telegraphedHazard
-                              ? Icons.warning_amber_rounded
-                              : Icons.visibility_outlined,
-                          color: state.telegraphedHazard
-                              ? GamePalette.gold
-                              : GamePalette.rust,
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.visibility_outlined,
+                              color: GamePalette.rust,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    localizedHeading(
+                                      context,
+                                      'ui.battle.opponentIntent',
+                                    ),
+                                    style: const TextStyle(
+                                      color: GamePalette.gold,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 9,
+                                      letterSpacing: 1.1,
+                                    ),
+                                  ),
+                                  Text(
+                                    _battleMessageText(
+                                      context,
+                                      state.intentMessage,
+                                      encounter,
+                                      _heroDisplayName(
+                                        context,
+                                        controller.save.heroName,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        if (state.telegraphedHazard) ...[
+                          const SizedBox(height: 10),
+                          const Divider(height: 1, color: GamePalette.rust),
+                          const SizedBox(height: 9),
+                          Row(
                             children: [
-                              Text(
-                                state.telegraphedHazard
-                                    ? localizedHeading(
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: GamePalette.gold,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      localizedHeading(
                                         context,
                                         'ui.battle.arenaHazard',
-                                      )
-                                    : localizedHeading(
-                                        context,
-                                        'ui.battle.opponentIntent',
                                       ),
-                                style: const TextStyle(
-                                  color: GamePalette.gold,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 9,
-                                  letterSpacing: 1.1,
-                                ),
-                              ),
-                              Text(
-                                state.telegraphedHazard
-                                    ? gameText(
-                                        context,
-                                        'ui.battle.hazardAdvice',
-                                      )
-                                    : _battleMessageText(
-                                        context,
-                                        state.intentMessage,
-                                        encounter,
-                                        _heroDisplayName(
-                                          context,
-                                          controller.save.heroName,
-                                        ),
+                                      style: const TextStyle(
+                                        color: GamePalette.gold,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 9,
+                                        letterSpacing: 1.1,
                                       ),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13,
+                                    ),
+                                    Text(
+                                      gameText(
+                                        context,
+                                        'ui.battle.hazardCountdown',
+                                        {
+                                          'turns':
+                                              state
+                                                  .hazardWarningTurnsRemaining ??
+                                              1,
+                                        },
+                                      ),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
@@ -5332,12 +5733,113 @@ class _BattleActionTile extends StatelessWidget {
 @visibleForTesting
 typedef BattleActionTile = _BattleActionTile;
 
-void _showMessage(BuildContext context, String text) {
+String _localizedShopError(BuildContext context, String message) {
+  const exactMessages = <String, String>{
+    'Önce dövüşçünü oluştur.': 'ui.shop.error.noHero',
+    'Bu katalog henüz açılmadı.': 'ui.shop.error.catalogLocked',
+    'Bu eşya zaten envanterinde.': 'ui.shop.error.alreadyOwned',
+    'Yeterli Sikke yok.': 'ui.shop.error.notEnoughCoins',
+    'Bu eşya dükkân kataloğunda bulunamadı.': 'ui.shop.error.unknownItem',
+    'Eşya envanterinde değil.': 'ui.shop.error.notOwned',
+    'Kuşanılmış eşya satılamaz.': 'ui.shop.error.cannotSellEquipped',
+    'Bu yetenek zaten öğrenildi.': 'ui.shop.error.alreadyLearned',
+    'Devre katalogu henüz açılmadı.': 'ui.shop.error.spellCatalogLocked',
+    'Bu sarf eşyasından en fazla 3 tane taşıyabilirsin.':
+        'ui.shop.error.consumableLimit',
+  };
+  final key = exactMessages[message];
+  if (key != null) return gameText(context, key);
+
+  final level = RegExp(r'^Bu eşya için seviye (\d+) gerekli\.$')
+      .firstMatch(message);
+  if (level != null) {
+    return gameText(context, 'ui.shop.error.level', {
+      'level': int.parse(level.group(1)!),
+    });
+  }
+
+  final attribute = RegExp(r'^Bu eşya için (.+) (\d+) gerekli\.$')
+      .firstMatch(message);
+  if (attribute != null) {
+    final statKey = switch (attribute.group(1)) {
+      'Kuvvet' => 'might',
+      'Çeviklik' => 'agility',
+      'İsabet' => 'precision',
+      'Canlılık' => 'vitality',
+      'Dayanıklılık' => 'stamina',
+      'Gard' || 'Savunma' => 'guard',
+      'Kondisyon' => 'stamina',
+      'Büyü' => 'arcana',
+      _ => null,
+    };
+    if (statKey != null) {
+      return gameText(context, 'ui.shop.error.minimumAttribute', {
+        'attribute': gameText(context, 'label.stat.$statKey'),
+        'value': int.parse(attribute.group(2)!),
+      });
+    }
+  }
+
+  if (message.startsWith('Kayıt yazılamadı:')) {
+    return gameText(context, 'ui.shop.error.saveFailed');
+  }
+  return message;
+}
+
+Future<void> _runShopOperation(
+  BuildContext context,
+  GameController controller,
+  Future<String?> Function() operation,
+) async {
+  String? result;
+  try {
+    result = await operation();
+  } on Object catch (error) {
+    result = controller.lastError ?? error.toString();
+  }
+  if (!context.mounted || result == null) return;
+  final canRetry = result.startsWith('Kayıt yazılamadı:');
+  _showMessage(
+    context,
+    _localizedShopError(context, result),
+    actionLabel: canRetry ? gameText(context, 'ui.common.retry') : null,
+    onAction: canRetry
+        ? () => unawaited(_runShopOperation(context, controller, operation))
+        : null,
+  );
+}
+
+Future<void> _runCampaignReset(
+  BuildContext context,
+  GameController controller,
+) async {
+  try {
+    await controller.resetCampaign();
+  } on Object {
+    if (!context.mounted) return;
+    _showMessage(
+      context,
+      gameText(context, 'ui.settings.resetSaveFailed'),
+      actionLabel: gameText(context, 'ui.common.retry'),
+      onAction: () => unawaited(_runCampaignReset(context, controller)),
+    );
+  }
+}
+
+void _showMessage(
+  BuildContext context,
+  String text, {
+  String? actionLabel,
+  VoidCallback? onAction,
+}) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(text),
       behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: actionLabel == null ? 2 : 8),
+      action: actionLabel == null || onAction == null
+          ? null
+          : SnackBarAction(label: actionLabel, onPressed: onAction),
     ),
   );
 }

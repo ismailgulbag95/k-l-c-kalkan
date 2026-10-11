@@ -3,6 +3,7 @@ import 'package:ash_circuit/game/data/content.dart';
 import 'package:ash_circuit/game/domain/game_controller.dart';
 import 'package:ash_circuit/game/domain/models.dart';
 import 'package:ash_circuit/game/ui/design.dart';
+import 'package:ash_circuit/game/l10n/game_localizations.dart';
 import 'package:ash_circuit/game/ui/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,6 +42,11 @@ void main() {
   testWidgets('settings persist separate audio levels and vibration choice', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1000, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final controller = GameController(storage: MemorySaveStorage());
     await controller.initialize();
     await tester.pumpWidget(
@@ -65,8 +71,111 @@ void main() {
     await tester.tap(vibrationTitle);
     await tester.pumpAndSettle();
     expect(controller.save.vibrationEnabled, isFalse);
+
+    final settingsScrollable = find.byWidgetPredicate(
+      (widget) => widget is Scrollable,
+    );
+    final largeTextChoice = find.widgetWithText(ChoiceChip, '200%');
+    await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
+    await tester.pumpAndSettle();
+    expect(largeTextChoice, findsOneWidget);
+    await tester.tap(largeTextChoice);
+    await tester.pumpAndSettle();
+    expect(controller.save.textScale, 2.0);
+
+    final fasterBattleChoice = find.widgetWithText(ChoiceChip, '2.0×');
+    await tester.scrollUntilVisible(
+      fasterBattleChoice,
+      240,
+      scrollable: settingsScrollable.first,
+    );
+    await tester.tap(fasterBattleChoice);
+    await tester.pumpAndSettle();
+    expect(controller.save.battleAnimationSpeed, 2.0);
+
+    final skipAnimationsTitle = find.text('Savaş animasyonlarını atla');
+    await tester.scrollUntilVisible(
+      skipAnimationsTitle,
+      240,
+      scrollable: settingsScrollable.first,
+    );
+    await tester.tap(skipAnimationsTitle);
+    await tester.pumpAndSettle();
+    expect(controller.save.skipBattleAnimations, isTrue);
+    expect(tester.takeException(), isNull);
     controller.dispose();
   });
+
+  testWidgets(
+    'arena warning keeps the rival intent visible beside its countdown',
+    (tester) async {
+      final storage = MemorySaveStorage()
+        ..value = GameSave(
+          hasHero: true,
+          heroName: 'Kıyı',
+          stats: const Stats(
+            might: 4,
+            agility: 4,
+            vitality: 4,
+            guard: 2,
+            stamina: 2,
+            arcana: 2,
+          ),
+          completedMatches: {'M01', 'M02', 'M03', 'M04', 'M05', 'M06'},
+        );
+      final controller = GameController(storage: storage);
+      await controller.initialize();
+      await controller.startEncounter(7, seed: 73);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildGameTheme(),
+          home: GameLocaleScope(
+            languageCode: 'tr',
+            child: BattlePage(controller: controller),
+          ),
+        ),
+      );
+
+      final startDuel = find.text('Düelloya başla');
+      await tester.scrollUntilVisible(
+        startDuel,
+        240,
+        scrollable: find
+            .descendant(
+              of: find.byType(BattlePage),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.tap(startDuel);
+      await tester.pumpAndSettle();
+
+      final guardAction = find.text('Gard al').last;
+      await tester.scrollUntilVisible(
+        guardAction,
+        240,
+        scrollable: find
+            .descendant(
+              of: find.byType(BattlePage),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.tap(guardAction);
+      await tester.pumpAndSettle();
+
+      expect(find.text('RAKİBİN NİYETİ'), findsOneWidget);
+      expect(find.text('ARENA TEHLİKESİ'), findsOneWidget);
+      expect(
+        find.text(
+          'İşaretli alan 2 tur sonra etkili olacak. Yer değiştir veya gard al.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      controller.dispose();
+    },
+  );
 
   testWidgets(
     'battle begins with a briefing and exposes its score conditions',
@@ -128,7 +237,7 @@ void main() {
       ),
     );
     await controller.startEncounter(1, seed: 34);
-    expect(controller.performAction(BattleAction.guard), isNull);
+    expect(await controller.performAction(BattleAction.guard), isNull);
     await controller.persistActiveBattleCheckpoint();
 
     final reloaded = GameController(storage: storage);
@@ -167,7 +276,6 @@ void main() {
       ),
     );
     await controller.startEncounter(1, seed: 33);
-    final engine = controller.battle!;
     await tester.pumpWidget(
       MaterialApp(
         theme: buildGameTheme(),
@@ -193,9 +301,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
     await tester.tap(quickAction);
 
-    expect(engine.metrics.turn, 1);
     await tester.pumpAndSettle();
-    expect(engine.metrics.turn, 1);
+    expect(controller.battle!.metrics.turn, 1);
     expect(tester.takeException(), isNull);
     controller.dispose();
   });
@@ -430,10 +537,7 @@ void main() {
               isPlayer: true,
               motionAtlasAsset: 'assets/art/characters/hero_battle_atlas.png',
               customization: const HeroAppearanceSelection(
-                headOptionId: 'head_04',
-                skinToneId: 'skin_07',
                 bodyProportionId: 'body_02',
-                facialHairId: 'facial_hair_03',
               ),
               motion: FighterMotion.attack,
               motionKey: 1,
@@ -474,22 +578,22 @@ void main() {
       {
         'name': 'Fener Şampiyonu',
         'portrait': 'assets/art/characters/fener_sampiyonu.webp',
-        'atlas': 'assets/art/characters/fener_champion_motion.png',
+        'atlas': 'assets/art/characters/fener_champion_motion.webp',
       },
       {
         'name': 'Pirinç Muhafız',
         'portrait': 'assets/art/characters/pirinc_muhafiz.webp',
-        'atlas': 'assets/art/characters/brass_guardian_motion.png',
+        'atlas': 'assets/art/characters/brass_guardian_motion.webp',
       },
       {
         'name': 'Gözlemci Başrahip',
         'portrait': 'assets/art/characters/gozlemci_basrahip.webp',
-        'atlas': 'assets/art/characters/observatory_priest_motion.png',
+        'atlas': 'assets/art/characters/observatory_priest_motion.webp',
       },
       {
         'name': 'Çember Ustası',
         'portrait': 'assets/art/characters/cember_ustasi.webp',
-        'atlas': 'assets/art/characters/circle_master_motion.png',
+        'atlas': 'assets/art/characters/circle_master_motion.webp',
       },
     ];
     for (final champion in champions) {

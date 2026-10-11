@@ -51,6 +51,7 @@ class CombatItemStats {
   const CombatItemStats({
     this.weaponPower = 0,
     this.armor = 0,
+    this.statusResistance = 0,
     this.might = 0,
     this.agility = 0,
     this.precision = 0,
@@ -60,6 +61,7 @@ class CombatItemStats {
   });
   final int weaponPower;
   final int armor;
+  final int statusResistance;
   final int might;
   final int agility;
   final int precision;
@@ -75,6 +77,7 @@ CombatItemStats _itemStats(String? id) {
       return CombatItemStats(
         weaponPower: item.weaponPower,
         armor: item.armor,
+        statusResistance: item.statusResistance,
         might: item.might,
         agility: item.agility,
         precision: item.precision,
@@ -100,6 +103,8 @@ class Combatant {
     required this.weaponPower,
     required this.family,
     required this.armor,
+    this.statusResistance = 0,
+    this.elementalImmunities = const {},
     required this.ammo,
     this.ammoCapacity = 0,
     required this.aiStyle,
@@ -122,6 +127,8 @@ class Combatant {
   final int bowPower;
   final WeaponFamily family;
   final int armor;
+  final int statusResistance;
+  final Set<CombatElement> elementalImmunities;
   final bool aiStyle;
   final Set<String> masteries;
   final int ammoCapacity;
@@ -194,6 +201,7 @@ class Combatant {
       bowPower: bow.weaponPower,
       family: weapon.family ?? WeaponFamily.shortSword,
       armor: head.armor + armor.armor + boots.armor,
+      statusResistance: head.statusResistance,
       ammo: bow.ammoCapacity,
       ammoCapacity: bow.ammoCapacity,
       aiStyle: false,
@@ -220,13 +228,14 @@ class Combatant {
       name: 'Ayna Dövüşçü',
       stats: stats,
       level: 20,
-      maxHealth: GameBalance.maxHealth(stats.vitality, 20),
-      maxEffort: GameBalance.maxEffort(stats.stamina),
-      maxMana: GameBalance.maxMana(stats.arcana),
+      maxHealth: hero.maxHealth,
+      maxEffort: hero.maxEffort,
+      maxMana: hero.maxMana,
       weaponPower: weaponPower,
       bowPower: useBow ? hero.bowPower : 0,
       family: family,
       armor: hero.armor,
+      statusResistance: hero.statusResistance,
       ammo: useBow ? hero.ammo : 0,
       ammoCapacity: useBow ? hero.ammoCapacity : 0,
       aiStyle: true,
@@ -248,6 +257,7 @@ class Combatant {
       weaponPower: encounter.weaponPower,
       family: encounter.weaponFamily,
       armor: 0,
+      elementalImmunities: encounter.elementalImmunities,
       ammo: ammoCapacity,
       ammoCapacity: ammoCapacity,
       aiStyle: true,
@@ -415,6 +425,7 @@ class BattleSnapshot {
     required this.playerWon,
     required this.phase,
     required this.telegraphedHazard,
+    required this.hazardWarningTurnsRemaining,
     required this.metrics,
   });
   final Combatant player;
@@ -430,6 +441,7 @@ class BattleSnapshot {
   final bool playerWon;
   final int phase;
   final bool telegraphedHazard;
+  final int? hazardWarningTurnsRemaining;
   final BattleMetrics metrics;
 }
 
@@ -474,6 +486,7 @@ class BattleEngine {
         {'hazard': encounter.hazard},
       );
     }
+    _setHazardTelegraphForNextTurn();
     _intent = _chooseIntent();
     _setIntentTelegraph();
   }
@@ -507,6 +520,7 @@ class BattleEngine {
   bool _movedThisTurn = false;
   bool _spellGuardedThisTurn = false;
   bool _telegraphedHazard = false;
+  int _phaseIntentIndex = 0;
   final List<String> _log = [];
   final List<BattleMessage> _messages = [];
   final List<BattleEvent> _events = [];
@@ -525,6 +539,7 @@ class BattleEngine {
     playerWon: _playerWon,
     phase: opponent.phase,
     telegraphedHazard: _telegraphedHazard,
+    hazardWarningTurnsRemaining: _hazardWarningTurnsRemaining,
     metrics: metrics,
   );
 
@@ -541,6 +556,7 @@ class BattleEngine {
     'movedThisTurn': _movedThisTurn,
     'spellGuardedThisTurn': _spellGuardedThisTurn,
     'telegraphedHazard': _telegraphedHazard,
+    'phaseIntentIndex': _phaseIntentIndex,
     'supplyUsed': _supplyUsed,
     'metrics': _metricsCheckpoint(),
     'log': _log,
@@ -572,7 +588,14 @@ class BattleEngine {
       checkpoint['telegraphedHazard'],
       false,
     );
+    _phaseIntentIndex = _checkpointInt(
+      checkpoint['phaseIntentIndex'],
+      0,
+    ).clamp(0, 1000000);
     _restoreMetrics(_checkpointMap(checkpoint['metrics']));
+    if (encounter.hazardSchedule != null) {
+      _telegraphedHazard = _hazardWarningTurnsRemaining != null;
+    }
     _supplyUsed = _checkpointBool(
       checkpoint['supplyUsed'],
       metrics.salveUsed || metrics.tonicUsed,
@@ -809,6 +832,11 @@ class BattleEngine {
           StatusKind.values,
           enumName,
           StatusKind.stagger,
+        ),
+        'TaughtTactic' => _checkpointEnum(
+          TaughtTactic.values,
+          enumName,
+          TaughtTactic.striker,
         ),
         'RangeBand' => _checkpointEnum(
           RangeBand.values,
@@ -1110,12 +1138,7 @@ class BattleEngine {
       player.counterCritReady = true;
     }
     _resolvePhaseChange();
-    _telegraphedHazard = encounter.hazard.isNotEmpty && metrics.turn % 4 == 2;
-    if (_telegraphedHazard)
-      _addLog(
-        'Arena tehlikesi yaklaşmakta: sonraki turda yer değiştir veya gard al.',
-        'battle.log.hazardApproaching',
-      );
+    _setHazardTelegraphForNextTurn();
     _intent = _chooseIntent();
     _setIntentTelegraph();
     _emitEvent(BattleEventType.turnEnded, actor: BattleActor.player);
@@ -1353,12 +1376,14 @@ class BattleEngine {
         action: action,
         amount: damage,
       );
-      _applyStatus(
+      _tryApplyStatus(
         target,
         StatusKind.burn,
         2,
+        baseChance: 100,
         viaSpell: playerAction,
         source: actorId,
+        element: CombatElement.ember,
         burnBonusPercent: actor.masteries.contains('seal_3') ? .01 : 0,
       );
       _addLog(
@@ -1391,27 +1416,31 @@ class BattleEngine {
         },
       );
       if (action == BattleAction.sweep) {
-        _applyStatus(
+        final applied = _tryApplyStatus(
           target,
           StatusKind.brokenGuard,
           1,
+          baseChance: 100,
           viaSpell: false,
           source: actorId,
         );
-        _addLog(
-          '${target.name} gardı kırıldı: zırhı bir sonraki tur %20 azalır.',
-          'battle.log.brokenGuard',
-          {'target': _battleActor(target)},
-        );
+        if (applied) {
+          _addLog(
+            '${target.name} gardı kırıldı: zırhı bir sonraki tur %20 azalır.',
+            'battle.log.brokenGuard',
+            {'target': _battleActor(target)},
+          );
+        }
       }
-      if (action == BattleAction.heavy && _random.nextInt(100) < 15) {
-        _applyStatus(
-          target,
-          StatusKind.stagger,
-          1,
-          viaSpell: false,
-          source: actorId,
-        );
+      if (action == BattleAction.heavy &&
+          _tryApplyStatus(
+            target,
+            StatusKind.stagger,
+            1,
+            baseChance: 15,
+            viaSpell: false,
+            source: actorId,
+          )) {
         _addLog('${target.name} sendeledi.', 'battle.log.stagger', {
           'target': _battleActor(target),
         });
@@ -1419,14 +1448,14 @@ class BattleEngine {
       if (actor.aiStyle &&
           encounter.archetype.contains('durum etkili') &&
           (action == BattleAction.quick || action == BattleAction.sweep) &&
-          _random.nextInt(100) < 30) {
-        _applyStatus(
-          target,
-          StatusKind.bleed,
-          2,
-          viaSpell: false,
-          source: actorId,
-        );
+          _tryApplyStatus(
+            target,
+            StatusKind.bleed,
+            2,
+            baseChance: 30,
+            viaSpell: false,
+            source: actorId,
+          )) {
         _addLog('${target.name} kanama etkisi aldı.', 'battle.log.bleed', {
           'target': _battleActor(target),
         });
@@ -1497,14 +1526,8 @@ class BattleEngine {
       final stacks = target.statuses[status] ?? 0;
       final turns = target.statusTurnsRemaining[status] ?? 0;
       if (stacks <= 0 || turns <= 0) continue;
-      final fraction = status == StatusKind.burn
-          ? GameBalance.burnDamageFraction + target.burnBonusPercent
-          : GameBalance.bleedDamageFraction;
-      projectedHealth -= GameBalance.dotDamage(
-        maxHealth: target.maxHealth,
-        fraction: fraction,
-        stacks: stacks,
-      );
+      if (_isImmuneToStatus(target, status)) continue;
+      projectedHealth -= _damageOverTime(target, status, stacks);
     }
     if (projectedHealth <= 0) return 0;
     return min(
@@ -1609,8 +1632,12 @@ class BattleEngine {
         distance == RangeBand.close) {
       base += 3;
     }
-    if (action == BattleAction.emberSpear || action == BattleAction.ashBurst)
-      armor = (armor * GameBalance.magicArmorMultiplier).round();
+    if (action == BattleAction.emberSpear || action == BattleAction.ashBurst) {
+      armor = GameBalance.magicEffectiveArmor(
+        physicalArmor: armor,
+        arcana: defender.stats.arcana,
+      );
+    }
     final guarded = defender.guarding
         ? (defender.masteries.contains('front_1')
               ? GameBalance.masteryGuardMultiplier
@@ -1655,8 +1682,12 @@ class BattleEngine {
         attacker.masteries.contains('front_2')) {
       armor = (armor * .9).round();
     }
-    if (action == BattleAction.emberSpear || action == BattleAction.ashBurst)
-      armor = (armor * GameBalance.magicArmorMultiplier).round();
+    if (action == BattleAction.emberSpear || action == BattleAction.ashBurst) {
+      armor = GameBalance.magicEffectiveArmor(
+        physicalArmor: armor,
+        arcana: defender.stats.arcana,
+      );
+    }
     final diff = attacker.stats.agility - defender.stats.agility;
     final critBonus = action == BattleAction.quick && attacker.counterCritReady
         ? 5
@@ -1757,19 +1788,75 @@ class BattleEngine {
     }
   }
 
+  bool _tryApplyStatus(
+    Combatant target,
+    StatusKind status,
+    int turns, {
+    required int baseChance,
+    required bool viaSpell,
+    BattleActor? source,
+    CombatElement? element,
+    double burnBonusPercent = 0,
+  }) {
+    final protectedElement = element ?? _elementForStatus(status);
+    if (protectedElement != null &&
+        target.elementalImmunities.contains(protectedElement)) {
+      _addLog(
+        '${target.name} ${status.label} etkisine bağışık.',
+        'battle.log.statusImmune',
+        {
+          'target': _battleActor(target),
+          'element': protectedElement,
+          'status': status,
+        },
+      );
+      return false;
+    }
+
+    final chance = GameBalance.statusChance(
+      baseChance,
+      target.statusResistance,
+    );
+    final roll = switch (chance) {
+      100 => 0,
+      0 => 100,
+      _ => _random.nextInt(100),
+    };
+    if (roll >= chance) {
+      if (chance < baseChance && (chance == 0 || roll < baseChance)) {
+        _addLog(
+          '${target.name} ${status.label} etkisine direndi.',
+          'battle.log.statusResisted',
+          {
+            'target': _battleActor(target),
+            'status': status,
+            'resistance': target.statusResistance,
+          },
+        );
+      }
+      return false;
+    }
+    _applyStatus(
+      target,
+      status,
+      turns,
+      viaSpell: viaSpell,
+      source: source,
+      burnBonusPercent: burnBonusPercent,
+    );
+    return true;
+  }
+
   void _tickDamageStatuses(Combatant target, {required BattleActor actor}) {
     for (final status in [StatusKind.burn, StatusKind.bleed]) {
       final stack = target.statuses[status] ?? 0;
       final turns = target.statusTurnsRemaining[status] ?? 0;
       if (stack <= 0 || turns <= 0) continue;
-      final fraction = status == StatusKind.burn
-          ? GameBalance.burnDamageFraction + target.burnBonusPercent
-          : GameBalance.bleedDamageFraction;
-      final damage = GameBalance.dotDamage(
-        maxHealth: target.maxHealth,
-        fraction: fraction,
-        stacks: stack,
-      );
+      if (_isImmuneToStatus(target, status)) {
+        _removeStatus(target, status);
+        continue;
+      }
+      final damage = _damageOverTime(target, status, stack);
       _dealDamage(target, damage);
       _addLog(
         '${actor == BattleActor.player ? 'Oyuncu' : 'Rakip'}: ${status.label} $damage hasar verdi.',
@@ -1784,9 +1871,42 @@ class BattleEngine {
     }
   }
 
+  CombatElement? _elementForStatus(StatusKind status) => switch (status) {
+    StatusKind.burn => CombatElement.ember,
+    _ => null,
+  };
+
+  bool _isImmuneToStatus(Combatant target, StatusKind status) {
+    final element = _elementForStatus(status);
+    return element != null && target.elementalImmunities.contains(element);
+  }
+
+  int _damageOverTime(Combatant target, StatusKind status, int stacks) {
+    final fraction = status == StatusKind.burn
+        ? GameBalance.burnDamageFraction + target.burnBonusPercent
+        : GameBalance.bleedDamageFraction;
+    final damage = GameBalance.dotDamage(
+      maxHealth: target.maxHealth,
+      fraction: fraction,
+      stacks: stacks,
+    );
+    if (status != StatusKind.burn) return damage;
+    return GameBalance.damageAfterArcanaResistance(
+      damage: damage,
+      arcana: target.stats.arcana,
+    );
+  }
+
   BattleAction _chooseIntent() {
-    if (encounter.hazard.isNotEmpty && metrics.turn % 4 == 2)
-      return BattleAction.guard;
+    final phaseTactics = encounter.tacticsForPhase(opponent.phase);
+    if (phaseTactics != null && phaseTactics.intentSequence.isNotEmpty) {
+      final sequence = phaseTactics.intentSequence;
+      final requested = sequence[_phaseIntentIndex % sequence.length];
+      _phaseIntentIndex++;
+      return _usablePhaseIntent(requested);
+    }
+
+    if (_hazardWarningTurnsRemaining == 1) return BattleAction.guard;
     if (opponent.health < opponent.maxHealth * .28 && _random.nextInt(100) < 38)
       return BattleAction.guard;
     if (opponent.aiStyle &&
@@ -1819,9 +1939,32 @@ class BattleEngine {
     return _random.nextInt(100) < 24 ? BattleAction.sweep : BattleAction.quick;
   }
 
+  BattleAction _usablePhaseIntent(BattleAction requested) {
+    final cost = _cost(requested, opponent);
+    if (requested == BattleAction.bow &&
+        (opponent.ammo <= 0 || opponent.effort < cost.effort)) {
+      return BattleAction.guard;
+    }
+    if (_isSpell(requested) && opponent.mana < cost.mana) {
+      return BattleAction.guard;
+    }
+    if ((requested == BattleAction.quick ||
+            requested == BattleAction.heavy ||
+            requested == BattleAction.sweep) &&
+        opponent.effort < cost.effort) {
+      return BattleAction.guard;
+    }
+    if (requested == BattleAction.closeDistance &&
+        distance == RangeBand.close) {
+      return BattleAction.guard;
+    }
+    if (requested == BattleAction.openDistance && distance == RangeBand.far) {
+      return BattleAction.guard;
+    }
+    return requested;
+  }
+
   String _intentLabel() {
-    final hazard = encounter.hazard.isNotEmpty && metrics.turn % 4 == 2;
-    if (hazard) return 'Arena tehlikesi: yer değiştir veya gard al';
     return switch (_intent) {
       BattleAction.quick => 'Hızlı vuruş hazırlıyor',
       BattleAction.heavy => 'Güçlü vuruş hazırlıyor',
@@ -1836,8 +1979,6 @@ class BattleEngine {
   }
 
   BattleMessage _intentMessage() {
-    final hazard = encounter.hazard.isNotEmpty && metrics.turn % 4 == 2;
-    if (hazard) return const BattleMessage('battle.intent.hazard');
     return BattleMessage('battle.intent.${_intent.name}');
   }
 
@@ -1859,7 +2000,11 @@ class BattleEngine {
   }
 
   void _resolveHazard() {
-    if (encounter.hazard.isEmpty || metrics.turn % 4 != 3) return;
+    if (encounter.hazard.isEmpty) return;
+    final schedule = encounter.hazardSchedule;
+    final due =
+        schedule?.impactsAfterTurn(metrics.turn) ?? (metrics.turn % 4 == 3);
+    if (!due) return;
     if (_movedThisTurn || player.guarding) {
       player.guarding = false;
       _emitEvent(BattleEventType.hazardAvoided, actor: BattleActor.player);
@@ -1884,6 +2029,32 @@ class BattleEngine {
     _addLog('Arena tehlikesi $damage hasar verdi.', 'battle.log.hazardDamage', {
       'damage': damage,
     });
+  }
+
+  int? get _hazardWarningTurnsRemaining {
+    if (encounter.hazard.isEmpty) return null;
+    final schedule = encounter.hazardSchedule;
+    if (schedule != null) {
+      return schedule.warningTurnsRemainingOn(metrics.turn + 1);
+    }
+    return (metrics.turn + 1) % 4 == 3 ? 1 : null;
+  }
+
+  void _setHazardTelegraphForNextTurn() {
+    final turnsRemaining = _hazardWarningTurnsRemaining;
+    _telegraphedHazard = turnsRemaining != null;
+    if (turnsRemaining == null) return;
+    _emitEvent(
+      BattleEventType.hazardWarned,
+      actor: BattleActor.opponent,
+      target: BattleActor.player,
+      amount: turnsRemaining,
+    );
+    _addLog(
+      'Arena tehlikesi $turnsRemaining tur içinde vuracak: yer değiştir veya gard al.',
+      'battle.log.hazardApproaching',
+      {'turns': turnsRemaining},
+    );
   }
 
   void _resolvePhaseChange() {
@@ -1921,8 +2092,17 @@ class BattleEngine {
           'archetype': encounter.archetype,
         },
       );
-      _intent = _chooseIntent();
-      _setIntentTelegraph();
+      final taughtTactics =
+          encounter.tacticsForPhase(opponent.phase)?.taughtTactics ??
+          const <TaughtTactic>[];
+      if (taughtTactics.isNotEmpty) {
+        _addLog(
+          'Rakip yeni bir taktik gösteriyor: ${taughtTactics.map((value) => value.name).join(', ')}.',
+          'battle.log.phaseTactics',
+          {'tactics': taughtTactics},
+        );
+      }
+      _phaseIntentIndex = 0;
     }
   }
 

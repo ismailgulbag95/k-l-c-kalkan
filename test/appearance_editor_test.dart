@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('post-creation appearance editing', () {
     test(
-      'persists cosmetic IDs without mutating campaign progression',
+      'persists the active body shape and clears removed appearance values',
       () async {
         final initial = GameSave(
           hasHero: true,
@@ -20,6 +20,8 @@ void main() {
           skinToneId: 'skin_03',
           bodyProportionId: 'body_02',
           facialHairId: 'facial_hair_04',
+          primaryAccentId: 'accent_06',
+          secondaryAccentId: 'accent_07',
           level: 12,
           xp: 6430,
           gold: 875,
@@ -54,12 +56,7 @@ void main() {
         await controller.initialize();
 
         expect(
-          await controller.updateHeroAppearance(
-            headOptionId: 'head_08',
-            skinToneId: 'skin_07',
-            bodyProportionId: 'body_03',
-            facialHairId: 'facial_hair_02',
-          ),
+          await controller.updateHeroAppearance(bodyProportionId: 'body_03'),
           isTrue,
         );
 
@@ -68,26 +65,34 @@ void main() {
               ..remove('headOptionId')
               ..remove('skinToneId')
               ..remove('bodyProportionId')
-              ..remove('facialHairId');
+              ..remove('facialHairId')
+              ..remove('primaryAccentId')
+              ..remove('secondaryAccentId');
         final actualUnchangedFields =
             Map<String, dynamic>.from(controller.save.toJson())
               ..remove('headOptionId')
               ..remove('skinToneId')
               ..remove('bodyProportionId')
-              ..remove('facialHairId');
+              ..remove('facialHairId')
+              ..remove('primaryAccentId')
+              ..remove('secondaryAccentId');
 
         expect(actualUnchangedFields, expectedUnchangedFields);
-        expect(controller.save.headOptionId, 'head_08');
-        expect(controller.save.skinToneId, 'skin_07');
+        expect(controller.save.headOptionId, 'head_01');
+        expect(controller.save.skinToneId, 'skin_01');
         expect(controller.save.bodyProportionId, 'body_03');
-        expect(controller.save.facialHairId, 'facial_hair_02');
+        expect(controller.save.facialHairId, 'facial_hair_00');
+        expect(controller.save.primaryAccentId, 'accent_01');
+        expect(controller.save.secondaryAccentId, 'accent_02');
 
         final reloaded = GameController(storage: storage);
         await reloaded.initialize();
-        expect(reloaded.save.headOptionId, 'head_08');
-        expect(reloaded.save.skinToneId, 'skin_07');
+        expect(reloaded.save.headOptionId, 'head_01');
+        expect(reloaded.save.skinToneId, 'skin_01');
         expect(reloaded.save.bodyProportionId, 'body_03');
-        expect(reloaded.save.facialHairId, 'facial_hair_02');
+        expect(reloaded.save.facialHairId, 'facial_hair_00');
+        expect(reloaded.save.primaryAccentId, 'accent_01');
+        expect(reloaded.save.secondaryAccentId, 'accent_02');
         expect(reloaded.save.completedMatches, initial.completedMatches);
         expect(reloaded.save.equippedItems, initial.equippedItems);
         expect(reloaded.save.xp, initial.xp);
@@ -104,12 +109,7 @@ void main() {
       await controller.initialize();
 
       expect(
-        await controller.updateHeroAppearance(
-          headOptionId: 'head_08',
-          skinToneId: 'skin_08',
-          bodyProportionId: 'body_03',
-          facialHairId: 'facial_hair_04',
-        ),
+        await controller.updateHeroAppearance(bodyProportionId: 'body_03'),
         isFalse,
       );
       expect(controller.save, const GameSave());
@@ -120,6 +120,11 @@ void main() {
     testWidgets('Fighter page opens an editor with live appearance preview', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1000, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final storage = MemorySaveStorage();
       final controller = GameController(storage: storage);
       await controller.initialize();
@@ -149,64 +154,32 @@ void main() {
       await tester.tap(editButton);
       await tester.pumpAndSettle();
       expect(find.byType(AppearanceEditorPage), findsOneWidget);
+      expect(find.text('Yüz kılı'), findsNothing);
+      expect(find.text('Ana renk vurgusu'), findsNothing);
+      expect(find.text('İkincil renk vurgusu'), findsNothing);
 
-      final headChoice = find.byKey(const ValueKey('appearance.head.head_05'));
-      await tester.ensureVisible(headChoice);
-      await tester.tap(headChoice);
-      await tester.pumpAndSettle();
-      expect(controller.save.headOptionId, 'head_05');
-      expect(storage.value?.headOptionId, 'head_05');
-      expect(
-        tester
-            .widget<HeroCustomizationArt>(find.byType(HeroCustomizationArt))
-            .selection
-            .headOptionId,
-        'head_05',
-      );
-
-      final skinChoice = find.byKey(const ValueKey('appearance.skin.skin_06'));
-      await tester.ensureVisible(skinChoice);
-      await tester.tap(skinChoice);
-      await tester.pumpAndSettle();
-      expect(controller.save.skinToneId, 'skin_06');
-      expect(storage.value?.skinToneId, 'skin_06');
-      expect(
-        tester
-            .widget<HeroCustomizationArt>(find.byType(HeroCustomizationArt))
-            .selection
-            .skinToneId,
-        'skin_06',
-      );
+      final previewFinder = find.byKey(const ValueKey('appearance.preview'));
+      Finder editorScrollable() => find
+          .descendant(
+            of: find.byType(AppearanceEditorPage),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      Future<void> reveal(Finder finder, double delta) => tester
+          .scrollUntilVisible(finder, delta, scrollable: editorScrollable());
+      HeroAppearanceSelection previewSelection() {
+        final preview = tester.widget<SizedBox>(previewFinder);
+        return (preview.child! as FighterArt).customization!;
+      }
 
       final bodyChoice = find.byKey(const ValueKey('appearance.body.body_03'));
-      await tester.ensureVisible(bodyChoice);
+      await reveal(bodyChoice, 240);
       await tester.tap(bodyChoice);
       await tester.pumpAndSettle();
       expect(controller.save.bodyProportionId, 'body_03');
       expect(storage.value?.bodyProportionId, 'body_03');
-      expect(
-        tester
-            .widget<HeroCustomizationArt>(find.byType(HeroCustomizationArt))
-            .selection
-            .bodyProportionId,
-        'body_03',
-      );
-
-      final facialHairChoice = find.byKey(
-        const ValueKey('appearance.facialHair.facial_hair_03'),
-      );
-      await tester.ensureVisible(facialHairChoice);
-      await tester.tap(facialHairChoice);
-      await tester.pumpAndSettle();
-      expect(controller.save.facialHairId, 'facial_hair_03');
-      expect(storage.value?.facialHairId, 'facial_hair_03');
-      expect(
-        tester
-            .widget<HeroCustomizationArt>(find.byType(HeroCustomizationArt))
-            .selection
-            .facialHairId,
-        'facial_hair_03',
-      );
+      await reveal(previewFinder, -240);
+      expect(previewSelection().bodyProportionId, 'body_03');
       expect(tester.takeException(), isNull);
 
       await tester.tap(find.byIcon(Icons.arrow_back));
@@ -216,15 +189,52 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.drag(find.byType(ListView).first, const Offset(0, 900));
       await tester.pumpAndSettle();
-      expect(
-        tester
-            .widget<FighterArt>(find.byType(FighterArt))
-            .customization
-            ?.facialHairId,
-        'facial_hair_03',
-      );
+      expect(tester.widget<FighterArt>(find.byType(FighterArt)).origin, 'Kıyı');
 
       controller.dispose();
     });
+
+    testWidgets(
+      'CharacterCreator keeps body shape and origin but removes hair and color options',
+      (tester) async {
+        tester.view.physicalSize = const Size(1000, 2000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final controller = GameController(storage: MemorySaveStorage());
+        await controller.initialize();
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildGameTheme(),
+            home: GameLocaleScope(
+              languageCode: 'tr',
+              child: Scaffold(body: CharacterCreator(controller: controller)),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yüz kılı'), findsNothing);
+        expect(find.text('Ana renk vurgusu'), findsNothing);
+        expect(find.text('İkincil renk vurgusu'), findsNothing);
+
+        expect(
+          find.byKey(const ValueKey('creator.body.body_01')),
+          findsOneWidget,
+        );
+
+        final originChoice = find.widgetWithText(ChoiceChip, 'Ocak');
+        expect(originChoice, findsOneWidget);
+        await tester.tap(originChoice);
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<FighterArt>(find.byType(FighterArt)).origin,
+          'Ocak',
+        );
+
+        controller.dispose();
+      },
+    );
   });
 }

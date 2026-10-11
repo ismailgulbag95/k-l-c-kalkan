@@ -66,6 +66,9 @@ void main() {
     for (var stage = 1; stage <= 8; stage++) {
       requiredKeys.add('content.postgame.$stage.name');
     }
+    for (final tactic in TaughtTactic.values) {
+      requiredKeys.add('content.tactic.${tactic.name}');
+    }
 
     for (final key in requiredKeys) {
       final message = gameMessages[key];
@@ -122,12 +125,15 @@ void main() {
       'battle.log.hit',
       'battle.log.stagger',
       'battle.log.bleed',
+      'battle.log.statusResisted',
+      'battle.log.statusImmune',
       'battle.log.shieldAbsorb',
       'battle.log.damageOverTime',
       'battle.log.spellTelegraph',
       'battle.log.hazardAvoided',
       'battle.log.hazardDamage',
       'battle.log.phaseChange',
+      'battle.log.phaseTactics',
       'battle.log.opponentRangeChange',
       'battle.log.victory',
       'battle.log.defeat',
@@ -138,6 +144,10 @@ void main() {
       'battle.preview.note.bowPenalty',
       'battle.preview.note.sweepArmor',
       'battle.preview.note.guard',
+      'ui.encounter.immunity',
+      'label.element.ember',
+      'label.element.tide',
+      'label.element.wind',
     };
     for (final action in BattleAction.values) {
       requiredBattleKeys.add('battle.intent.${action.name}');
@@ -196,6 +206,11 @@ void main() {
   testWidgets('fighter preview follows the selected appearance', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1000, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final controller = GameController(storage: MemorySaveStorage());
     await controller.initialize();
     await tester.pumpWidget(
@@ -215,6 +230,46 @@ void main() {
     expect(
       tester.widget<FighterArt>(portrait).portraitAsset,
       heroArtForAppearance('Ocak'),
+    );
+
+    final primaryAccent = find.byKey(
+      const ValueKey('creator.primaryAccent.accent_05'),
+    );
+    await tester.scrollUntilVisible(
+      primaryAccent,
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byType(CharacterCreator),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(primaryAccent);
+    await tester.pump();
+    expect(
+      tester.widget<FighterArt>(portrait).customization?.primaryAccentId,
+      'accent_05',
+    );
+
+    final secondaryAccent = find.byKey(
+      const ValueKey('creator.secondaryAccent.accent_08'),
+    );
+    await tester.scrollUntilVisible(
+      secondaryAccent,
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byType(CharacterCreator),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(secondaryAccent);
+    await tester.pump();
+    expect(
+      tester.widget<FighterArt>(portrait).customization?.secondaryAccentId,
+      'accent_08',
     );
     expect(find.text('İsabet'), findsOneWidget);
     controller.dispose();

@@ -1,6 +1,6 @@
 # Art asset manifest
 
-All images listed here are original assets generated for the Kül Çemberi project. They are not extracted from or traced over Swords and Sandals. The generated PNG masters remain in `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\`; WebP files in the workspace are the runtime versions. Opaque scene art and transparent character/atlas art were encoded at quality 90, preserving alpha where present.
+All images listed here are original assets generated for the Kül Çemberi project. They are not extracted from or traced over Swords and Sandals. The generated PNG masters remain in `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\`; WebP files in the workspace are the runtime versions. Opaque scene art and other transparent character/atlas art use quality-90 WebP, preserving alpha where present; the 32 rival motion atlases use quality 95 with exact alpha preservation.
 
 ## Arenas
 
@@ -12,6 +12,7 @@ All images listed here are original assets generated for the Kül Çemberi proje
 | `arenas/gelgit_amfitiyatrosu.webp` | Third chapter arena | `exec-8f93100a-c68d-426e-97f5-a36150e0d9dc.png` | Tide amphitheatre with water channels and sea-glass mosaics |
 | `arenas/tac_kalesi.webp` | Fourth chapter arena | `exec-1c368bd2-8055-4398-a995-a7926fb9c288.png` | Crown fortress, stone buttresses, banners and siege beams |
 | `arenas/tac_halkasi.webp` | Final arena | `exec-036f30b2-2817-4fd9-bd45-daa7b2b66ec9.png` | Open-air final ring at sunset with rising spectator tiers |
+| `arenas/chapter_heraldry_atlas.png` | Four unique campaign chapter crests for result and chapter UI | `exec-cfacda2d-8bce-4557-b826-9ceb4c3333f3.png` | Transparent RGBA 2×2 heraldry atlas: ember, tide, storm, and crown motifs in chapter order |
 
 ## Characters
 
@@ -20,29 +21,57 @@ All images listed here are original assets generated for the Kül Çemberi proje
 | `characters/hero_kulak.webp` | Player portrait and battle-stage art | `exec-e663517e-aa93-4325-aa38-6c8c4d19ff4b.png` | Original teal-scarfed coastal gladiator in charcoal and brass armor |
 | `characters/hero_battle_atlas.png` | Player battle poses | `exec-d4a38097-da3b-48bf-99d0-ced4dbd2039e.png` | Transparent 3×2 pose atlas: idle, attack wind-up, sword slash, hit recoil, guard and victory; cropped row-major |
 | `characters/hero_battle_actions.png` | Player action-specific battle poses | `exec-f67517fd-7838-407f-8b64-38ec4d4a6190.png` | Transparent RGBA 4×2 atlas (1774×887); four columns use fractional source bounds and the row crop splits at y=459 through the transparent gap to preserve feet/head silhouettes: strong strike, bow draw, bow release, dodge, consumable, stagger, spell and defeat; row-major cells 0–7 |
+| `characters/hero_combat_base_layers.png` | Player appearance and equipped-weapon fallback art | `exec-9300761b-281b-4f79-bb75-ce127ed42c19.png` | Transparent RGBA 1536×1024, 3×1 row-major body atlas; weaponless base with integrated curly hair so weapon silhouettes can be painted per family and separate hair/skin layers cannot float or tint the face |
+| `characters/hero_ocak_combat_base_layers.png` | Ocak-origin player appearance | `exec-1fce855d-86bc-417c-bb70-8e0d93e543ca.png` | Transparent RGBA 1536×1024, 3×1 atlas; soot-charcoal armor, restrained copper and ember-red cloth; same three body proportion cells |
+| `characters/hero_firtina_combat_base_layers.png` | Fırtına-origin player appearance | `exec-26d8ed02-36f8-4aa1-92e2-977a8aa6ffaf.png` | Transparent RGBA 1536×1024, 3×1 atlas; storm-teal cloth, charcoal layers and pale-silver armor; same three body proportion cells |
+| `characters/hero_tac_combat_base_layers.png` | Taç-origin player appearance | `exec-381dfecd-f53d-4853-9e5d-1d58528dbca8.png` | Transparent RGBA 1536×1024, 3×1 atlas; worn ivory cloth, charcoal armor and muted burgundy accents; same three body proportion cells |
 | `characters/fener_sampiyonu.webp` | Fener Champion | `exec-82f5bcd7-4d2d-4370-9404-6f192dbd8ff9.png` | Lantern-bearing spear champion with a deep-teal mantle |
-| `characters/fener_champion_motion.png` | Fener Champion battle pose atlas | `exec-650c8231-128e-42d0-9fc0-8218d2c9817e.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, spear wind-up, spear thrust, hit recoil, guard, defeat; used by match 8 |
+| `characters/fener_champion_motion.webp` | Fener Champion battle pose atlas | `exec-650c8231-128e-42d0-9fc0-8218d2c9817e.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, spear wind-up, spear thrust, hit recoil, guard, defeat; used by match 8 |
 | `characters/pirinc_muhafiz.webp` | Brass Guardian | `exec-a214cf11-bef8-4e42-907a-157bd45dc4c6.png` | Forge champion with a heavy hammer and warm metal palette |
-| `characters/brass_guardian_motion.png` | Brass Guardian battle pose atlas | `exec-e7cf6289-dde2-41f4-880d-23973594314a.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, maul wind-up, maul strike, hit recoil, guard, defeat; used by match 16 |
+| `characters/brass_guardian_motion.webp` | Brass Guardian battle pose atlas | `exec-e7cf6289-dde2-41f4-880d-23973594314a.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, maul wind-up, maul strike, hit recoil, guard, defeat; used by match 16 |
 | `characters/gozlemci_basrahip.webp` | Observatory High Priest | `exec-13298b5e-e9b7-4f93-b44d-d55b29cf781f.png` | Storm observatory spellkeeper with ceremonial robes and a staff |
-| `characters/observatory_priest_motion.png` | Observatory High Priest battle pose atlas | `exec-c252458c-e831-4af6-97cb-20390909bf72.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, storm charge, spell cast, hit recoil, guard, defeat; used by match 24 |
+| `characters/observatory_priest_motion.webp` | Observatory High Priest battle pose atlas | `exec-c252458c-e831-4af6-97cb-20390909bf72.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, storm charge, spell cast, hit recoil, guard, defeat; used by match 24 |
 | `characters/cember_ustasi.webp` | Circle Master, final champion | `exec-910b1614-77a3-4b8e-afd7-c9c5a9f0b399.png` | Veteran arena champion in bone enamel, brass and sea-glass armor; ring-staff |
-| `characters/circle_master_motion.png` | Circle Master battle pose atlas | `exec-ea2d0463-0aac-4697-8429-ebf2b2aa7874.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, staff wind-up, staff strike, hit recoil, guard, defeat; registered for match 32 only |
+| `characters/circle_master_motion.webp` | Circle Master battle pose atlas | `exec-ea2d0463-0aac-4697-8429-ebf2b2aa7874.png` | Transparent 1536×1024 RGBA, 3×2 row-major atlas: idle, staff wind-up, staff strike, hit recoil, guard, defeat; registered for match 32 only |
 | `characters/ayna_dovuscu.webp` | Mirror Fighter, final Champions Road duel | `exec-848e2530-b4c7-42df-bb07-26b8332bd64f.png` | Original reflection of the coastal gladiator in silvered armor and sea-glass accents; transparent full-body portrait |
 
 Character portraits are 1024×1536 WebP files except `pirinc_muhafiz.webp` (1143×1376). Transparent corners are retained for compositing over arena art. `hero_battle_atlas.png` is 1536×1024 RGBA with six 512×512 row-major cells. Arena dimensions are recorded in the image files; use resolution-aware fitting and avoid stretching.
 
 ### Player appearance layers
 
-The player preview composes original transparent layers in this order: body proportion base → exposed-skin tone mask → selected hair/headwear → optional facial hair clipped to the face opening. The face-hair layer follows the head so it remains visible over the portrait. `head_01`, `skin_01`, `body_01`, and `facial_hair_00` are the defaults and preserve the coastal fighter's medium build and clean-shaven look. These selections are cosmetic and do not affect combat stats or economy.
+Active character creation and the appearance editor expose four fixed origin looks and three body proportions. Kıyı uses `hero_combat_base_layers.png`; the other origins use the matching atlas above. Heads, hair and clothing colors are painted into each base image. Separate hair/headwear, facial-hair and palette-color choices are removed from the UI and painter because they produced floating overlays or unnatural color patches. Old `headOptionId`, `skinToneId`, `facialHairId` and accent IDs remain in the save schema for compatibility; the renderer ignores them, and editing the body shape writes their canonical defaults. `HeroWeaponArt` continues to draw the selected weapon family on top of the origin-specific base.
 
 | Runtime file | Dimensions and layout | IDs and mapping | Generated master |
 |---|---|---|---|
-| `characters/hero_head_layers.png` | 1774×887 RGBA; 4×2 equal transparent cells (443.5×443.5; fractional crop bounds are intentional) | Row-major `head_01`–`head_08`: curls, swept crop, braid, tight coils, undercut, topknot, circlet, sea-glass half-helm; `head_01` default | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-14fc6f58-e665-4377-ba09-81d6bb5f0630.png` |
-| `characters/hero_body_layers.png` | 1536×1024 RGBA; 3×1 equal transparent cells (512×1024) | Left-to-right `body_01`–`body_03`: medium (default), lean/tall, broad/sturdy | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-102d474f-cc61-4f3b-843f-3a53ed0866de.png` |
-| `characters/hero_facial_hair_layers.png` | 1536×1024 RGBA; 3×2 equal transparent cells (512×512) | Row-major `facial_hair_00`–`facial_hair_04`: empty/clean-shaven (default), stubble, moustache, short beard, chin beard; final cell reserved/empty | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-c8d664fa-3f71-494c-99d1-9d444a356809.png` |
+| `characters/hero_head_layers.png` | 1774×887 RGBA; 4×2 equal transparent cells (443.5×443.5) | Legacy, not used by runtime character UI or painter | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-14fc6f58-e665-4377-ba09-81d6bb5f0630.png` |
+| `characters/hero_body_layers.png` | 1536×1024 RGBA; legacy 3×1 atlas | Historical source, not used at runtime; each cell has a baked sword | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-102d474f-cc61-4f3b-843f-3a53ed0866de.png` |
+| `characters/hero_combat_base_layers.png` | 1536×1024 RGBA; 3×1 equal transparent cells (512×1024) | Left-to-right body proportion IDs `body_01`–`body_03`; natural face/hair included; weapon silhouettes are rendered by `HeroWeaponArt` | `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\exec-9300761b-281b-4f79-bb75-ce127ed42c19.png` |
+| `characters/hero_facial_hair_layers.png` | 1536×1024 RGBA; 3×2 equal transparent cells (512×512) | Legacy facial-hair study; not used by runtime character UI or painter | `C:\Users\ismai\.codex\generated_images\01a1249b-75c7-7490-977b-0c8360e1f271\exec-c8d664fa-3f71-494c-99d1-9d444a356809.png` |
 
-Eight skin IDs (`skin_01`–`skin_08`) map to distinct tone colors in `design.dart`. A reusable path mask tints the face, throat, exposed arms, hands and legs on the selected body base, so proportions and skin tones remain independent choices without storing 24+ precomposed portraits. The existing `hero_kulak.webp` portrait remains the temporary loading/failure fallback.
+Origin atlas masters are listed below; each keeps the same 3×1 body-proportion crop contract as the Kıyı atlas. Atlas previews and combat fallback art select the asset from the saved origin, so the chosen origin remains visible beyond character creation.
+
+| Runtime file | Dimensions and layout | Visual mapping | Generated master |
+|---|---|---|---|
+| `characters/hero_ocak_combat_base_layers.png` | 1536×1024 RGBA; 3×1 equal transparent cells (512×1024) | `body_01`–`body_03`; Ocak charcoal/copper/ember outfit | `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\exec-1fce855d-86bc-417c-bb70-8e0d93e543ca.png` |
+| `characters/hero_firtina_combat_base_layers.png` | 1536×1024 RGBA; 3×1 equal transparent cells (512×1024) | `body_01`–`body_03`; Fırtına teal/silver outfit | `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\exec-26d8ed02-36f8-4aa1-92e2-977a8aa6ffaf.png` |
+| `characters/hero_tac_combat_base_layers.png` | 1536×1024 RGBA; 3×1 equal transparent cells (512×1024) | `body_01`–`body_03`; Taç ivory/burgundy outfit | `C:\Users\ismai\.codex\generated_images\01a1227a-fd13-7050-9974-c98c71a09e82\exec-381dfecd-f53d-4853-9e5d-1d58528dbca8.png` |
+
+### Hero combat rig art gate
+
+An original art pass explored replacing the fixed-standing preview layers with a reusable cutout rig. Multiple candidates failed at the 126×156 battle-art size. The round-2 4×4 sheet is 1285×1224 RGBA rather than an integer-cell atlas; all 16 nominal cells touch alpha at crop edges, including both intended blank cells, and the target-size preview shows fragments and clipping. Both new full-figure sheets bake one appearance/gear look and contain no customization layers. **None of the failed candidates is bundled or used at runtime.** The complete existing `hero_battle_atlas.png` and `hero_battle_actions.png` remain the pose sources until replacement art passes fit review. The review packet is kept under `docs/art-review/hero_combat_rig/`.
+
+| File | Layout / source | Status |
+|---|---|---|
+| `docs/art-review/hero_combat_rig/hero_head_base.png` | 512×512 transparent hairless head/neck, alpha-clean export of `hero_head_base_master.png` | Unaccepted source only; not bundled |
+| `docs/art-review/hero_combat_rig/hero_head_skin_mask.png` | 512×512 candidate mask for the standalone head | Tint result not yet reviewed; not bundled |
+| `docs/art-review/hero_combat_rig/hero_equipment_layers.png` | 1086×1448 transparent 3×4 atlas, source `hero_equipment_layers_master.png`; columns are helmets, coats, boots; rows are tiers 1–4 | Isolated item art is not pose-fitted; not bundled |
+| `docs/art-review/hero_combat_rig/hero_modular_parts_master.png` | 1536×1024 4×4 cutout anatomy experiment | Fit failed; archived source material only |
+| `docs/art-review/hero_combat_rig/hero_full_pose_atlas_candidate.png` | 1382×1138 RGBA full-figure concept sheet; intended as a 14-pose review candidate | No dependable frame bounds; not a runtime atlas or customization layer set |
+| `docs/art-review/hero_combat_rig/hero_8_pose_full_figure_candidate_round1.png` | 1774×887 RGBA, 4×2 requested action sheet | All eight crops touch cell edges; clipping and single baked appearance; review only |
+| `docs/art-review/hero_combat_rig/hero_14_pose_atlas_candidate_round2.png` | 1285×1224 RGBA, 4×4 requested layout; source reference was `hero_battle_atlas.png` | All 16 nominal crops touch cell edges; intended blank cells contain fragments; review only |
+| `docs/art-review/hero_combat_rig/hero_14_pose_fit_preview_round2_126x156.png` | Candidate cells previewed at the in-game 126×156 viewport | Shows clipped figures and detached neighboring-cell props; review evidence only |
+| `docs/art-review/hero_combat_rig/rig_manifest.json` | Existing 14-pose selector mapping, selection IDs, candidate notes and gate status | No battle pivots, masks, gear sockets, occlusion, or draw placements validated |
+| `docs/art-review/hero_combat_rig/fit_audit.md` | Acceptance notes and exact remaining art coverage | Correction pass remains blocked; target-size samples and new candidate reviewed |
 
 ## Equipment and spell icons
 
@@ -67,6 +96,12 @@ The four campaign rival sheets are original 1536×1024 WebP atlases laid out as 
 All 32 campaign opponents now resolve to either one of the seven act-specific atlas cells or a dedicated champion portrait. Contracts that reuse campaign IDs inherit the same art mapping. Preview and battle use the same source selection.
 
 Champions Road encounters 33–39 use the dedicated postgame atlas in stage order, cells 0–6. Its eight original rivals are painted as full-body dark-fantasy portraits against charcoal panels; cell 7 remains reserved for a future challenge or gallery use. Encounter 40 uses the dedicated `characters/ayna_dovuscu.webp` portrait and its dynamic player-build combat data. The atlas follows the existing 4×2 crop contract and is decoded and painted by asset/widget tests.
+
+## Fonts
+
+| Runtime file | Use | License | Notes |
+|---|---|---|---|
+| `../fonts/NotoSans-Variable.ttf` | Main application typography | SIL Open Font License 1.1 (`assets/fonts/OFL-NotoSans.txt`) | Variable Noto Sans font, bundled locally for consistent offline rendering |
 
 ## Contract card illustrations
 
@@ -169,77 +204,77 @@ All six atlases are 1536×1024 RGBA PNGs arranged as equal 2×2 cells, row-major
 
 ## Early rival motion atlases
 
-Four original transparent PNG masters were generated with the built-in ImageGen tool. They use the existing battle painter's exact 1536×1024, 3×2 row-major contract: idle, wind-up, attack/cast, hit recoil, guard, defeat. Each output was copied byte-for-byte from its source master; no existing portrait or champion atlas was replaced. `rivalMotionAtlasAssetForEncounter` in `lib/game/ui/rival_motion_assets.dart` registers the stable encounter-ID mapping, and the battle-stage `FighterArt` selects these sheets for encounters 1–4.
+Four original transparent PNG masters were generated with the built-in ImageGen tool. They use the existing battle painter's exact 1536×1024, 3×2 row-major contract: idle, wind-up, attack/cast, hit recoil, guard, defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged; no existing portrait or champion atlas was replaced.  `rivalMotionAtlasAssetForEncounter` in `lib/game/ui/rival_motion_assets.dart` registers the stable encounter-ID mapping, and the battle-stage `FighterArt` selects these sheets for encounters 1–4. Across all 32 atlases, the quality-95 lossy WebPs total 17,139,516 bytes, down from 78,412,549 bytes for the former PNG runtime copies; a pixel-exact lossless WebP set measured 53,725,112 bytes. The selected exports retain the alpha channel exactly.
 
 | Encounter | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 1 — İskele Kabadayısı | `characters/iskele_kabadayisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-e3064b00-89e1-4790-80a4-d634ebc63cfb.png` | Broad salt-dock bruiser with an iron-headed maul | 1536×1024 RGBA; 2,426,898 bytes |
-| 2 — Halat Koşucusu | `characters/halat_kosucusu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-94ffe7cf-f435-4e3f-b865-c01d329de840.png` | Agile rope-runner with a curved short sword | 1536×1024 RGBA; 2,184,193 bytes |
-| 3 — Kapı Bekçisi | `characters/kapi_bekcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-89c0d0fc-c798-4165-9063-1bf0a50bc52a.png` | Armored gate guard with a tall shield and mace | 1536×1024 RGBA; 2,431,494 bytes |
-| 4 — Tuz Kahini | `characters/tuz_kahini_motion.png` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-4a5428dd-4d8d-43b5-8f94-a26636b7cda0.png` | Salt-seer with a crystal-tipped spear | 1536×1024 RGBA; 2,468,958 bytes |
+| 1 — İskele Kabadayısı | `characters/iskele_kabadayisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-e3064b00-89e1-4790-80a4-d634ebc63cfb.png` | Broad salt-dock bruiser with an iron-headed maul | 1536×1024 RGBA; 500,888 bytes |
+| 2 — Halat Koşucusu | `characters/halat_kosucusu_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-94ffe7cf-f435-4e3f-b865-c01d329de840.png` | Agile rope-runner with a curved short sword | 1536×1024 RGBA; 409,120 bytes |
+| 3 — Kapı Bekçisi | `characters/kapi_bekcisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-89c0d0fc-c798-4165-9063-1bf0a50bc52a.png` | Armored gate guard with a tall shield and mace | 1536×1024 RGBA; 471,038 bytes |
+| 4 — Tuz Kahini | `characters/tuz_kahini_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a125ea-b125-7f93-9184-ca34895dafff\exec-4a5428dd-4d8d-43b5-8f94-a26636b7cda0.png` | Salt-seer with a crystal-tipped spear | 1536×1024 RGBA; 553,698 bytes |
 
 ## Next rival motion atlases
 
-Four original transparent PNG masters extend the same 1536×1024, 3×2 row-major fighter-pose contract. Cells are idle, wind-up, attack/cast, hit recoil, guard, and defeat. Each runtime file is a byte-for-byte copy of its generated master; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart` and the existing battle-stage `FighterArt` wiring picks them up.
+Four original transparent PNG masters extend the same 1536×1024, 3×2 row-major fighter-pose contract. Cells are idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart` and the existing battle-stage `FighterArt` wiring picks them up.
 
 | Encounter | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 5 — Halatçı Sefa | `characters/halatci_sefa_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-b392f71a-d18d-4cad-84e7-7cb90eb63bab.png` | Teal-clad harbor archer with a recurved bow | 1536×1024 RGBA; 2,224,227 bytes |
-| 6 — Paslı Kanca | `characters/pasli_kanca_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-4d8d48c2-bcfe-4002-94c4-83cc83f97734.png` | Rust-red harbor counterattacker with a curved short sword and parrying hook | 1536×1024 RGBA; 2,316,616 bytes |
-| 7 — Fener Bekçisi | `characters/fener_bekcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-da92f7a9-a62f-4064-91e5-71fc372d9ca9.png` | Hooded lantern keeper with an iron maul | 1536×1024 RGBA; 2,448,313 bytes |
-| 9 — Cüruf Taşıyıcı | `characters/curuf_tasiyici_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-98f48d4d-71e0-45db-be8c-e36697960045.png` | Forge hauler with a heavy slag maul | 1536×1024 RGBA; 2,323,526 bytes |
+| 5 — Halatçı Sefa | `characters/halatci_sefa_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-b392f71a-d18d-4cad-84e7-7cb90eb63bab.png` | Teal-clad harbor archer with a recurved bow | 1536×1024 RGBA; 438,738 bytes |
+| 6 — Paslı Kanca | `characters/pasli_kanca_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-4d8d48c2-bcfe-4002-94c4-83cc83f97734.png` | Rust-red harbor counterattacker with a curved short sword and parrying hook | 1536×1024 RGBA; 482,212 bytes |
+| 7 — Fener Bekçisi | `characters/fener_bekcisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-da92f7a9-a62f-4064-91e5-71fc372d9ca9.png` | Hooded lantern keeper with an iron maul | 1536×1024 RGBA; 517,208 bytes |
+| 9 — Cüruf Taşıyıcı | `characters/curuf_tasiyici_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12621-916d-7e73-89aa-a735c034ae3f\exec-98f48d4d-71e0-45db-be8c-e36697960045.png` | Forge hauler with a heavy slag maul | 1536×1024 RGBA; 465,728 bytes |
 
 ## Rival motion atlases, encounters 10–13
 
-Four original transparent PNG masters extend the same 1536×1024, 3×2 row-major fighter-pose contract. Each sheet contains six 512×512 cells: idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime files are byte-for-byte copies of their generated masters; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart` and rendered through the existing `FighterArt` path.
+Four original transparent PNG masters extend the same 1536×1024, 3×2 row-major fighter-pose contract. Each sheet contains six 512×512 cells: idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart` and rendered through the existing `FighterArt` path.
 
 | Encounter | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 10 — Zincirci | `characters/zincirci_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-b76f3036-52e2-4446-9409-969e757b1e5b.png` | Chain-fettered status fighter with a hooked iron spear | 1536×1024 RGBA; 2,294,820 bytes |
-| 11 — Örs Muhafızı | `characters/ors_muhafizi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-775ac448-00db-4b36-a30d-fd4d39fe5edd.png` | Fully armored maul fighter with a blocky anvil-shaped head | 1536×1024 RGBA; 2,447,726 bytes |
-| 12 — Sözleşmeli Düellocu | `characters/sozlesmeli_duellocu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-3843e1e4-05b3-40b6-ad9b-b6e0381daf1d.png` | Bronze-and-charcoal sword-and-buckler duelist with teal contract sash | 1536×1024 RGBA; 2,318,382 bytes |
-| 13 — Köz Gölgesi | `characters/koz_golgesi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-168b0980-4e75-4af7-b735-92007d505b06.png` | Hooded counterattacker with a narrow curved parrying blade | 1536×1024 RGBA; 2,277,219 bytes |
+| 10 — Zincirci | `characters/zincirci_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-b76f3036-52e2-4446-9409-969e757b1e5b.png` | Chain-fettered status fighter with a hooked iron spear | 1536×1024 RGBA; 473,106 bytes |
+| 11 — Örs Muhafızı | `characters/ors_muhafizi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-775ac448-00db-4b36-a30d-fd4d39fe5edd.png` | Fully armored maul fighter with a blocky anvil-shaped head | 1536×1024 RGBA; 511,268 bytes |
+| 12 — Sözleşmeli Düellocu | `characters/sozlesmeli_duellocu_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-3843e1e4-05b3-40b6-ad9b-b6e0381daf1d.png` | Bronze-and-charcoal sword-and-buckler duelist with teal contract sash | 1536×1024 RGBA; 463,072 bytes |
+| 13 — Köz Gölgesi | `characters/koz_golgesi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126bc-225a-7cc0-b23d-5109dca1c5f4\exec-168b0980-4e75-4af7-b735-92007d505b06.png` | Hooded counterattacker with a narrow curved parrying blade | 1536×1024 RGBA; 457,770 bytes |
 
 ## Rival motion atlases, encounters 14–18
 
-Four original transparent PNG masters extend the same 1536×1024 RGBA, 3×2 row-major fighter-pose contract. The six 512×512 cells are idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime atlases are byte-for-byte copies of their generated masters and are registered by stable encounter ID in `lib/game/ui/rival_motion_assets.dart`.
+Four original transparent PNG masters extend the same 1536×1024 RGBA, 3×2 row-major fighter-pose contract. The six 512×512 cells are idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged. `lib/game/ui/rival_motion_assets.dart` registers the runtime atlases by stable encounter ID.
 
 | Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 14 → `characters/kizil_ocak_sefi_motion.png` | `characters/kizil_ocak_sefi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-d714927c-7e35-42e4-b75d-03d90d6fe5d8.png` | Kızıl Ocak Şefi; soot-armored area-control boss with a heavy iron maul | 1536×1024 RGBA; 2,737,968 bytes |
-| 15 → `characters/kukurt_matronu_motion.png` | `characters/kukurt_matronu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-7ca26c18-7e95-48f9-8930-380714147460.png` | Kükürt Matronu; sulfur oracle and spear mage with a spectral phase-two aura | 1536×1024 RGBA; 2,809,399 bytes |
-| 17 → `characters/menzil_avcisi_motion.png` | `characters/menzil_avcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-f9f9e0fd-ea7e-4b50-80f6-d74a87ca63a3.png` | Menzil Avcısı; hooded reach fighter with a long steel spear | 1536×1024 RGBA; 2,157,597 bytes |
-| 18 → `characters/ayna_kilic_motion.png` | `characters/ayna_kilic_motion.png` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-b2f0f448-d74c-4f19-ad6b-2d2c01b46267.png` | Ayna Kılıç; silvered counter-duelist with a short sword and parrying dagger | 1536×1024 RGBA; 2,582,642 bytes |
+| 14 → `characters/kizil_ocak_sefi_motion.webp` | `characters/kizil_ocak_sefi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-d714927c-7e35-42e4-b75d-03d90d6fe5d8.png` | Kızıl Ocak Şefi; soot-armored area-control boss with a heavy iron maul | 1536×1024 RGBA; 688,872 bytes |
+| 15 → `characters/kukurt_matronu_motion.webp` | `characters/kukurt_matronu_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-7ca26c18-7e95-48f9-8930-380714147460.png` | Kükürt Matronu; sulfur oracle and spear mage with a spectral phase-two aura | 1536×1024 RGBA; 714,456 bytes |
+| 17 → `characters/menzil_avcisi_motion.webp` | `characters/menzil_avcisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-f9f9e0fd-ea7e-4b50-80f6-d74a87ca63a3.png` | Menzil Avcısı; hooded reach fighter with a long steel spear | 1536×1024 RGBA; 428,640 bytes |
+| 18 → `characters/ayna_kilic_motion.webp` | `characters/ayna_kilic_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a126ef-bb57-7d41-89b8-d8d9308ec132\exec-b2f0f448-d74c-4f19-ad6b-2d2c01b46267.png` | Ayna Kılıç; silvered counter-duelist with a short sword and parrying dagger | 1536×1024 RGBA; 605,210 bytes |
 
 ## Rival motion atlases, encounters 19–22
 
-These four original, transparent masters continue the 1536×1024 RGBA, 3×2 atlas contract. The six 512×512 cells are row-major: idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime PNGs are byte-for-byte copies of their generated masters; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart`.
+These four original, transparent masters continue the 1536×1024 RGBA, 3×2 atlas contract. The six 512×512 cells are row-major: idle, wind-up, attack/cast, hit recoil, guard, and defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged; stable encounter IDs are registered in `lib/game/ui/rival_motion_assets.dart`.
 
 | Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 19 → `characters/gelgit_muhurcusu_motion.png` | `characters/gelgit_muhurcusu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-45c9304f-b783-4874-8a95-8dbea0cb651c.png` | Gelgit Mührücüsü; slate-and-teal tide caster with a crystal-tipped spear-staff and compact sigil effects | 1536×1024 RGBA; 2,342,643 bytes |
-| 20 → `characters/firtina_avcisi_motion.png` | `characters/firtina_avcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-38f15028-c64b-46d9-b94b-5e07ed1c5ae3.png` | Fırtına Avcısı; charcoal-armored storm boss with a forked spear and phase-two lightning | 1536×1024 RGBA; 2,175,462 bytes |
-| 21 → `characters/ruzgar_seyircisi_motion.png` | `characters/ruzgar_seyircisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-8653c2b2-32b5-42de-ad22-b005916e2c2a.png` | Rüzgâr Seyircisi; agile hooded wind duelist with one curved short sword | 1536×1024 RGBA; 2,159,004 bytes |
-| 22 → `characters/kiyi_orakcisi_motion.png` | `characters/kiyi_orakcisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-bb0e8a73-b4bc-4e19-a9b3-c5272591dcf0.png` | Kıyı Orakçısı; elite masked coastal champion with shell seals and a hooked spear-polearm | 1536×1024 RGBA; 2,424,238 bytes |
+| 19 → `characters/gelgit_muhurcusu_motion.webp` | `characters/gelgit_muhurcusu_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-45c9304f-b783-4874-8a95-8dbea0cb651c.png` | Gelgit Mührücüsü; slate-and-teal tide caster with a crystal-tipped spear-staff and compact sigil effects | 1536×1024 RGBA; 526,456 bytes |
+| 20 → `characters/firtina_avcisi_motion.webp` | `characters/firtina_avcisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-38f15028-c64b-46d9-b94b-5e07ed1c5ae3.png` | Fırtına Avcısı; charcoal-armored storm boss with a forked spear and phase-two lightning | 1536×1024 RGBA; 460,340 bytes |
+| 21 → `characters/ruzgar_seyircisi_motion.webp` | `characters/ruzgar_seyircisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-8653c2b2-32b5-42de-ad22-b005916e2c2a.png` | Rüzgâr Seyircisi; agile hooded wind duelist with one curved short sword | 1536×1024 RGBA; 419,846 bytes |
+| 22 → `characters/kiyi_orakcisi_motion.webp` | `characters/kiyi_orakcisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12715-4bc9-7830-a0bb-1a898a2a80a1\exec-bb0e8a73-b4bc-4e19-a9b3-c5272591dcf0.png` | Kıyı Orakçısı; elite masked coastal champion with shell seals and a hooked spear-polearm | 1536×1024 RGBA; 525,478 bytes |
 
 ## Rival motion atlases, encounters 23 and 25–27
 
-Four original transparent PNG masters extend the 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell shows the same full-body rival in this pose order: idle, wind-up, attack/cast, hit recoil, guard, defeat. Each runtime atlas is a byte-for-byte copy of its generated master and is registered under the listed encounter ID in `lib/game/ui/rival_motion_assets.dart`. Encounter 24 retains its dedicated Observatory High Priest champion portrait.
+Four original transparent PNG masters extend the 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell shows the same full-body rival in this pose order: idle, wind-up, attack/cast, hit recoil, guard, defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged. `lib/game/ui/rival_motion_assets.dart` registers each atlas under its encounter ID. Encounter 24 retains its dedicated Observatory High Priest champion portrait.
 
 | Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 23 → `characters/gelgit_yargici_motion.png` | `characters/gelgit_yargici_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-07c45991-b294-48e9-a75f-ded31de449ae.png` | Gelgit Yargıcı; armored tidal judge with a crystal spear-scepter and a clearly awakened phase-two tide aura | 1536×1024 RGBA; 2,617,318 bytes |
-| 25 → `characters/tac_muhafizi_motion.png` | `characters/tac_muhafizi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-8262a8d5-df4a-4e1f-a28c-45bb4d2051cf.png` | Taç Muhafızı; crown-crested armored sentinel with a broad shield and heavy iron maul | 1536×1024 RGBA; 2,467,031 bytes |
-| 26 → `characters/golge_duellocu_motion.png` | `characters/golge_duellocu_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-be615e90-9910-4728-98db-a7f70dff90ad.png` | Gölge Düellocu; agile hooded shadow fighter with a short sword and parrying dagger | 1536×1024 RGBA; 2,327,797 bytes |
-| 27 → `characters/sancak_cadisi_motion.png` | `characters/sancak_cadisi_motion.png` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-24c0e17c-dd3d-45d6-baef-23b541d67fd3.png` | Sancak Cadısı; arcana-heavy spear mage with a torn burgundy pennant and teal banner-sigil magic | 1536×1024 RGBA; 2,648,476 bytes |
+| 23 → `characters/gelgit_yargici_motion.webp` | `characters/gelgit_yargici_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-07c45991-b294-48e9-a75f-ded31de449ae.png` | Gelgit Yargıcı; armored tidal judge with a crystal spear-scepter and a clearly awakened phase-two tide aura | 1536×1024 RGBA; 694,210 bytes |
+| 25 → `characters/tac_muhafizi_motion.webp` | `characters/tac_muhafizi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-8262a8d5-df4a-4e1f-a28c-45bb4d2051cf.png` | Taç Muhafızı; crown-crested armored sentinel with a broad shield and heavy iron maul | 1536×1024 RGBA; 503,198 bytes |
+| 26 → `characters/golge_duellocu_motion.webp` | `characters/golge_duellocu_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-be615e90-9910-4728-98db-a7f70dff90ad.png` | Gölge Düellocu; agile hooded shadow fighter with a short sword and parrying dagger | 1536×1024 RGBA; 511,684 bytes |
+| 27 → `characters/sancak_cadisi_motion.webp` | `characters/sancak_cadisi_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a1273d-c1e9-7850-b927-7b9662d220c3\exec-24c0e17c-dd3d-45d6-baef-23b541d67fd3.png` | Sancak Cadısı; arcana-heavy spear mage with a torn burgundy pennant and teal banner-sigil magic | 1536×1024 RGBA; 687,176 bytes |
 
 ## Rival motion atlases, encounters 28–31
 
-Four original transparent masters extend the shared 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell contains one full-body pose in this order: idle, wind-up, attack, hit recoil, guard, defeat. Runtime PNGs are byte-for-byte copies of the generated masters and are registered by stable encounter ID in `lib/game/ui/rival_motion_assets.dart`. Encounter 24 keeps the Observatory High Priest atlas, and encounter 32 keeps the Circle Master champion atlas.
+Four original transparent masters extend the shared 1536×1024 RGBA, 3×2 row-major contract. Each 512×512 cell contains one full-body pose in this order: idle, wind-up, attack, hit recoil, guard, defeat. Runtime atlases are quality-95 lossy WebP exports with exact alpha preservation; source PNG masters remain unchanged. `lib/game/ui/rival_motion_assets.dart` registers them by stable encounter ID. Encounter 24 keeps the Observatory High Priest atlas, and encounter 32 keeps the Circle Master champion atlas.
 
 | Encounter → runtime mapping | Runtime atlas | Generated source master | Character/weapon | Runtime size |
 |---|---|---|---|---:|
-| 28 → `characters/demir_cellat_motion.png` | `characters/demir_cellat_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8698792c-9559-47a7-89a9-dd41b1ab5d4e.png` | Demir Cellat; broad iron executioner with a rust-red tabard and oversized two-handed cleaver | 1536×1024 RGBA; 2,402,631 bytes |
-| 29 → `characters/tahtsiz_varis_motion.png` | `characters/tahtsiz_varis_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-26360c8c-ceab-41bb-96e1-bf1c09cdd0a0.png` | Tahtsız Varis; lean displaced heir duelist in worn teal court cloth with a slender curved sword | 1536×1024 RGBA; 2,377,992 bytes |
-| 30 → `characters/kul_komutani_motion.png` | `characters/kul_komutani_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8b3e9587-8d4c-4278-8dd9-9467748ce9e0.png` | Kül Komutanı; soot-armored officer with burgundy command pennon and a long poleaxe | 1536×1024 RGBA; 2,198,052 bytes |
-| 31 → `characters/muhur_kirici_motion.png` | `characters/muhur_kirici_motion.png` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-68339330-49d6-4018-8838-656bb0137065.png` | Mühür Kırıcı; compact slate-armored breaker with a broad ring-faced breach hammer | 1536×1024 RGBA; 2,483,789 bytes |
+| 28 → `characters/demir_cellat_motion.webp` | `characters/demir_cellat_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8698792c-9559-47a7-89a9-dd41b1ab5d4e.png` | Demir Cellat; broad iron executioner with a rust-red tabard and oversized two-handed cleaver | 1536×1024 RGBA; 486,886 bytes |
+| 29 → `characters/tahtsiz_varis_motion.webp` | `characters/tahtsiz_varis_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-26360c8c-ceab-41bb-96e1-bf1c09cdd0a0.png` | Tahtsız Varis; lean displaced heir duelist in worn teal court cloth with a slender curved sword | 1536×1024 RGBA; 499,968 bytes |
+| 30 → `characters/kul_komutani_motion.webp` | `characters/kul_komutani_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-8b3e9587-8d4c-4278-8dd9-9467748ce9e0.png` | Kül Komutanı; soot-armored officer with burgundy command pennon and a long poleaxe | 1536×1024 RGBA; 425,752 bytes |
+| 31 → `characters/muhur_kirici_motion.webp` | `characters/muhur_kirici_motion.webp` | `C:\Users\ismai\.codex\generated_images\01a12757-0103-74f0-9a25-9f6dfd5c5562\exec-68339330-49d6-4018-8838-656bb0137065.png` | Mühür Kırıcı; compact slate-armored breaker with a broad ring-faced breach hammer | 1536×1024 RGBA; 519,750 bytes |

@@ -112,6 +112,29 @@ void main() {
       expect(contracts.map((contract) => contract.id).toSet(), hasLength(16));
     });
 
+    test(
+      'headgear resistance reduces status proc chance and follows the mirror',
+      () {
+        expect(
+          [
+            for (var tier = 1; tier <= 4; tier++)
+              shopItems
+                  .firstWhere((item) => item.id == 'helm_$tier')
+                  .statusResistance,
+          ],
+          [3, 5, 7, 9],
+        );
+        expect(GameBalance.statusChance(100, 9), 91);
+        expect(GameBalance.statusChance(30, 9), 21);
+        expect(GameBalance.statusChance(15, 30), 0);
+        expect(GameBalance.statusChance(30, -10), 30);
+
+        final save = GameSave(equippedItems: const {'head': 'helm_4'});
+        expect(Combatant.player(save).statusResistance, 9);
+        expect(Combatant.mirror(save).statusResistance, 9);
+      },
+    );
+
     test('versioned save round-trips sets, stats and equipped gear', () {
       final save = GameSave(
         hasHero: true,
@@ -165,13 +188,13 @@ void main() {
         final game = GameController(storage: storage);
         await game.initialize();
 
-        expect(game.save.schemaVersion, 9);
+        expect(game.save.schemaVersion, 10);
         expect(game.save.heroName, 'Eski Şampiyon');
         expect(game.save.level, 6);
         expect(game.save.gold, 420);
         expect(game.save.completedMatches, containsAll(['M01', 'M02']));
         expect(game.save.audienceBestScores, isEmpty);
-        expect(storage.value?.schemaVersion, 9);
+        expect(storage.value?.schemaVersion, 10);
         game.dispose();
       },
     );
@@ -193,11 +216,11 @@ void main() {
         final game = GameController(storage: storage);
         await game.initialize();
 
-        expect(game.save.schemaVersion, 9);
+        expect(game.save.schemaVersion, 10);
         expect(game.save.stats.precision, 2);
         expect(game.save.audienceBestScores['M01'], 3);
         expect(game.save.completedMatches, containsAll(['M01', 'M02']));
-        expect(storage.value?.schemaVersion, 9);
+        expect(storage.value?.schemaVersion, 10);
         game.dispose();
       },
     );
@@ -215,7 +238,7 @@ void main() {
       final game = GameController(storage: storage);
       await game.initialize();
 
-      expect(game.save.schemaVersion, 9);
+      expect(game.save.schemaVersion, 10);
       expect(game.save.heroName, 'Eski Şampiyon');
       expect(game.save.gold, 550);
       expect(game.save.sfxEnabled, isFalse);
@@ -227,13 +250,47 @@ void main() {
         musicVolume: 1.4,
         sfxVolume: -0.2,
         vibrationEnabled: false,
+        skipBattleAnimations: true,
+        textScale: 2.5,
+        battleAnimationSpeed: 0.5,
       );
       expect(game.save.musicVolume, 1.0);
       expect(game.save.sfxVolume, 0.0);
       expect(game.save.vibrationEnabled, isFalse);
-      expect(storage.value?.schemaVersion, 9);
+      expect(game.save.skipBattleAnimations, isTrue);
+      expect(game.save.textScale, 2.0);
+      expect(game.save.battleAnimationSpeed, 1.0);
+      expect(storage.value?.schemaVersion, 10);
       game.dispose();
     });
+
+    test(
+      'migrates a version nine save with accent and accessibility settings',
+      () async {
+        final storage = MemorySaveStorage()
+          ..value = GameSave.fromJson({
+            'schemaVersion': 9,
+            'hasHero': true,
+            'primaryAccentId': 'accent_06',
+            'secondaryAccentId': 'accent_08',
+            'skipBattleAnimations': true,
+            'textScale': 1.5,
+            'battleAnimationSpeed': 2.0,
+            'stats': _startingStats().toJson(),
+          });
+        final game = GameController(storage: storage);
+        await game.initialize();
+
+        expect(game.save.schemaVersion, 10);
+        expect(game.save.primaryAccentId, 'accent_06');
+        expect(game.save.secondaryAccentId, 'accent_08');
+        expect(game.save.skipBattleAnimations, isTrue);
+        expect(game.save.textScale, 1.5);
+        expect(game.save.battleAnimationSpeed, 2.0);
+        expect(storage.value?.schemaVersion, 10);
+        game.dispose();
+      },
+    );
 
     test(
       'migrates version five saves with backward-compatible cosmetics',
@@ -253,7 +310,7 @@ void main() {
         final game = GameController(storage: storage);
         await game.initialize();
 
-        expect(game.save.schemaVersion, 9);
+        expect(game.save.schemaVersion, 10);
         expect(game.save.heroName, 'Eski Şampiyon');
         expect(game.save.appearance, 'Kıyı');
         expect(game.save.level, 9);
@@ -267,7 +324,7 @@ void main() {
         expect(game.save.skinToneId, 'skin_01');
         expect(game.save.bodyProportionId, 'body_01');
         expect(game.save.facialHairId, 'facial_hair_00');
-        expect(storage.value?.schemaVersion, 9);
+        expect(storage.value?.schemaVersion, 10);
         game.dispose();
       },
     );
@@ -290,7 +347,7 @@ void main() {
       final game = GameController(storage: storage);
       await game.initialize();
 
-      expect(game.save.schemaVersion, 9);
+      expect(game.save.schemaVersion, 10);
       expect(game.save.heroName, 'Eski Şampiyon');
       expect(game.save.level, 12);
       expect(game.save.gold, 960);
@@ -303,7 +360,7 @@ void main() {
         containsAll(['M01', 'M02', 'M03', 'M04']),
       );
       expect(game.save.equippedItems['weapon'], 'sword_3');
-      expect(storage.value?.schemaVersion, 9);
+      expect(storage.value?.schemaVersion, 10);
       game.dispose();
     });
 
@@ -443,9 +500,9 @@ void main() {
         final game = GameController(storage: storage);
         await game.initialize();
 
-        expect(game.save.schemaVersion, 9);
+        expect(game.save.schemaVersion, 10);
         expect(game.pendingIntermissionDecision?.id, 'I04');
-        expect(storage.value?.schemaVersion, 9);
+        expect(storage.value?.schemaVersion, 10);
         game.dispose();
       },
     );

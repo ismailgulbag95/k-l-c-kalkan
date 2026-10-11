@@ -1,8 +1,8 @@
 # Mobil Arena RPG — Oyun ve Üretim Planı
 
 **Belge türü:** Ürün tanımı, oyun tasarım belgesi ve üretim yol haritası  
-**Sürüm:** 1.30
-**Tarih:** 10 Ekim 2026  
+**Sürüm:** 1.34
+**Tarih:** 11 Ekim 2026
 **Durum:** Tam oyun üretim planı; Flutter uygulaması geniş kapsamlı oynanabilir içerik içeriyor ve yayın kapılarını kapatma çalışması sürüyor  
 **Çalışma adı:** Kül Çemberi  
 **Hedef:** Flutter ile Android ve iOS için çevrimdışı, tek oyunculu, portre yönelimli arena RPG
@@ -29,7 +29,7 @@ Fandom ve Flash Gaming Wiki topluluk kaynaklarıdır; mekanik ayrıntıları ke�
 | Fandom — silah, yuva ve mühimmat tabloları | Silah rehberi her silah için Strength/Agility koşulu ve fiyat bulunduğunu; kılıç tablosunda 3–60 Agility ile 1.285–94.538 altın arasında bir ilerleme gösterir. Balta/topuz bilgisi boş, yay tablosu kısmi ve bazı enchant değerleri tutarsızdır. Ana oyun sayfası yakın/menzilli yuvaları, 5’ten başlayıp 10/15/20/25/30’a çıktığını iddia ettiği fişek kapasitesini ve dört enchant türünü listeler. Bunlar bağımsız oyun içi doğrulama değildir. | Katalogda seviye ve özellik koşulları ayrı alanlar olur; ikisi, etkisi ve fiyatı satın almadan önce görünür. Yeni oyunun 20 seviye ve dört devre eğrisine göre şartlar/fiyatlar sıkıştırılır. Yay fişeği 3/4/5/6 olarak devre başına yenilenir; Classic’in 9/23/28/35/45. seviye eşikleri kopyalanmaz. Rastgele silah enchantment’ı ilk yayın kapsamına girmez; element etkileri açık maliyetli büyü ve tılsım kartlarında gösterilir. [Wiki — S&S II Weapons](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_II_Weapons), [Wiki — Emperor’s Reign](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_2%3A_Emperor%27s_Reign) |
 | Fandom — Classic şampiyon sırası ve rakip profilleri | Arena Bosses arama dizini 18 numaralı Classic boss kaydı gösterir: #1 John, #2 Evil Ninja, #3 Son of Stylonius, #4 Marksman Dantus, #5 Great Beast, #6 Wizard Sagan, #7 Slave Driver, #8 Spheracles, #9 Maharaja Saeed, #10 Gaiax, #11 Daimyo Katsumodo, #12 HeChaos, #13 Zeerzabahl, #14 Sir Belgrave, #15 Bargle Yarg, #16 Sandalphon, #17 oyuncu aynası ve #18 Antares. Başka sayfalarda Bhaargle/Bargle Yarg yazımı değişir; bireysel profiller Classic ve Redux sıra numaralarını ayrı verir (ör. Gaiax #10/#9, Nameless Shadow #17/#19), bazıları ilerleme/oyun modu ayrımı da bildirir. | Bu, oynanışta teyit edilmiş roster değil, toplulukta indekslenen 18 maddelik sıra iddiasıdır. Resmî Tome “20 notable Arena Champions” ifadesini kullanır; fakat bu ifadenin altındaki görünen bölüm 22 ayrı karakter maddesi sıralar ve Sir Belgrave’in Classic’te dövüşülen, Redux’ta NPC olan bir karakter olduğunu ayrıca açıklar. Dolayısıyla 18, 20 ve 22 farklı kapsam/sayım iddialarıdır; hiçbiri tek başına Classic build’in dövüş sırasını doğrulamaz. Yeni oyunun 32 maçı ve 8 finali bağımsız kapsamdır; yalnızca menzil, büyü, ağır saldırı, dayanıklılık, karma yapı ve ayna karşılaşması gibi rol çeşitliliği sinyalleri alınır. [Wiki — Arena Bosses](https://swordsandsandals.fandom.com/wiki/Arena_Bosses), [Wiki — Nameless Shadow](https://swordsandsandals.fandom.com/wiki/The_Nameless_Shadow), [Resmi Tome of Lore — S&S II](https://swordsandsandals.com/), [Resmi Classic Collection tanıtımı](https://swordsandsandals.com/swords-and-sandals-classic-collection/), [Bhaargle profile](https://swordsandsandals.fandom.com/wiki/Bhaargle), [Wiki — The Great Beast](https://swordsandsandals.fandom.com/wiki/The_Great_Beast), [Wizard Sagan](https://swordsandsandals.fandom.com/wiki/Wizard_Sagan), [The Slave Driver](https://swordsandsandals.fandom.com/wiki/The_Slave_Driver), [Spheracles](https://swordsandsandals.fandom.com/wiki/Spheracles), [Gaiax](https://swordsandsandals.fandom.com/wiki/Gaiax), [Daimyo Katsumodo](https://swordsandsandals.fandom.com/wiki/Daimyo_Katsumodo), [Zeerzabahl](https://swordsandsandals.fandom.com/wiki/Archfiend_Zeerzabahl), [Sandalphon](https://swordsandsandals.fandom.com/wiki/Archangel_Sandalphon), [Antares](https://swordsandsandals.fandom.com/wiki/Emperor_Antares) |
 | Fandom ve Flash Gaming Wiki — zırh yuvası sayımı | İndekslenen tablolar yedi giyilebilir zırh parçası ile ayrı kalkanı gösteriyor; Flash Gaming Wiki ayrıca 23 kalkan kaydı veriyor. “Sekiz” sayımı, kalkanın sekizinci savunma ekipmanı konumu olarak eklenmesiyle açıklanabiliyor; bu muhtemel bir uzlaştırmadır, oynanabilir build’de doğrulanmış ortak terminoloji değildir. Flash rehberi kalkanların menzilli saldırıları bloklamaya yaradığını söyler. | Mobil sürüm UX ve yükleme sadeliği kararı olarak üç işlevsel zırh yuvasında kalır: başlık kritik/durum direnci, gövde temel hasar azaltımı, çizme konum/kaçınma desteği. Her parça bir ana pasif taşır; simgesi ve sayısal etkisi kartta görünür. Ayrı kalkan envanter yuvası eklenmez; her oyuncunun erişebildiği **Gard** hamlesi menzilli saldırılar dâhil gelen hasarı azaltır. Bu, referans sayımını çözme iddiası değil, mobil savaşta savunma karşı oyunu sağlamaya yönelik ürün kararıdır. [Wiki — Emperor’s Reign](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_2%3A_Emperor%27s_Reign), [Flash Gaming Wiki — S&S 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
-| Flash Gaming Wiki — zırh/karakter görünüşü | İndekslenen rehber yedi giyilebilir zırh parçasını, ayrıca 23 kalkan kaydını ve miğfer fiyat örneklerini gösterir: Peasant 1.200; 6. seviyede Militia/Veteran 7.500/10.800; 12. seviyede Hoplite/Swashbuckler/Retarius 14.700/19.200/24.300; 48. seviyede Champion 187.500 altın. Aynı sayfa karakter yaratmada ırk, saç ve yüz kılı seçeneklerinden söz eder. Katalog tamlığı ve build eşleşmesi doğrulanmamıştır. | Mobilde üç işlevsel zırh yuvası dört devre kademesinde gerçek savaş rolü taşır. Seçim derinliği modüler baş/saç, yüz kılı, ten ve gövde kozmetiğiyle sağlanır; zırh seviyesi karakter silüetinde ve dükkân kartında görünür. Uzun seviye/fiyat kuyruğu Classic build’de doğrulanmadan yeni kampanyaya taşınmaz; yuva, kalkan veya miğfer sayıları içerik kotası değildir. [Flash Gaming Wiki — Swords and Sandals 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
+| Flash Gaming Wiki — zırh/karakter görünüşü | İndekslenen rehber yedi giyilebilir zırh parçasını, ayrıca 23 kalkan kaydını ve miğfer fiyat örneklerini gösterir: Peasant 1.200; 6. seviyede Militia/Veteran 7.500/10.800; 12. seviyede Hoplite/Swashbuckler/Retarius 14.700/19.200/24.300; 48. seviyede Champion 187.500 altın. Aynı sayfa karakter yaratmada ırk, saç ve yüz kılı seçeneklerinden söz eder. Katalog tamlığı ve build eşleşmesi doğrulanmamıştır. | Mobilde üç işlevsel zırh yuvası dört devre kademesinde gerçek savaş rolü taşır. Aktif görünüş çeşitliliği gövde yapısı, yüz kılı ve renk vurguları kozmetiğiyle sağlanır; kesilmiş saç/başlık ve parçalı ten tonları ise tam oturan sanat katmanları sağlanana kadar sanat kapısında ertelenmiştir. Zırh seviyesi karakter silüetinde ve dükkân kartında görünür. Uzun seviye/fiyat kuyruğu Classic build’de doğrulanmadan yeni kampanyaya taşınmaz; yuva, kalkan veya miğfer sayıları içerik kotası değildir. [Flash Gaming Wiki — Swords and Sandals 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
 | Fandom — bilinen hatalar sayfası | Topluluk listesi sürüme bağlı kayıt kaybı, alışveriş sonrası bakiyenin yenilenmesi, bazı mesafelerde hamle/weapon switch kilidi, arena sınırı sorunları, aşırı menzilli hasar, değiştirilen enchant’ın eski türde tetiklenmesi ve şart dışı rakip ekipmanı örnekleri verir. Sayfa bu sorunların tek bir build’de bulunmadığını özellikle belirtir. | QA kapıları atomik alışveriş/kayıt, her mesafede yasal hamle, arena konum sınırı, menzilli hasar tavanı, koşul doğrulamalı rakip donanımı, eşya değişim geçişi ve yeniden açılış tutarlılığını kapsar. Bu hata örnekleri yeni oyunda varmış gibi varsayılmaz. [Wiki — S&S II Bugs](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_II_Bugs) |
 | Resmi Tome of Lore — S&S II | Yapımcının lore kaynağı Doomtrek’te altı yeni arena der ve “20 notable Arena Champions” ifadesini kullanır. Aynı bölümdeki görünür listede 22 karakter maddesi vardır. Bu listede Fearful Prisoner’ın S&S II açılışındaki tutorial rakibi olup sonradan S&S III şampiyonu olduğu, Bhaargle’ın ise kendisini şampiyon gibi tanıtıp maçı bilerek kaybettiği anlatılır; bu iki istisnayı çıkarmak 20’yi verir, fakat bu çıkarım yazarın açıkça tanımladığı sayım yöntemi değildir. Kaynak ayrıca Sir Belgrave’in Classic’te dövüşülen, Redux’ta NPC olan karakter olduğunu açıklar. | Sürüm ve anlatı kapsamı için birincil kaynaktır, oyun veritabanı veya maç sıra tablosu değildir. Fandom’ın 18 sıralı boss iddiasıyla aynı şeyi saydığı varsayılmaz; kesin Classic rosterı seçilen build’de oynanarak doğrulanmalıdır. Yeni oyunda 6 arena, sayı paritesi için değil, bölüm bölüm ayrışan görsel ve mekanik mekân kimlikleri için bağımsız ürün kararıdır. [Resmi Tome of Lore — S&S II](https://swordsandsandals.com/) |
 | Steam ve Google Play — S&S 2 Redux | Redux listeleri yeniden düzenlenmiş grafik/müzik, 30’dan fazla savaş yeteneği, 200’den fazla silah/zırh parçası, 20 arena şampiyonu ve altı arena sayar. Google Play listesi ilk üç turnuvayı ücretsiz, 4–20 aralığını tek seferlik satın alımla açılır olarak tanımlar. Steam’deki “Classic Edition” ayarı Redux uygulaması içindeki sürüm seçeneğidir; geliştirici duyurusu bu modda görsel/dükkân geri dönüşlerinin yanında turnuva ve denge değişiklikleri bulunduğunu bildirir. | Redux sayıları ve kilit akışı yalnızca Redux sürümüne aittir; ayardaki Classic Edition özgün Flash build’iyle eşdeğer kabul edilmez. [Steam — Redux](https://store.steampowered.com/app/649600/Swords_and_Sandals_2_Redux/), [Google Play — Redux](https://play.google.com/store/apps/details?id=air.com.game.whiskeybarrelstudios.swordsandsandals2), [Geliştirici — Redux Classic Edition duyurusu](https://store.steampowered.com/news/app/649600/view/4738306083312209369) |
@@ -42,7 +42,7 @@ Fandom ve Flash Gaming Wiki topluluk kaynaklarıdır; mekanik ayrıntıları ke�
 | Fandom [Items](https://swordsandsandals.fandom.com/wiki/Items) özeti savaşta kullanılabilecek iksir ve büyüleri Magicka düzeyine bağlıyor; ifade bunun satın alma, öğrenme, kuşanma veya taşıma kapasitesi koşullarından hangisi olduğunu açıklamıyor. | Büyü kartları için `minLevel`/`minAttribute` koşulları açık veri alanı olur; dükkân, hazırlık ekranı ve savaş girişi aynı uygunluk kuralını kullanır ve gereken Büyü/seviye önceden görünür. Büyü özelliği sarf yuvası veya sarf adedini gizlice değiştirmez; maç başına bir sarf sınırı korunur. Wiki’deki belirsiz koşul bire bir kopyalanmadan görünür ilerleme kuralına çevrilir. |
 | Fandom [Emperor’s Reign](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_2%3A_Emperor%27s_Reign) arama özeti, bazı çevrimiçi sürümlerde yay/arıbalet takılıyken Whirlwind büyüsünün mesafeden bağımsız isabet edebildiğini ve zırhı tamamen bitmişken zırh yenileme iksirinin bazı sürümlerde etkisiz kaldığını bildiriyor. Bu sayfalar bu araştırmada doğrudan açılamadı; kayıtlar sürüme bağlı ve doğrulanmamış topluluk iddialarıdır. | Bildirilen davranışlar oyuna alınmaz. QA; her büyünün üç mesafe bandında ve her silah ailesi takılıyken tanımlı hedefleme kuralını korumasını, sarfların sıfır kaynak/tam kaynak/sınır değerlerinde doğru çalışmasını doğrular. Geçersiz veya etkisiz kullanım eşya/kaynak tüketmez; geçerli kullanım etkisi, kaynak düşümü ve kayıt tek işlemde sonuçlanır. |
 | Flash Gaming Wiki dört ayrı hizmet tanımlar: silahçı, zırhçı, büyü dükkânı ve kilise; kilise sağlık/kondisyon iksirleri satar. Altın galibiyetlerden gelir; daha ileri turnuvalarda zorluk ve ödül artar. | Lig merkezinde hizmetler dört mobil kategori/sekme olarak sunulur: silah, zırh, büyü-tılsım, sarf. Ayrı NPC gezintisi zorunlu değildir. Ana rota düğümleri önceki karşılaşma tamamlandığında açılır; önerilen seviye gösterilir ama seviye tek başına kampanyayı kilitlemez. Sarflar hazırlık seçeneğidir, tamamlanma şartı değildir. [Flash Gaming Wiki — S&S 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
-| Flash Gaming Wiki yedi giyilebilir zırh parçası ve miğfer fiyat örnekleri verir. Aynı sayfa karakter yaratmada görünüş, saç ve yüz kılı seçeneklerini belirtir. Bu topluluk kaydı Classic build’de doğrulanmamıştır. | Üç işlevsel zırh yuvası ve dört devre kademesi korunur; bu sayı mobil donanım/denge kararıdır. Çeşitlilik her yuvanın açık taktik rolü, dövüşçü silüetindeki görünür kademe farkı ve modüler baş/saç/yüz kılı/ten/gövde kozmetiğiyle sağlanır. Referansın slot veya katalog sayısı kopyalanmaz; yüz kılı seçenekleri karakter oluşturma kapsamına eklenir. [Flash Gaming Wiki — S&S 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
+| Flash Gaming Wiki yedi giyilebilir zırh parçası ve miğfer fiyat örnekleri verir. Aynı sayfa karakter yaratmada görünüş, saç ve yüz kılı seçeneklerini belirtir. Bu topluluk kaydı Classic build’de doğrulanmamıştır. | Üç işlevsel zırh yuvası ve dört devre kademesi korunur; bu sayı mobil donanım/denge kararıdır. Çeşitlilik her yuvanın açık taktik rolü, dövüşçü silüetindeki görünür kademe farkı ile aktif gövde yapısı, yüz kılı ve renk vurguları kozmetiğiyle sağlanır; kesilmiş saç/başlık ve parçalı ten maskesi katmanları sanat kapısında ertelenmiştir. Referansın slot veya katalog sayısı kopyalanmaz; yüz kılı seçenekleri karakter oluşturma kapsamına eklenir. [Flash Gaming Wiki — S&S 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
 | Flash Gaming Wiki kalkanları ayrı bir ekipman türü sayar; rehberde 23 kalkan kaydı vardır ve menzilli saldırılara karşı bloklama işlevi belirtilir. | Savunma karşı oyunu ekipman satın almaya bağlı olmaz: tüm yapılarda **Gard** menzilli saldırı hasarını da %45 azaltır. Ayrı kalkan katalog/yuvası bu yayında yoktur; bu seçim ek mağaza/animasyon yükü ve mobil yükleme karmaşıklığını sınırlayan ürün kararıdır. [Flash Gaming Wiki — S&S 2](https://flashgaming.fandom.com/wiki/Swords_And_Sandals_2) |
 | Wiki’nin Classic boss listesi 18 şampiyonu sıralar. Dantus menzili, Sagan büyüyü, Spheracles ağır vuruşu, Gaiax dayanıklılık/çeviklik karşıtlığını, Sandalphon çok yönlü yüklemeyi, Nameless Shadow ayna eşleşmesini ve Antares son zirveyi temsil eder. Aynı maddeler Classic ile Redux sırasını ayırır; bazı karakter sayfaları taslak ve birkaç ekipman/stat satırı kendi içinde sorunludur. Resmi Tome “20 notable” der; görünen 22 maddenin tutorial rakibi ve bilerek kaybeden Bhaargle maddelerini hariç tutup 20’ye ulaşmak olası sayım açıklamasıdır, ancak bu yalnızca araştırmacı çıkarımıdır. | 32 maç 4 bölüm ve 8 dört maçlık turnuvaya ayrılır; her dört maçlık blok bir finalle biter, her sekizinci maç bölüm şampiyonudur. Böylece bölümün yeni rolü tanıtılır, ilk turnuva finalinde erken sınanır ve ikinci turnuva finalinde birleştirilir. Kampanya 8 farklı final rakibi/karşılaşma kartı içerir; 4’ü bölüm şampiyonu, 4’ü ara turnuva finalidir. Kaynaklardan 18, 20 veya 22 rakip kotası alınmaz; yalnızca rol çeşitliliği ve sınanabilir karşı oyunlar alınır. [Wiki — Arena Bosses](https://swordsandsandals.fandom.com/wiki/Arena_Bosses), [Wiki — Marksman Dantus](https://swordsandsandals.fandom.com/wiki/Marksman_Dantus), [Wiki — Wizard Sagan](https://swordsandsandals.fandom.com/wiki/Wizard_Sagan), [Wiki — Spheracles](https://swordsandsandals.fandom.com/wiki/Spheracles), [Wiki — Gaiax](https://swordsandsandals.fandom.com/wiki/Gaiax), [Wiki — Sandalphon](https://swordsandsandals.fandom.com/wiki/Archangel_Sandalphon), [Wiki — Nameless Shadow](https://swordsandsandals.fandom.com/wiki/The_Nameless_Shadow), [Wiki — Antares](https://swordsandsandals.fandom.com/wiki/Emperor_Antares), [resmi Tome of Lore](https://swordsandsandals.com/) |
 | Wiki stat sayfaları sekiz ayrı özelliği (Strength, Agility, Attack, Defence, Vitality, Charisma, Stamina, Magicka) listeler. Görev kayıtlarında düello dışı seçimlerin stat veya kaynağı değiştirdiği örnekler vardır. | Yeni sistem yedi savaş özelliğini ayırır: Kuvvet, Çeviklik, İsabet, Dayanıklılık, Savunma, Kondisyon, Büyü. Ayrı Attack/Agility alanları mobil yapı çeşitliliği için korunur. Charisma’nın fiyat, ödül, seyirci ve taunt’a aynı anda bağlanmasının snowball riski nedeniyle Seyirci Notu harcanabilir puan vermez. Her ara turnuva sonrası tek seferlik altın veya özellik puanı seçimi bulunur; sonuç önceden gösterilir, kaydedilir ve yeniden oynanarak çiftlenemez. [Wiki — Emperor’s Reign](https://swordsandsandals.fandom.com/wiki/Swords_and_Sandals_2%3A_Emperor%27s_Reign), [Wiki — Quests](https://swordsandsandals.fandom.com/wiki/Quests), [Wiki — Charisma](https://swords-and-sandals.fandom.com/wiki/Charisma) |
@@ -128,7 +128,7 @@ Dövüşçü yarat
 | Ekran | İçerik ve temel eylem |
 |---|---|
 | Açılış / devam | Devam et, yeni dövüşçü, ayarlar; son kayıt durumu |
-| Dövüşçü yaratma | İsim, baş/saç, yüz kılı, ten, gövde oranı ve renk seçimi; başlangıç özellik puanları ve kısa yapı önerileri |
+| Dövüşçü yaratma | İsim, vücut yapısı, yüz kılı ve renk vurgusu seçimi (kesilmiş saç ve ten maskesi sanat kapısında ertelenmiştir; eski kayıt kimlikleri korunur); başlangıç özellik puanları ve kısa yapı önerileri |
 | Lig merkezi | Sıradaki düello, turnuva ağacı, dövüşçü durumu, altı arena rotası, dükkân ve antrenman girişleri |
 | Rakip kartı | Rakip silüeti/portresi, davranış ipucu, önerilen seviye, ödül ve arena kuralı |
 | Maç | Rakip ve oyuncu, sağlık/kaynak çubukları, rakip niyeti, hamle kartları, genişletilebilir savaş günlüğü |
@@ -158,7 +158,7 @@ Dövüşçü yarat
 
 ### 4.2 Başlangıç özellikleri
 
-Özellik adları ve formüller bu projeye ait yeni sistemdir. Başlangıçta her özellik 2’dir; oyuncuya dağıtması için 6 ek puan verilir. Karakter yaratırken tek bir özellik 5’i geçemez. Karakter yaratma ekranında bir özelliğin etkisi kısa ve sayısal örnekle açıklanır. Kampanya seviyeleri boyunca özellik başına üst sınır 20’dir. Wiki’de Agility ile Attack ayrı özellikler olduğundan mobil sadeleştirme bunları tek bir “çeviklik” skoruna birleştirmez; İsabet saldırı başarısını, Çeviklik kaçınma ve konum eylemlerini yönetir.
+Özellik adları ve formüller bu projeye ait yeni sistemdir. Başlangıçta her özellik 2’dir; oyuncuya dağıtması için 6 ek puan verilir. Karakter yaratırken tek bir özellik 5’i geçemez. Karakter yaratma ekranında bir özelliğin etkisi kısa ve sayısal örnekle açıklanır. Kampanya seviyeleri boyunca harcanabilir temel özellik başına üst sınır 20’dir; ekipman bonusları savaş hesabında bu tabanın üstüne eklenebilir. Ayna Dövüşçü’nün kayıtlı yapıyı 2–20 aralığına normalize etmesi bu nedenle ekipman bonusunu sınırlayabilir. Wiki’de Agility ile Attack ayrı özellikler olduğundan mobil sadeleştirme bunları tek bir “çeviklik” skoruna birleştirmez; İsabet saldırı başarısını, Çeviklik kaçınma ve konum eylemlerini yönetir.
 
 | İç ID | Türkçe ad | Etki |
 |---|---|---|
@@ -169,6 +169,8 @@ Dövüşçü yarat
 | `guard` | Savunma | Zırh etkinliği ve blok azaltımı |
 | `stamina` | Kondisyon | Efor havuzu ve fiziksel hamleleri sürdürme |
 | `arcana` | Büyü | Mana, büyü hasarı ve büyü savunması |
+
+Azami mana kayıtlı temel Büyü değerinden hesaplanır (`16 + 8 × temel Büyü`). Ekipmandan gelen Büyü bonusu büyü hasarı ve büyü/yanma savunmasına eklenir, mana kapasitesini artırmaz. Ayna Dövüşçü’nün azami mana havuzu oyuncununkiyle aynıdır; rakip savaş özellikleri ise Şampiyonlar Yolu kuralına göre 2–20 aralığına normalize edilir.
 
 Bir seviye atlama 2 özellik puanı verir. Oyuncu her devre sonunda bir ücretsiz yeniden dağıtım hakkı alır; bu, yapı denemeyi teşvik eder.
 
@@ -223,7 +225,7 @@ Bir turda bir ana hamle yapılır. Her dövüşçünün kendi tur başında 4 ef
 | Rüzgâr | Çevik Esinti | 10 mana | — | — | Sonraki hamleye +8 isabet puanı; bir tur sürer |
 | Rüzgâr | Kıyı Sıçrayışı | 12 efor | — | — | Mesafeyi bir basamak değiştirir ve sonraki gelen saldırının isabetini −10 etkiler |
 
-Büyü hasarı `büyü taban gücü + 1.5 × Büyü` olarak hesaplanır, sonra hedefin büyü direnci uygulanır. Büyüler varsayılan olarak kritik vurmaz; kartta açıkça belirtilmedikçe durum etkisi de eklemez.
+Büyü hasarı `büyü taban gücü + 1.5 × Büyü` olarak hesaplanır, sonra hedefin büyü direnci uygulanır. Direnç eğrisi `max(0, hedef Büyü)` puandır; bu değer büyü hasarında zırh paydasına düz eklenir. Büyüler fiziksel etkin zırhı %40 oranında kullanır: `büyü etkin zırhı = round(fiziksel etkin zırh × 0,40) + max(0, hedef Büyü)`. Son hasar diğer saldırılardaki `100 / (100 + etkin zırh)` azaltımını izler. Büyüler varsayılan olarak kritik vurmaz; kartta açıkça belirtilmedikçe durum etkisi de eklemez.
 
 Durum etkileri başlangıçta sınırlı ve okunaklı tutulur:
 
@@ -235,7 +237,9 @@ Durum etkileri başlangıçta sınırlı ve okunaklı tutulur:
 | Kırık gard | Etkin zırh −%20 | Başarılı Çelme uygular; takip eden bir tur boyunca etkin, yenilenir ve birikmez |
 | Gard | Gelen hasar −%45 | Bir sonraki hasarda tüketilir |
 
-Element direnci, ilgili durumun hasarını azaltır; bağışıklık ancak rakip kartında açıkça belirtilirse kullanılır. Her yeni etki oyuncuya simge, kısa metin ve kalan tur sayısıyla gösterilir.
+Element direnci, ilgili durumun hasarını azaltır. Mevcut Kor/yanma etkisinde her hedef Büyü puanı yanma hasarı paydasına bir puan ekler: `max(1, round(ham yanma hasarı × 100 / (100 + max(0, hedef Büyü))))`. Arcana hasar formülü büyü vuruşlarıyla paylaşılan savunma niteliğidir; fiziksel kanama bundan etkilenmez. Direnç durum etkisini yok etmez. Element bağışıklığı yalnızca rakip `Encounter.elementalImmunities` listesinde açıkça belirtilirse uygulanır; bu bağışıklık ilgili durum etkisini engeller ve kendiliğinden Arcana’dan türemez. Her yeni etki oyuncuya simge, kısa metin ve kalan tur sayısıyla gösterilir.
+
+Kampanya içeriğinde M14 Kızıl Ocak Şefi Kor elementine bağlı yanmaya bağışıktır; bu durum yanmayı ve sonraki yanma tiklerini engeller, Kor büyüsünün doğrudan hasarını engellemez. Karşılaşma kartındaki “durum etkisi bağışıklığı” satırı bu ayrımı maçtan önce gösterir.
 
 ### 4.5 Rakip yapay zekâsı
 
@@ -290,7 +294,7 @@ Hikâye ipuçları dört bölümde birer kez, sırasıyla #4, #12, #20 ve #28 so
 | 11 | normal | Kor Ocağı | Örs Muhafızı, zırhlı | 9 | Çelme, büyü ve silah seçimi | Dar alan yalnızca görsel | Ara zırh seçeneği |
 | 12 | ara final | Kor Ocağı | Sözleşmeli Düellocu, karma | 9 | Oyuncu yapısına göre taktik değiştirme | Önceden ilan edilen arena kuralı | Şampiyon öncesi hazırlık ödülü |
 | 13 | normal | Kor Ocağı | Köz Gölgesi, karşı saldırgan | 10 | Rakibin güçlü hamlesini gard ile cezalandırma | Buhar çıkışı iki tur önceden belirtilir | Büyü direnci ekipmanı |
-| 14 | elit | Kor Ocağı | Kızıl Ocak Şefi, elit alan kontrolcüsü | 10 | İşaretli tehlike ve kaynak zamanlaması | Buhar iki tur önceden belirtilir | Elit ödülü; ikinci seviye tılsım kataloğu |
+| 14 | elit | Kor Ocağı | Kızıl Ocak Şefi, elit alan kontrolcüsü | 10 | İşaretli tehlike, kaynak zamanlaması ve Kor kaynaklı yanma bağışıklığını gözetme | Buhar iki tur önceden belirtilir | Elit ödülü; ikinci seviye tılsım kataloğu |
 | 15 | elit | Kor Ocağı | Kükürt Matronu, elit büyücü | 11 | Mana ve durum etkisi yönetimi | Alan etkisi iki tur önce bildirilir | Elit ödülü; yeni büyü seçeneği |
 | 16 | bölüm şampiyonu | Kor Ocağı | Pirinç Muhafız, şampiyon | 12 | Kaynak ve ekipman yönetimi | İkinci fazda önceden görülen niyet dizisi | Devre 3 ve üçüncü dükkân açılır |
 | 17 | normal | Fırtına Gözlemevi | Menzil Avcısı, mızrakçı | 13 | Menzil ve geri çekilme | Rüzgâr yalnızca hamle kartında gösterildiğinde etkili | Devre 3 silah stoğu |
@@ -316,12 +320,12 @@ Rakip adları, anlatı ve arena görselleri çalışma adlarıdır; içerik üre
 
 - Bir karşılaşma en fazla bir yeni kural öğretir.
 - Yeni kural önce güvenli örnekle görünür; aynı kural sonraki rakipte sınanır; şampiyon daha önce öğretilmiş kuralları birleştirir.
-- Arena tehlikesi en az bir tur önceden işaretlenir ve yalnızca oyuncunun anlayabileceği bir karşı hamlesi varsa kullanılır.
+- Arena tehlikesi karşılaşma verisindeki tipli takvimle yönetilir; ilk etki üçüncü oyuncu eyleminden sonra çözülür, yinelenen alanlar her dört oyuncu eyleminde bir tekrar eder, #4 ve #20 alanları tek seferlidir. Karşılaşma kartı 1 veya 2 eylemlik uyarı penceresi taşır; #19’daki “iki turluk işaretli gelgit alanı” iki eylem süren ön uyarı anlamına gelir, iki tur süren hasar alanı değildir. Uyarı sayacı kalan oyuncu eylemlerini gösterir; oyuncu hareket ederek veya gard alarak etkiyi önleyebilir.
 - Oyuncu bir karşılaşmada yenilirse seviye, ekipman veya kampanya ilerlemesini kaybetmez.
 - Her karşılaşma için rakip silüeti, portre, arena arka planı, giriş/çıkış, davranış, ödül ve ses listesi içerik kartında tanımlanır.
 - İlk devrede rastgele arena kuralı yoktur. Rastgele içerik daha sonra eklenirse yalnızca kozmetik değişir veya sonuç oyuncu hamlesini anlamlı biçimde etkileyemeyecek kadar hafif olur.
 - Ana kampanyada 32 karşılaşmanın tümü zorunlu olarak erişilebilir ve tamamlanabilir olmalıdır; isteğe bağlı sözleşmeler ana ilerlemeyi kilitlemez.
-- Şampiyon fazları yeni mekanik öğretmez. Her faz geçişi metin, animasyon ve rakip niyet kartında aynı bilgiyi verir.
+- Şampiyon fazları yeni mekanik öğretmez. Her faz geçişi metin, animasyon ve rakip niyet kartında aynı bilgiyi verir; fazın öğrettiği adlandırılmış taktik de savaş günlüğünde TR/EN gösterilir. Geçiş tur için önceden seçilmiş niyeti değiştirmez; deterministik faz sırası sonraki niyetten başlar ve savaş checkpoint’inde sürer.
 - 32 ana maç sekiz dört-maçlık turnuvaya ayrılır; #4, #12, #20, #28 ara finallerdir, #8, #16, #24, #32 bölüm şampiyonlarıdır. Bir bölüm dört normal, iki elit, bir ara final ve bir bölüm şampiyonu taşır; ekonomi ve içerik kartları aynı sayımı kullanır.
 - Rakip rol eğrisi Dantus/Sagan/Spheracles/Gaiax/Sandalphon sayfalarındaki menzil, büyü, ağır hasar, çevikliği düşük güç ve karma yükleme profillerini kendi özgün düşmanlarına dağıtır. Her final rakip profili, imza baskısı, görünür zaafı ve en az iki yasal karşı hamle taşır. Ad, istatistik, ekipman ve hamle kopyalanmaz.
 - Her bölümün ilk turnuva finalinden sonra (#4, #12, #20, #28) etkinin açıklandığı bir ara-turnuva kararı gösterilir. Seçim yalnızca bir kez yazılır, geri alınmaz ve ana kampanya kilidini değiştirmez; iki ödül yolunun da ekonomi/karakter testleri bulunur.
@@ -402,7 +406,7 @@ Sözleşme hedefi sonuç ekranında maç başlamadan gösterilir; başarısız d
 
 İlk seçimden önce olay kapatılabilir; onaydan sonra seçim geri alınamaz. Aynı olay için uygulama yeniden açılışı, maç tekrarı veya yedek kayıttan devam ikinci ödül üretmez. Antrenman yolu dört ek özellik puanına, sponsorluk yolu en fazla 840 Sikke’ye çıkar; denge simülasyonu iki uç yolu ve aradaki 14 kombinasyonu kapsar.
 
-**Şampiyonlar Yolu:** Finalden sonra açılan çevrimdışı, tekrar oynanabilir sekiz maçlık eleme serisi. Seviye 20’de mevcut rakip varyantlarıyla oynanır; yeni arena tehlikesi veya öğrenilmemiş kural eklemez. Her maç arasında otomatik kayıt ve ana merkeze güvenli dönüş bulunur; sağlık ve kaynaklar yeniden dolar, mobil oturum kesintisi seriyi bozmaz. Dört maç ve sekiz maç tamamlandığında birer kozmetik ödül açılır. Tekrar oynama Sikke/XP üretmez; en iyi tamamlama serisi yerel kayda yazılır. Son aşama **Ayna Dövüşçü** oyuncunun ana silah/ustalık arketipini yansıtır; karşılaşma öncesi yükleme ve rol gösterilir, rakip değerleri seviye 20 aralığına normalize edilir, hamle niyetleri deterministiktir. Böylece wiki’de anlatılan aynalı son rakip fikri uyarlanır, eş statlı kopyanın şansla belirlenen sonucu kullanılmaz. Ayna Dövüşçü oyuncunun kayıtlı dövüşçü görünüşünü/teçhizatını katmanlı olarak kullanır; bağımsız yeni karakter portresi gerektirmez. Çevrimiçi liderlik tablosu ilk yayın kapsamına girmez.
+**Şampiyonlar Yolu:** Finalden sonra açılan çevrimdışı, tekrar oynanabilir sekiz maçlık eleme serisi. Seviye 20’de mevcut rakip varyantlarıyla oynanır; yeni arena tehlikesi veya öğrenilmemiş kural eklemez. Her maç arasında otomatik kayıt ve ana merkeze güvenli dönüş bulunur; sağlık ve kaynaklar yeniden dolar, mobil oturum kesintisi seriyi bozmaz. Dört maç ve sekiz maç tamamlandığında birer kozmetik ödül açılır. Tekrar oynama Sikke/XP üretmez; en iyi tamamlama serisi yerel kayda yazılır. Son aşama **Ayna Dövüşçü** oyuncunun ana silah/ustalık arketipini yansıtır; karşılaşma öncesi yükleme ve rol gösterilir, savaş özellikleri seviye 20 aralığına normalize edilir, azami sağlık/efor/mana havuzları oyuncunun savaşa girerken kullandığı kapasitelerle eşleşir, hamle niyetleri deterministiktir. Böylece wiki’de anlatılan aynalı son rakip fikri uyarlanır, eş statlı kopyanın şansla belirlenen sonucu kullanılmaz. Ayna Dövüşçü oyuncunun kayıtlı dövüşçü görünüşünü/teçhizatını katmanlı olarak kullanır; bağımsız yeni karakter portresi gerektirmez. Çevrimiçi liderlik tablosu ilk yayın kapsamına girmez.
 
 | Aşama | Rakip | Sınanan ustalık | Ödül/kayıt |
 |---:|---|---|---|
@@ -419,7 +423,7 @@ Sözleşme hedefi sonuç ekranında maç başlamadan gösterilir; başarısız d
 
 ### 6.1 Dövüşçü yaratma
 
-Oyuncu ad, baş şekli, saç/başlık, yüz kılı, ten tonu, vücut yapısı ve iki renk vurgusu seçer. Görünüş seçenekleri savaş performansını değiştirmez. İlk seçimden sonra görünüşü lig merkezinde ücretsiz değiştirebilir. Seçenekler birbirinden bağımsız katmanlar olarak birleştirilir; dövüş animasyonlarında yüz ve silüet okunaklı kalır.
+Oyuncu adını, kökenini (Kıyı, Ocak, Fırtına veya Taç) ve üç vücut oranından birini seçer. Kökenler ayrı, bütünleşik ve saydam karakter atlaslarıyla görünür; her atlasın başı, saçı ve kıyafeti çizimin parçasıdır. Saç, sakal/yüz kılı, ten tonu ve serbest renk seçenekleri aktif akıştan kaldırılmıştır. Eski kayıt alanları şema uyumluluğu için korunur, fakat çizimde kullanılmaz; vücut oranı değiştirildiğinde bu eski alanlar varsayılan değerlere temizlenir. Görünüş savaş performansını değiştirmez. Oyuncu lig merkezinde vücut oranını ücretsiz değiştirebilir.
 
 Kampanya yedi harcanabilir savaş özelliği kullanır. Referans wiki’sindeki Charisma’nın tribün, taunt, ödül ve mağaza fiyatına bağlanan rolünden esinlenen **Seyirci Notu**, karakter özelliği değildir: maç sonunda brifingde önceden yazılmış üç koşuldan her karşılananı bir puan, en fazla 3 puan verir. Her maçta koşullar aynıdır ve yapılabilir: en az iki taktik yaklaşım kullanmak (saldırı, gard, konum değiştirme, büyü veya destek); gösterilen saldırı niyetine gardla karşılık vermek; arena tehlikesi olmayan maçta mesafeyi en az bir kez değiştirmek, tehlikeli arenada ise arena tehlikesinden hasar almadan çıkmak. Koşullar maça girmeden görünür; süre, hasar zarları veya gizli puan kullanılmaz. Yalnızca ana kampanya zaferlerinde her maçın en iyi notu saklanır; bölüm başına en fazla 24 puanın 16’sını toplayan oyuncu bir kozmetik arma açar. Sözleşme/ustalık maçlarının notu arma ilerlemesine yazılmaz. Ana ilerlemeye, savaş değerlerine, Sikke/XP kazancına etkisi yoktur.
 
@@ -429,11 +433,13 @@ Kampanya yedi harcanabilir savaş özelliği kullanır. Referans wiki’sindeki 
 |---|---|
 | Ana silah | Hasar, menzil niteliği, hamle ailesi |
 | Menzilli silah | Atış menzili, fişek kapasitesi; yay atışı hamlesini açar |
-| Başlık | Kritik veya durum etkisine karşı küçük direnç; karşılaştırmada açıkça gösterilir |
+| Başlık | Kademe başına durum etkisi uygulama olasılığını düşürür; zırh ve direnç ayrı gösterilir |
 | Gövde | Ana zırh/hasar azaltımı |
 | Çizme | Mesafe değiştirme veya kaçınma hamlelerine küçük destek; hamle önizlemesinde gösterilir |
 | Tılsım | Yapıya özgü bir küçük pasif |
 | Sarf kemeri | Maç başına bir kez kullanılabilen, maç öncesi seçilen isteğe bağlı sarf eşyası |
+
+Durum direnci bir olasılık yüzdesinden puan düşürür; başarıyla isabet eden durum etkilerinin temel uygulama olasılığı yan etkiden önce okunur ve direnç bu değeri azaltır. Dört miğfer sırasıyla **3, 5, 7 ve 9 yüzde puanı** direnç verir; toplam savunma zırhından bağımsızdır, başka yuvalardan birikmez ve yansıma dövüşçüsüne taşınır. Mevcut taban uygulama olasılıkları yanma/kırık gard için %100, kanama için %30, sendeleme için %15’tir. Böylece direnç her durumda en fazla 9 puanlık bir azalma sağlar; etkiler 0’ın altına inmez. Mağaza kartı miğfer zırhını ve direnç bonusunu ayrı gösterir.
 
 Tam oyunda üç yakın dövüş ailesi (hızlı ve isabetli kısa kılıç, gard/sendeletme odaklı tokmak, mesafe ve karşı hamle odaklı mızrak) ile bir menzilli yay ailesi bulunur. Yakın dövüş ve menzilli silah ayrı yuvalara takılır; dört ailenin her birinde dört güç seviyesi vardır. Yay atışı Uzak ve Orta mesafede çalışır, Yakın mesafede −15 isabet alır ve maç başına kapasiteyle sınırlıdır. Aileler farklı oynanış sunar; doğrudan “daha pahalı = her durumda daha iyi” çizgisine bağlanmaz. Wiki’de daha çok ekipman yuvası ve silah kaydı bulunması, bu mobil sürümde aynı katalog büyüklüğünü gerektirmez; seçilen her yuva ve aile belirgin, önceden açıklanmış bir taktik rolü taşır.
 
@@ -579,7 +585,7 @@ Renk, tek başına sağlık, nadirlik veya durum anlamı taşımaz; simge, etike
 
 Tam yayın için içerik kilidine girecek sanat varlık listesi:
 
-- 1 katmanlı oyuncu dövüşçüsü: en az 8 baş/saç/başlık seçeneği, 4 yüz kılı seçeneği + sakalsız varsayılan, 8 ten tonu, 3 gövde oranı ve tüm ekipman yuvaları için eşleşen sprite katmanları;
+- 1 katmanlı oyuncu dövüşçüsü: 3 gövde oranı (`body_01`–`body_03`), 5 yüz kılı durumu (`facial_hair_00`–`facial_hair_04`), 8+8 renk vurgusu ve tüm ekipman yuvaları için eşleşen sprite katmanları (kesilmiş saç/başlık katmanları ve kalibre ten rengi maskeleri sanat kapısında ertelenmiş varlıklardır);
 - 32 ana rakip portresi (8 turnuva finali bunun alt kümesi), 16 sözleşme kartı illüstrasyonu, 4 ara seçim kartı görseli, 20 tekrar kullanılabilir rakip animasyon rig’i, 8 elit varyantı, 7 Şampiyonlar Yolu görünüş varyantı (aynı rig üstünde donanım/renk/efekt değişimi), oyuncu dövüşçü sprite’ından üretilen 1 Ayna Dövüşçü ve 8 final rakibine özgü giriş/zafer/yenilgi vuruşu; her rakibin rolü/imza silahı küçük ikonla tanınır, zırh/özellik verisiyle silüeti tutarlıdır;
 - Dört dükkân kategorisini tanıtan özgün simge/tezgâh işaretleri; üç Seyirci Notu göstergesi, dört devreye ait kozmetik arma ve sonuç ekranı kalabalık tepkisi; mevcut arena sanat yönüyle uyumlu, oyunun kendine ait görsel tasarımı;
 - Dört özgün hikâye izi kayıt kartı/nesne illüstrasyonu (ödül tutarsızlığı, ikinci kaynak, örüntü kanıtı ve halka açık açıklama); aynı mobil kart bileşeninde kullanılır, metinler görselden ayrı yerelleştirilir ve dört hikâye bölümünde birer kez gösterilir;
@@ -643,28 +649,34 @@ Flutter’ın resmi mimari rehberindeki UI/veri katmanı ayrımı ve View/ViewMo
 
 ### 10.1 Modüller
 
+Uygulamanın gerçek kaynak yerleşimi şu şekildedir; planın ilk sürümündeki `app/features/game_domain` taslağı uygulanmış dizin ağacı değildir.
+
 ```text
 lib/
-  app/                 uygulama başlangıcı, tema, yönlendirme
-  features/
-    onboarding/        ilk açılış ve dövüşçü yaratma
-    hub/               lig merkezi ve devre haritası
-    battle/            savaş görünümü, ViewModel, animasyon bağlayıcısı
-    character/          özellik, yetenek, ekipman
-    shop/              silah, zırh, büyü/tılsım ve sarf katalogları; satın alma
-    results/            ödül ve seviye akışı
-    settings/           dil, ses, erişilebilirlik
-  game_domain/
-    models/             Fighter, Stats, Item, Encounter, Save
-    combat/             hit chance, damage, AI, status, reward
-    campaign/           devre, unlock ve encounter state
-  data/
-    repositories/       save, content, settings
-    local_storage/      sürümlü yerel kayıt
-  assets/
-    content/            rakip, hamle, eşya ve ekonomi verisi
-    art/ audio/          dışa aktarılan varlıklar
+  main.dart                         Flutter başlangıcı, tema ve uygulama kökü
+  game/
+    data/
+      content.dart                  rakip, eşya, büyü ve kampanya içeriği
+      intermission_decisions.dart   ara turnuva seçimleri
+      save_storage.dart             yerel kayıt, yedek ve şema yükseltme
+    domain/
+      models.dart                   dövüşçü, kayıt, eşya ve savaş durumları
+      balance.dart                  XP, Sikke, ödül ve ekonomi kuralları
+      battle_engine.dart            seed'li savaş çözümü, AI, durumlar ve olaylar
+      game_controller.dart          kullanım akışları ve kayıt commit sınırı
+    l10n/
+      game_localizations.dart       TR/EN mesaj kataloğu
+    ui/
+      screens.dart                  ekranlar, rotalar ve kullanıcı akışları
+      design.dart                   tasarım sistemi, çizim ve animasyonlar
+      audio_service.dart            müzik, ambiyans, SFX ve titreşim yönlendirmesi
+      rival_motion_assets.dart      rakip atlas eşlemeleri
+assets/
+  art/                              arayüz, kahraman, arena ve rakip görselleri
+  audio/                            müzik, ambiyans ve efektler
 ```
+
+Yeni içerik eklendiğinde veri kataloglarında kalır; savaş çözümü ve UI ancak yeni bir kural ya da yeni bir etkileşim gerektiriyorsa değişir. Kaynak modülleri büyüdükçe ekran ve domain sorumlulukları ayrı dosyalara bölünebilir; bunu yalnızca mevcut kabul testlerinin korunabildiği ölçüde yap.
 
 ### 10.2 Sorumluluk sınırları
 
@@ -682,7 +694,7 @@ Sıra tabanlı ve az aktörlü savaşta üretim tercihi Flutter animasyonları v
 - Savaş çözümü, animasyondan ayrı bir olay listesi üretir: `attackStarted`, `hit`, `blocked`, `statusApplied`, `turnEnded`, `rewardGranted`.
 - Eşya, rakip, ödül, hamle ve seviye verisi oyun kodundan ayrılır; geçerli şema sürümüyle doğrulanır.
 - Yerel kayıt `schemaVersion` taşır; uygulama güncellemesinde kayıt dönüştürücü ve yedekleme yolu bulunur.
-- `seenStoryEvidence` ve kampanya ilerleme kimlikleri yerel kayıt şemasında sürümlü saklanır (güncel şema 8); maç sonucu, ilk galibiyet ödülü ve ilgili hikâye izi tek idempotent sonuç yazımında commit edilir.
+- `seenStoryEvidence` ve kampanya ilerleme kimlikleri yerel kayıt şemasında sürümlü saklanır (güncel şema 10); maç sonucu, ilk galibiyet ödülü ve ilgili hikâye izi tek idempotent sonuç yazımında commit edilir.
 - Kayıt, maç ortasında uygulama kapanırsa tur başı güvenli durumuna döner; sonuç/ödül/hikâye olayı iki kez yazılmaz.
 - İlk yayın tam oynanabilirliği ağ bağlantısına bağlamaz.
 
@@ -766,7 +778,7 @@ Tek kişi birden çok rol üstlenebilir; ancak tasarım kartı, asset manifesti 
 
 ### 13.4 Tam oyun çıkış kapısı
 
-- İçerik manifestinin %100’ü yayındaki sürüme bağlıdır: 32 ana karşılaşma, 16 sözleşme kaydı, 8 oyun sonu karşılaşma kaydı ve 4 ara-turnuva seçimi; toplam 60 üretim kartı. Bunların 40’ı savaş ayarı, 16’sı sözleşme kuralı ve 4’ü seçim olayıdır. #1 öğretici maçıdır, ayrıca bir maç sayılmaz; #32 finaldir. Sözleşmeler ana kadroyu yeniden kullanır; Şampiyonlar Yolu sekiz rakip varyantıdır. Toplamda 32 temel rakip tasarımı, 4 ara final, 4 bölüm şampiyonu, 6 arena, 16 silah, 12 zırh, 4 tılsım, 6 büyü, 2 sarf ailesi, katmanlı oyuncu görünüşü (8 baş/saç, 5 yüz kılı durumu, 8 ten tonu, 3 gövde oranı), 4 Seyirci Notu kozmetik arması ve 4 hikâye izi kartı tamamlanır.
+- İçerik manifestinin %100’ü yayındaki sürüme bağlıdır: 32 ana karşılaşma, 16 sözleşme kaydı, 8 oyun sonu karşılaşma kaydı ve 4 ara-turnuva seçimi; toplam 60 üretim kartı. Bunların 40’ı savaş ayarı, 16’sı sözleşme kuralı ve 4’ü seçim olayıdır. #1 öğretici maçıdır, ayrıca bir maç sayılmaz; #32 finaldir. Sözleşmeler ana kadroyu yeniden kullanır; Şampiyonlar Yolu sekiz rakip varyantıdır. Toplamda 32 temel rakip tasarımı, 4 ara final, 4 bölüm şampiyonu, 6 arena, 16 silah, 12 zırh, 4 tılsım, 6 büyü, 2 sarf ailesi, katmanlı oyuncu görünüşü (aktif: 3 gövde oranı, 5 yüz kılı durumu, 8+8 renk vurgusu; kesilmiş saç/başlık ve ten maskesi sanat kapısında ertelenmiştir, eski kayıt kimlikleri korunur), 4 Seyirci Notu kozmetik arması ve 4 hikâye izi kartı tamamlanır.
 - Her dört maçlık turnuva üç eleme/lig düellosu ve bir finalle kapanır; #4/#12/#20/#28 ara final, #8/#16/#24/#32 bölüm şampiyonudur. Her bölüm dört normal, iki elit, bir ara final ve bir bölüm şampiyonu içerir; arka arkaya rakip dalgası yoktur. Maç sonuçları, ara seçim ve sıradaki turnuva adımı güvenli kaydedilir.
 - Temiz kurulumla karakter yaratmadan 8 turnuva finali, 4 ara seçim, epilog ve oyun sonu meydan okumasına kadar ilerleme tamamlanır; kapalı test kayıtları güncelleme sonrası da açılır.
 - Eksik/yer tutucu ekran, metin, sanat/ses varlığı, çalışmayan düğme veya sonradan tamamlanacak içerik yoktur.
@@ -800,6 +812,108 @@ Tek kişi birden çok rol üstlenebilir; ancak tasarım kartı, asset manifesti 
 - #19–22 eklemesinden sonra `flutter test --no-pub --reporter compact`: **163/163 test geçti**. `dart format --output=none --set-exit-if-changed` üç değişen Dart dosyasında temiz; `dart analyze` çıkış kodu 0, 29 bilgi düzeyi lint notu.
 - `rivalMotionAtlasAssetsByEncounter` şu anda 32 ana karşılaşmanın 24’üne (#1–22, #24, #32) atlas bağlıyor. #23 ve #25–31 için sekiz rig gerekiyor. Bu batch’ten sonra web/Android release build yeniden alınmadı.
 - Katmanlı oyuncu görünüşü ve kuşanılan teçhizatın poz-özel aksiyon atlaslarıyla hizalanması, kalan UI glyph/VFX kapsamı ve Android/iOS yayın kimliği, imza, mağaza, gizlilik, yaş derecelendirmesi, destek kanalı ile gerçek cihaz QA kapıları hâlâ açık.
+
+### 13.8 Tam kadro hareket atlasları ve mağaza build hatları (10 Ekim 2026)
+
+- #23 Gelgit Yargıcı, #25 Taç Muhafızı, #26 Gölge Düellocu, #27 Sancak Cadısı ve #28–31 Demir Cellat, Tahtsız Varis, Kül Komutanı, Mühür Kırıcı için sekiz özgün 1536×1024 RGBA hareket atlası eklendi. Her atlas altı 512×512 savaş pozu içerir; kaynak master/runtime dosyaları ve encounter eşlemeleri manifest ile otomatik test kapsamına bağlandı. `rivalMotionAtlasAssetsByEncounter` artık 32/32 ana karşılaşmayı eşler; #24 ve #32 şampiyon atlasları korunmuştur.
+- Dövüşte sersemleme, kanama, yanma ve kırık muhafız durumları için dört Canvas glifi eklendi. Seyirci notlarının taktik, saldırıya cevap, tehlikeden kaçış ve menzil değiştirme koşulları için dört glif daha eklendi. Durum rozetleri kaynak sütunlarında görünür; kurallar ekran okuyucuya `checked` semantiği verir. 360×800 düzen testinde rozetlerin savaşçı çizimi ve orta mesafe göstergesiyle çakışmadığı doğrulandı.
+- Son `flutter test --no-pub --reporter compact`: **174/174 geçti**. `dart analyze`: çıkış kodu 0; hata/uyarı yok, **29 bilgi düzeyi lint notu**. Altı değişen Dart dosyasında `dart format --output=none --set-exit-if-changed` temiz; `git diff --check` geçti.
+- Son `flutter build web --release --no-pub` başarılı oldu. Web bundle içinde 32 rakip hareket atlası, toplam **78.412.549 bayt** olarak doğrulandı. Web derlemesi 247,3 saniye sürdü.
+- `tool/build_android.ps1 -Format apk` başarılı oldu; Gradle release derlemesi 853,9 saniye sürdü. `build/app/outputs/flutter-apk/app-release.apk` **203.247.516 bayt (193,8 MiB)** olarak üretildi. `apksigner` APK imzasını v2 şemasıyla doğruladı; sertifika **Android Debug**, paket kimliği `com.example.ash_circuit` olduğundan dosya mağazaya gönderilecek nihai paket değildir. Büyük paket boyutu için atlas/ses/görsel indirme bütçesi ayrıca optimize edilmelidir.
+- Android için `tool/build_store_android.ps1` ve iOS için `tool/build_store_ios.sh` mağaza artifact hattı eklendi. Gerçek bundle/package ID, imza ve profil bilgileri dış publisher girdisi olarak zorunludur; hatlar App Store/Play'e yükleme yapmaz. Android store lane `com.example` örnek namespace'ini reddeder. iOS mağaza ayarları yalnız Runner Release konfigürasyonunda uygulanır; yerel Debug/Profile ayarları korunur.
+- Android store AAB ve iOS IPA build'i çalıştırılmadı: gerçek publisher kimlikleri/keystore/sertifika/provisioning profile sağlanmadı; bu çalışma Windows üzerinde olduğu için Xcode/iOS build aracı da yok. Yaş derecelendirmesi, gizlilik/veri beyanı, mağaza metinleri/görselleri, destek kanalı ve gerçek cihaz QA'si yayın öncesi kapılar olarak sürüyor.
+- AGY `reviewer`, oyun UI/glif ve hareket atlası diff'ini inceledi; bulgu raporunda **approve** verdi. Review sırasında iOS proje dosyası başka bir ajan tarafından güncellendiği için iOS release ayarları ayrı diff kontrolünden geçirildi; Debug/Profile varsayılanları korunarak son değişiklik yalnız Release ayarlarına daraltıldı.
+- Katmanlı oyuncu görünüşünün poz-özel aksiyon atlaslarında doğru teçhizatla çizilmesi ve silah/arena başına VFX varyantları hâlâ içerik/teknik sanat işi olarak açık.
+
+### 13.9 Atomik kayıt, savaş VFX’i ve release doğrulaması (11 Ekim 2026)
+
+- Save yazımı artık önce aday kaydı depoya yazar, başarılı olursa bellekteki durumu commit eder. Primary/backup yazımı `false` döner veya hata verirse cache yeniden yüklenir; kontrolcü alışveriş, savaş ödülü, kahraman/özellik, ayar ve hikâye mutasyonlarını bellekte de geri alır. Kampanya sıfırlama depolama temizlenmeden belleği sıfırlamaz. Yeni hata ve geri alma testleri, eski concurrency/regresyon beklentileriyle birlikte kapsama alındı.
+- Sekiz savaş efekti karesine tipli süre/eğri/ölçek profilleri eklendi; animasyon opaklığı başlangıç ve bitişte kesin sıfırdır. Altı arena ve dört silah ailesi için deterministik renk varyantları, painter’a tint/blend aktarımı ve bilinmeyen değer fallback’i doğrulanıyor.
+- Özelleştirilmiş/teçhizatlı kahraman, ekipman katmanlarını koruyan gövde hareket profilleriyle oynatılır; poz-özel kahraman aksiyon atlasları hâlâ bu katmanlarla güvenilir biçimde hizalanamaz. Üretim kalitesinde çözüm için eklem/pivot, silah ve ekipman soketi, ten maskesi ve katman-örtüşme sırası içeren rig veya her poz için eşleşmiş gövde/ekipman katmanları gerekir.
+- 32 runtime rakip hareket atlası WebP q95’e çevrildi; Web çıktısındaki bu atlaslar toplam **17.139.516 bayt**. PNG master kaynakları üretim arşivinde tutuldu. Web bundle toplamı **130.102.390 bayt**; önceki 78.412.549 baytlık runtime atlas toplamına göre yaklaşık **%78,1** azalma sağlandı.
+- Son toplu `flutter test --no-pub --reporter compact`: **224/224 test geçti**. `dart analyze`: çıkış kodu 0, hata/uyarı yok ve **31 bilgi düzeyi lint notu**. Format kontrolü 52 Dart dosyasında temiz; `git diff --check` çıkış kodu 0.
+- `flutter build web --release --no-pub` başarılı; `build/web` üretildi ve derleme **174,1 saniye** sürdü. Web bundle’da 32 adet `*_motion.webp` dosyası ve toplam **17.139.516 bayt** doğrulandı.
+- `tool/build_android.ps1 -Format apk` başarılı; `build/app/outputs/flutter-apk/app-release.apk` **142.056.464 bayt (135,5 MiB)**. Android release derlemesi **760,5 saniye** sürdü. SDK 36.0.0 `apksigner` v2 imza doğrulamasını geçti; sertifika DN’si `C=US, O=Android, CN=Android Debug`. Gradle’ın yerel debug imzalama fallback’i kullanıldı; bu benim/yayıncının özel anahtarı değildir ve mağazaya hazır imzalı paket sayılmaz. Paket kimliği `com.example.ash_circuit`, sürüm `1.0.0`/kod `1` olarak kaldı.
+- Gerçek yayıncı `applicationId`, keystore, sertifika ve mağaza girdileri sağlanmadığı için store signing/AAB hattı çalıştırılmadı; iOS build’i bu Windows ortamında Xcode bulunmadığından alınmadı. Gerçek cihaz QA’sı, mağaza/gizlilik/yaş derecelendirmesi ve destek bilgileri yayın kapıları olarak açık.
+
+### 13.10 İçerik takvimleri, direnç ve erişilebilirlik kapanışı (11 Ekim 2026)
+
+- Her etkin arena tehlikesinin tipli bir zamanlama kaydı vardır. İlk darbe, oyuncunun üçüncü eylemi çözüldükten sonra ve rakibin o turdaki cevabından önce gelir. Tekrarlayan alanlar bundan sonra her dört oyuncu eyleminde bir, yani 3, 7, 11… eylemlerden sonra vurur. M04 ve M20 yalnızca ilk darbeyi yapar.
+- Tehlike uyarısı, çarpışmanın çözüleceği eylemde oyuncunun hamlesinden önce gösterilir. `warningTurns: 1` yalnızca o eylemin başında `1` kalan eylem gösterir; `warningTurns: 2` çarpışmadan önceki iki eylemin başında `2`, ardından `1` gösterir. Örneğin 7. eylemde çözülecek iki turluk uyarı 6. eylem başında `2`, 7. eylem başında `1` olur. Sayaç etki alanının süresini değil, çarpışmaya kalan eylem sayısını gösterir. Oyuncu çarpışma eyleminde hareket ederek veya gard alarak hasardan kaçınabilir; sayaç rakip niyet teleğrafıyla aynı savaş panelinde görünür.
+
+| Karşılaşma | Uyarı penceresi | Etki takvimi |
+|---|---:|---|
+| M04 Tuz Kahini | 1 eylem | 3. oyuncu eyleminden sonra bir kez |
+| M07 Fener Bekçisi | 2 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M09 Cüruf Taşıyıcı | 1 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M13 Köz Gölgesi | 2 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M14 Kızıl Ocak Şefi | 2 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M15 Kükürt Matronu | 2 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M19 Gelgit Mührücüsü | 2 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M20 Fırtına Avcısı | 1 eylem | 3. oyuncu eyleminden sonra bir kez |
+| M22 Kıyı Orakçısı | 1 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M23 Gelgit Yargıcı | 1 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+| M28 Demir Cellat | 1 eylem | 3, 7, 11… oyuncu eylemlerinden sonra |
+
+- #8, #16, #24 ve #32’nin şampiyon fazları öğretilecek taktik adıyla ve sabit rakip niyet dizisiyle tanımlanır. Faz değişiminde önceden uyarısı gösterilmiş rakip hamlesi çözülür; yeni faz dizisinin ilk niyeti bundan sonraki düşman turunda seçilir. Niyet dizisi kaynak/mesafe yetersizliğinde güvenli gard niyetine düşebilir; bu durumda sonraki sıra yine faz dizisinin sıradaki girdisinden ilerler. Aşağıdaki döngü faz başına yeniden başlar. Faz mesajı taktik adlarını TR/EN gösterir; savaş checkpoint’i fazı, sıra indeksini ve öğretim listesini saklayıp geri yükler.
+
+- Depolama yazımı başarısız olursa savaş başlatılmaz; oyuncu hamlesi, sonuç ödülü, mağaza işlemi veya kampanya sıfırlaması bellekte commit edilmez. Savaş checkpoint’i, düello sonucu, eşya/büyü/sarf alışverişi, kampanya temizliği ve eski kayıt şeması yükseltmesi kendi işlemini yeniden deneme kontrolü sunar. Tamamlanmış savaşın yeniden denemesi aynı sonuç ve ödülü bir kez kaydeder.
+
+| Şampiyon / faz | Öğretilen taktik | Rakip niyet döngüsü |
+|---|---|---|
+| M08 / 1 | Vurucu | Güçlü vuruş → hızlı vuruş → güçlü vuruş → gard |
+| M08 / 2 | Kalkanlı | Gard → hızlı vuruş → çelme → gard |
+| M16 / 1 | Kalkanlı | Gard → çelme → hızlı vuruş → gard |
+| M16 / 2 | Vurucu | Güçlü vuruş → hızlı vuruş → güçlü vuruş |
+| M24 / 1 | Menzilli | Geri çekil → Kor Mızrağı → yaklaş → gard |
+| M24 / 2 | Mühür | Kül Patlaması → geri çekil → Kor Mızrağı → gard |
+| M32 / 1 | Vurucu | Güçlü vuruş → hızlı vuruş → güçlü vuruş → gard |
+| M32 / 2 | Mühür | Kor Mızrağı → Kül Patlaması → gard → geri çekil |
+| M32 / 3 | Vurucu + Mühür | Güçlü vuruş → Kor Mızrağı → hızlı vuruş → Kül Patlaması |
+- Arcana savunması `round(0,40 × fiziksel etkin zırh) + max(0, hedef Büyü)` büyü zırhı ve `round(yanma × 100 / (100 + Büyü))` yanma tik formülüyle uygulanır; kanama etkilenmez. Ekipman Büyü bonusu saldırı/direnç hesabına eklenir, mana kapasitesini değiştirmez. Ayna Dövüşçü oyuncuyla aynı azami sağlık, efor ve mana kapasitesini kullanırken savaş özelliklerini 2–20 aralığına normalize eder. Özellik yardım metni iki dilde savunma ve ekipmanın mana kuralını açıklar.
+- M14 Kızıl Ocak Şefi’nin açık Kor bağışıklığı yanmayı ve mevcut yanma tiklerini engeller; doğrudan Kor büyüsü hasarı devam eder. Rakip kartı “Durum etkisi bağışıklığı” satırını gösterir ve bu kural roster kabul testinde gerçek karşılaşmayla sınanır.
+- Miğfer durum direnci artık savaşta işlenir ve mağaza kartında ayrı görünür: dört kademe +3, +5, +7 ve +9 yüzde puanıdır. Değer, isabetten sonra durum etkisi uygulama olasılığından düşer; mevcut taban olasılıklar yanma/kırık gard %100, kanama %30, sendeleme %15’tir. Direnç negatif olasılık üretmez ve Ayna Dövüşçüye taşınır.
+- Kayıt şeması 10; iki karakter vurgu rengi, metin ölçeği, animasyon hızı ve animasyonu atlama tercihlerinin eski kayıttan güvenli varsayılanla taşınmasını sağlar. Uygulama Flutter yerel ayarı TR/EN kaydıyla eşleşir. Müzik/ambiyans arka planda duraklatılır; arka plandayken yeni SFX/stinger başlatılmaz. Sistem ses odağı, devam eden kısa efektlerin kesilmesi ve titreşim davranışı cihazlarda ayrıca doğrulanmalıdır.
+- Hero combat-rig için üretilen 8 ve 14 pozlu iki tam-figür atlas adayı da 126×156 fit kapısını geçmedi. Son 1285×1224 RGBA adayında 16 nominal hücrenin tümü kenara değen alfa içeriyor; iki boş hücrede de parçalar var ve özelleştirme/teçhizat katmanları bulunmuyor. İkisi de runtime’a alınmadı; ölçümler, target-size önizlemeleri ve gereken poz/soket listesi `docs/art-review/hero_combat_rig/` altında tutulur. `assets/art/characters/` altında bulunan dosyalar Flutter tarafından pakete alındığından kabul edilmemiş adaylar bu dizine konmamalıdır. Kabul edilmiş hero atlasları çalışma halinde kalır.
+- Son toplu test, analyzer, format, web ve Android build çıktıları için bkz. 13.11.
+
+### 13.11 Son kod ve release doğrulaması (11 Ekim 2026)
+
+- Kampanya denge matrisi geçti: dört yapı × 16 ara seçim dizisinin **64/64** kombinasyonu 32 ana karşılaşmayı tamamladı. Test oyuncusu, iki turluk arena uyarısında yalnızca darbenin çözüleceği son uyarı eyleminde kaçacak şekilde düzeltildi; M15'teki önceki başarısızlık denge verisinden değil, testçinin uyarı sayacını erken tüketmesinden kaynaklanıyordu.
+- Son tam `flutter test --no-pub --reporter compact`: **254/254 test geçti**. `dart analyze` çıkış kodu **0**; hata/uyarı yok, **30 bilgi düzeyi lint notu** var. `dart format --output=none --set-exit-if-changed lib test`: **59 dosyada değişiklik yok**. `git diff --check` çıkış kodu **0**; Windows satır sonu normalizasyon uyarıları dışında whitespace hatası bulunmadı.
+- `flutter build web --release --no-pub` başarılı; derleme **83,8 saniye** sürdü. `build/web` toplamı **130.529.689 bayt**; 32 adet `*_motion.webp` atlası **17.139.516 bayt**.
+- `tool/build_android.ps1 -Format apk` başarılı; Gradle `assembleRelease` **638,8 saniye** sürdü. `build/app/outputs/flutter-apk/app-release.apk` **143.383.764 bayt (136,7 MiB)**. `apksigner` v2 APK imza şemasını doğruladı; sertifika DN'si `C=US, O=Android, CN=Android Debug`, sertifika SHA-256 parmak izi `a1f2e5df2752dd53162bda566e7d55792f857dfddc1e705e5b700e425b79e7dd`. Bu Android debug anahtarıdır; proje/yayıncı anahtarı değildir ve mağazaya gönderilecek imzalı yayın paketi olarak kullanılamaz. Paket kimliği `com.example.ash_circuit`, sürüm `1.0.0`/kod `1` olarak kaldı.
+- Release Android build sırasında SDK araçlarından XML sürüm uyumsuzluğu uyarısı alındı; build tamamlandı, APK imzası doğrulandı. Web derlemesinin Wasm dry run mesajı bilgilendirmedir; normal JavaScript Web release çıktısı başarılı üretildi.
+- iOS derlemesi bu Windows ortamında Xcode bulunmadığından alınmadı. Gerçek yayıncı kimliği/keystore, mağaza varlıkları ve beyanları, gerçek Android/iOS cihaz QA'sı ile düşük seviye performans ölçümleri yayın kapıları olarak sürüyor.
+
+### 13.12 İlk karakter görünüş düzeltmesi (11 Ekim 2026)
+
+- Manuel testlerde karakter oluşturucu ve görünüş düzenleyicide saçın karakter üzerinde havada kalması ve ten rengi değişiminin piksel seviyesinde yapay bir renk boyaması yapması incelendi.
+- Teknik inceleme sonucunda: `hero_body_layers.png` içindeki gövde katmanlarının (`body_01`–`body_03`) zaten tam çizilmiş baş ve saç anatomisine sahip olduğu; `hero_head_layers.png` atlasının bu gövdelere uygun kesilmiş saydam katmanlar olarak üretilmediği ve koordinat/ölçek olarak karakter üzerinde oturtulamadığı tespit edildi. Ten rengi için de saydam/kalibre maske katmanları bulunmadığından vektörel yol üzerinden uygulanan `BlendMode.color` renklendirmesinin görsel bozulma yarattığı doğrulandı.
+- Kullanıcı talimatı doğrultusunda: Hatalı saç/başlık (`headOptionId`) ve ten tonu (`skinToneId`) seçenekleri hem karakter oluşturucudan hem de görünüş düzenleyiciden kaldırıldı. Çizim katmanında (`HeroCustomizationArt` / `_HeroCustomizationPainter`) havada kalan saç çizimi ve yapay ten rengi boyaması devre dışı bırakılarak karakterin doğal sanat çizimi korundu.
+- Geriye dönük uyumluluk ve kayıt güvenliği korundu: `GameSave` modeli ve serileştirme şeması bozulmadı; eski kayıtların `headOptionId` ve `skinToneId` değerleri güvenle deserialize edilebilir durumdadır.
+- O aşamada köken seçimi, gövde yapısı, yüz kılı ve renk vurguları aktif bırakılmıştı. Sonraki manuel test bunların da kabul edilebilir görünmediğini ve köken seçiminin çizime yansımadığını gösterdi; §13.14 bu durumu düzeltir. Kuşanılan miğfer teçhizatı ayrı ekipman çizimi olarak korunur.
+- `HeroAppearanceSelection.isDefault` ilk sürümde etkin bırakılan seçenekleri hesaba alıyordu. §13.14'te model yalnızca gövde oranını temsil eder; eski görünüş alanları render yoluna aktarılmaz.
+- İlk sürümde saç/başlık ve ten kontrollerinin UI'da olmadığını doğrulayan testler vardı. Yüz kılı ve renk seçeneklerinin görünsel olarak başarılı olduğunu doğrulamıyorlardı; bu eksik daha sonraki manuel testte bulundu.
+- Önceki §8.4 ve §13.11 maddeleri tarihsel kayıt olarak korunur. Güncel seçenek ve çizim sözleşmesi §13.14'tür.
+
+### 13.13 Dövüşçü silah görünüşü, seyirci armaları ve yazı tipi (11 Ekim 2026)
+
+- Oyuncu gövdesi için üç hücreli şeffaf `hero_combat_base_layers.png` üretildi. Baş ve kıvırcık saç karakter çiziminin içine dâhil edildi; elde önceden çizili kılıç kaldırıldı. Böylece havada duran ayrı saç katmanı ve yanlış silahın her oyuncu yapısında görünmesi giderildi.
+- `HeroWeaponArt`, kısa kılıç, balyoz, mızrak ve yay siluetlerini aktif görünüş önizlemesinde, görünüş düzenleyicisinde ve katmanlı oyuncu savaş çiziminde kuşanılmış aileye göre çizer. Eski `hero_body_layers.png` arşiv/kaynak kimliği olarak korunur; yeni oyuncu çizimi `hero_combat_base_layers.png` kullanır.
+- Dört bölüm için özgün, ayrı 2×2 arma atlası üretildi ve kampanya arayüzüyle maç sonucu ekranına bağlandı. Sonuç ekranı zafer/yenilgiye göre Türkçe ve İngilizce seyirci tepkisi gösterir; tema armasının yükleme hatasında yedek glif kullanılır.
+- Son savaş fazında arenaya göre düşük opaklıklı ışık rengi uygulanır; normal fazda bu katman görünmez.
+- Savaş statü rozetleri artık yığın sayısını ve hesaplanan kalan turu hem görsel olarak hem de ekran okuyucu semantiğinde duyurur. Karakter yaratma/düzenleme geri düğmeleri, ustalık açma ve savaş/briefing gezinme ikonlarına TR/EN etiket ve tooltip eklendi.
+- Noto Sans değişken fontu ve OFL 1.1 lisansı uygulama varlıklarına eklendi; tema fontu tüm çevrimdışı istemcilerde aynı dosyadan çizilir. Mevcut Flutter 3.47.1, değişken fontlarda `FontWeight` değerini ağırlık eksenine uygular ([Flutter resmi değişken font belgesi](https://docs.flutter.dev/release/breaking-changes/font-weight-variation)).
+- Yeni görünüş sanatının hücre kırpımları ve hedef ölçekte okunabilirliği, armaların farklılığı/semantiği, final faz ışığı, font yüklemesi, durum rozeti süreleri ve ikon etiketleri son toplu doğrulama bölümünde test edilmelidir. Kısa kılıç dışındaki aileler silah siluetini kullanır; her aileye özel ayrı kahraman poz atlası üretimi, poz kapsamı gereksinimi onaylanana kadar ayrı sanat kapısıdır.
+
+### 13.14 Köken görünüşleri ve başarısız seçeneklerin kaldırılması (11 Ekim 2026)
+
+- Manuel testte dört kökenin seçilebildiği, ancak aynı oyuncu çizimini kullandığı ve sakal/renk seçeneklerinin görsel olarak başarısız olduğu bildirildi. Karakter yaratma ve görünüş düzenleyici artık sakal/yüz kılı, serbest saç, ten tonu ve renk vurgusu seçeneklerini göstermiyor.
+- `HeroAppearanceSelection` yalnızca gövde oranını taşır. `_HeroCustomizationPainter` ayrı yüz kılı atlası ve renk vurgusu vektörlerini çizmez; entegre baş/saç ve giyim rengi seçilen köken atlasında sabittir. Kuşanılmış ekipman ve `HeroWeaponArt` silahları çalışmaya devam eder.
+- Kıyı, Ocak, Fırtına ve Taç artık ayrı 1536×1024 saydam, 3×1 karakter atlaslarına eşlenir. Gövde oranı her atlasın üç hücresinden seçilir. Köken değeri yaratıcıda önizlemeye aktarılır, kayıt alanına yazılır ve dövüşçü, görünüş düzenleyici ve savaş görsellerinde aynı eşleme kullanılır.
+- `GameSave` içindeki eski saç/ten/yüz kılı/renk alanları eski kayıtların açılabilmesi için tutulur; hiçbirinin çizim etkisi yoktur. Yeni dövüşçüler varsayılan değerlerle yazılır. Görünüş düzenleyicide gövde oranı kaydedildiğinde eski alanlar varsayılanlara temizlenir.
+- Test kapsamı dört atlasın benzersiz eşlenmesini, saydam ölçülerini, köken başına farklı çizim üretmesini, gövde oranlarını ve kaldırılmış kontrol gruplarının yokluğunu kapsar. Bu kapsam son toplu doğrulamada çalıştırılacaktır.
 
 ## 14. Riskler ve azaltma planı
 

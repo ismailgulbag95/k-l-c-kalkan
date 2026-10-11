@@ -10,6 +10,13 @@ import 'battle_engine.dart';
 import 'balance.dart';
 import 'models.dart';
 
+typedef _BattleStartCandidate = ({
+  GameSave save,
+  BattleEngine battle,
+  Encounter encounter,
+  Contract? contract,
+});
+
 class GameController extends ChangeNotifier {
   GameController({SaveStorage? storage})
     : _storage = storage ?? PreferencesSaveStorage();
@@ -22,13 +29,15 @@ class GameController extends ChangeNotifier {
   bool ready = false;
   String? lastError;
   Future<void> _mutationQueue = Future.value();
-  int _pendingMutations = 0;
   BattleEngine? _lastResolvedBattle;
   BattleResolution? _lastBattleResolution;
   bool _restoredBattleFromSave = false;
+  bool _battleCheckpointWritePending = false;
 
   GameSave get save => _save;
   bool get restoredBattleFromSave => _restoredBattleFromSave;
+  bool get battleCheckpointWritePending => _battleCheckpointWritePending;
+  bool get schemaMigrationPending => _save.schemaVersion < 10;
   bool get campaignComplete => _save.completedMatches.contains('M32');
 
   bool consumeRestoredBattleFlag() {
@@ -58,7 +67,6 @@ class GameController extends ChangeNotifier {
   }
 
   Future<T> _enqueueMutation<T>(Future<T> Function() action) {
-    _pendingMutations++;
     final completer = Completer<T>();
     _mutationQueue = _mutationQueue.whenComplete(() async {
       try {
@@ -66,8 +74,6 @@ class GameController extends ChangeNotifier {
         completer.complete(result);
       } catch (error, stackTrace) {
         completer.completeError(error, stackTrace);
-      } finally {
-        _pendingMutations--;
       }
     });
     return completer.future;
@@ -107,11 +113,12 @@ class GameController extends ChangeNotifier {
           _save.seenStoryEvidence.contains(entry.id)) {
         return false;
       }
-      _save = _save.copyWith(
+      final candidateSave = _save.copyWith(
         seenStoryEvidence: {..._save.seenStoryEvidence, entry.id},
       );
+      await _writeStorage(candidateSave);
+      _save = candidateSave;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -133,21 +140,29 @@ class GameController extends ChangeNotifier {
       lastError = 'Kayıt yüklenemedi: $error';
       _save = const GameSave();
     }
-    if (_save.schemaVersion < 9) {
-      _save = _save.copyWith(schemaVersion: 9);
-      try {
-        await _writeStorage(_save);
-      } on Object {
-        // Keep the recovered save in memory; a later write can finish migration.
-        // _writeStorage records the error for the recovery UI before it is caught.
-      }
-    }
-    _restoreActiveBattle();
+    if (schemaMigrationPending) await retrySchemaMigration();
+    await _restoreActiveBattle();
     ready = true;
     notifyListeners();
   }
 
-  void _restoreActiveBattle() {
+  Future<bool> retrySchemaMigration() {
+    return _enqueueMutation(() async {
+      if (!schemaMigrationPending) return true;
+      final candidate = _save.copyWith(schemaVersion: 10);
+      try {
+        await _writeStorage(candidate);
+      } on Object {
+        notifyListeners();
+        return false;
+      }
+      _save = candidate;
+      notifyListeners();
+      return true;
+    });
+  }
+
+  Future<void> _restoreActiveBattle() async {
     final checkpoint = _save.battleCheckpoint;
     if (checkpoint == null) return;
     try {
@@ -209,9 +224,15 @@ class GameController extends ChangeNotifier {
       activeEncounter = null;
       activeContract = null;
       battle = null;
-      _save = _save.copyWith(clearBattleCheckpoint: true);
-      lastError = 'Dövüş kaydı açılamadı: $error';
-      unawaited(_storage.write(_save).catchError((Object _) {}));
+      final candidate = _save.copyWith(clearBattleCheckpoint: true);
+      try {
+        await _writeStorage(candidate);
+        _save = candidate;
+        lastError = 'Dövüş kaydı açılamadı: $error';
+      } on Object {
+        // Preserve the bad checkpoint in memory if its durable cleanup fails.
+        // _writeStorage leaves lastError set for the recovery UI.
+      }
     }
   }
 
@@ -219,10 +240,7 @@ class GameController extends ChangeNotifier {
     required String name,
     required Stats stats,
     String appearance = 'Kıyı',
-    String headOptionId = 'head_01',
-    String skinToneId = 'skin_01',
     String bodyProportionId = 'body_01',
-    String facialHairId = 'facial_hair_00',
   }) {
     final candidateName = name.trim();
     final normalized = candidateName.isEmpty
@@ -239,45 +257,44 @@ class GameController extends ChangeNotifier {
       );
     }
     return _enqueueMutation(() async {
-      _save = GameSave(
+      final candidate = GameSave(
         hasHero: true,
         heroName: normalized,
         appearance: appearance,
-        headOptionId: headOptionId,
-        skinToneId: skinToneId,
         bodyProportionId: bodyProportionId,
-        facialHairId: facialHairId,
         stats: stats,
         gold: GameBalance.startingGold,
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
     });
   }
 
-  Future<bool> updateHeroAppearance({
-    required String headOptionId,
-    required String skinToneId,
-    required String bodyProportionId,
-    required String facialHairId,
-  }) {
+  Future<bool> updateHeroAppearance({required String bodyProportionId}) {
     return _enqueueMutation(() async {
       if (!_save.hasHero) return false;
-      if (_save.headOptionId == headOptionId &&
-          _save.skinToneId == skinToneId &&
-          _save.bodyProportionId == bodyProportionId &&
-          _save.facialHairId == facialHairId) {
+      if (_save.bodyProportionId == bodyProportionId &&
+          _save.headOptionId == 'head_01' &&
+          _save.skinToneId == 'skin_01' &&
+          _save.facialHairId == 'facial_hair_00' &&
+          _save.primaryAccentId == 'accent_01' &&
+          _save.secondaryAccentId == 'accent_02') {
         return true;
       }
 
-      _save = _save.copyWith(
-        headOptionId: headOptionId,
-        skinToneId: skinToneId,
+      // Deprecated cosmetic fields remain serialized but are normalized on edit.
+      final candidate = _save.copyWith(
         bodyProportionId: bodyProportionId,
-        facialHairId: facialHairId,
+        headOptionId: 'head_01',
+        skinToneId: 'skin_01',
+        facialHairId: 'facial_hair_00',
+        primaryAccentId: 'accent_01',
+        secondaryAccentId: 'accent_02',
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -296,81 +313,62 @@ class GameController extends ChangeNotifier {
   bool isEncounterUnlocked(int id) =>
       id <= unlockedThrough || _save.completedMatches.contains(_matchKey(id));
 
-  void _setupEncounterBattle(int id, int? seed) {
+  _BattleStartCandidate _setupEncounterBattle(int id, int? seed) {
     if (id < 1 || id > 32 || !isEncounterUnlocked(id)) {
       throw StateError('Bu düello henüz açılmadı.');
     }
-    activeEncounter = getEncounter(id);
-    activeContract = null;
-    battle = BattleEngine(
+    final encounter = getEncounter(id);
+    final engine = BattleEngine(
       save: _save,
-      encounter: activeEncounter!,
+      encounter: encounter,
       seed: seed ?? DateTime.now().microsecondsSinceEpoch,
     );
-    _save = _buildBattleCheckpointSave(mode: 'encounter', encounterId: id);
+    final candidateSave = _buildBattleCheckpointSave(
+      source: _save,
+      engine: engine,
+      mode: 'encounter',
+      encounterId: id,
+    );
+    return (
+      save: candidateSave,
+      battle: engine,
+      encounter: encounter,
+      contract: null,
+    );
   }
 
-  Future<void> startEncounter(int id, {int? seed}) {
-    if (_pendingMutations == 0) {
-      _setupEncounterBattle(id, seed);
-      final candidate = _save;
-      notifyListeners();
-      return _enqueueMutation(() async {
-        try {
-          await _writeStorage(candidate);
-        } catch (_) {}
-      });
-    }
-    return _enqueueMutation(() async {
-      _setupEncounterBattle(id, seed);
-      final candidate = _save;
-      try {
-        await _writeStorage(candidate);
-      } catch (_) {}
-      notifyListeners();
-    });
-  }
+  Future<void> startEncounter(int id, {int? seed}) =>
+      _startBattle(() => _setupEncounterBattle(id, seed));
 
-  void _setupContractBattle(String contractId, int? seed) {
+  _BattleStartCandidate _setupContractBattle(String contractId, int? seed) {
     final contract = contracts.firstWhere((entry) => entry.id == contractId);
     if (!isEncounterUnlocked(contract.targetId)) {
       throw StateError('Sözleşmenin hedef düellosu henüz açılmadı.');
     }
-    activeContract = contract;
-    activeEncounter = getEncounter(contract.targetId);
-    battle = BattleEngine(
+    final encounter = getEncounter(contract.targetId);
+    final engine = BattleEngine(
       save: _save,
-      encounter: activeEncounter!,
+      encounter: encounter,
       seed: seed ?? DateTime.now().microsecondsSinceEpoch,
     );
-    _save = _buildBattleCheckpointSave(
+    final candidateSave = _buildBattleCheckpointSave(
+      source: _save,
+      engine: engine,
       mode: 'contract',
       contractId: contractId,
     );
+    return (
+      save: candidateSave,
+      battle: engine,
+      encounter: encounter,
+      contract: contract,
+    );
   }
 
-  Future<void> startContract(String contractId, {int? seed}) {
-    if (_pendingMutations == 0) {
-      _setupContractBattle(contractId, seed);
-      final candidate = _save;
-      notifyListeners();
-      return _enqueueMutation(() async {
-        try {
-          await _writeStorage(candidate);
-        } catch (_) {}
-      });
-    }
-    return _enqueueMutation(() async {
-      _setupContractBattle(contractId, seed);
-      final candidate = _save;
-      try {
-        await _writeStorage(candidate);
-      } catch (_) {}
-      notifyListeners();
-    });
-  }
+  Future<void> startContract(String contractId, {int? seed}) =>
+      _startBattle(() => _setupContractBattle(contractId, seed));
 
-  void _setupChampionsRoadBattle(int stage, int? seed) {
+  _BattleStartCandidate _setupChampionsRoadBattle(int stage, int? seed) {
     if (!campaignComplete) {
       throw StateError('Şampiyonlar Yolu finalden sonra açılır.');
     }
@@ -379,37 +377,40 @@ class GameController extends ChangeNotifier {
       throw StateError('Önceki ustalık sınamasını tamamla.');
     }
     final built = _buildChampionsRoadEncounter(stage);
-    activeEncounter = built.encounter;
-    activeContract = null;
-    battle = BattleEngine(
+    final engine = BattleEngine(
       save: _save,
-      encounter: activeEncounter!,
+      encounter: built.encounter,
       seed: seed ?? DateTime.now().microsecondsSinceEpoch,
       opponentOverride: built.mirror,
     );
-    _save = _buildBattleCheckpointSave(mode: 'championsRoad', stage: stage);
+    final candidateSave = _buildBattleCheckpointSave(
+      source: _save,
+      engine: engine,
+      mode: 'championsRoad',
+      stage: stage,
+    );
+    return (
+      save: candidateSave,
+      battle: engine,
+      encounter: built.encounter,
+      contract: null,
+    );
   }
 
-  Future<void> startChampionsRoad(int stage, {int? seed}) {
-    if (_pendingMutations == 0) {
-      _setupChampionsRoadBattle(stage, seed);
-      final candidate = _save;
-      notifyListeners();
-      return _enqueueMutation(() async {
-        try {
-          await _writeStorage(candidate);
-        } catch (_) {}
+  Future<void> startChampionsRoad(int stage, {int? seed}) =>
+      _startBattle(() => _setupChampionsRoadBattle(stage, seed));
+
+  Future<void> _startBattle(_BattleStartCandidate Function() setup) =>
+      _enqueueMutation(() async {
+        final candidate = setup();
+        await _writeStorage(candidate.save);
+        _save = candidate.save;
+        battle = candidate.battle;
+        activeEncounter = candidate.encounter;
+        activeContract = candidate.contract;
+        _battleCheckpointWritePending = false;
+        notifyListeners();
       });
-    }
-    return _enqueueMutation(() async {
-      _setupChampionsRoadBattle(stage, seed);
-      final candidate = _save;
-      try {
-        await _writeStorage(candidate);
-      } catch (_) {}
-      notifyListeners();
-    });
-  }
 
   ({Encounter encounter, Combatant? mirror}) _buildChampionsRoadEncounter(
     int stage, {
@@ -446,19 +447,21 @@ class GameController extends ChangeNotifier {
           ? null
           : GameBalance.mirrorPhaseRecoveryFraction,
       hazard: original.hazard,
+      hazardSchedule: original.hazardSchedule,
+      phaseTactics: mirror == null ? original.phaseTactics : const [],
     );
     return (encounter: variant, mirror: mirror);
   }
 
   GameSave _buildBattleCheckpointSave({
+    required GameSave source,
+    required BattleEngine engine,
     required String mode,
     int? encounterId,
     String? contractId,
     int? stage,
   }) {
-    final engine = battle;
-    if (engine == null) return _save;
-    return _save.copyWith(
+    return source.copyWith(
       battleCheckpoint: {
         'version': 1,
         'mode': mode,
@@ -473,23 +476,34 @@ class GameController extends ChangeNotifier {
     );
   }
 
-  Future<void> persistActiveBattleCheckpoint() {
+  Future<bool> persistActiveBattleCheckpoint() {
     if (battle == null || activeEncounter == null || battle!.snapshot.done) {
-      return Future.value();
+      return Future.value(true);
     }
     return _enqueueMutation(() async {
-      if (battle == null || activeEncounter == null || battle!.snapshot.done) {
-        return;
+      final engine = battle;
+      if (engine == null || activeEncounter == null || engine.snapshot.done) {
+        return true;
       }
       final checkpoint = _save.battleCheckpoint;
-      if (checkpoint == null) return;
-      final updated = Map<String, dynamic>.from(checkpoint);
-      updated['engine'] = battle!.toCheckpointJson();
-      final candidate = _save.copyWith(battleCheckpoint: updated);
-      _save = candidate;
+      if (checkpoint == null) return true;
       try {
+        final updated = Map<String, dynamic>.from(checkpoint);
+        updated['engine'] = engine.toCheckpointJson();
+        final candidate = _save.copyWith(battleCheckpoint: updated);
         await _writeStorage(candidate);
-      } catch (_) {}
+        if (battle == engine) {
+          _save = candidate;
+          _battleCheckpointWritePending = false;
+        }
+      } on Object catch (error) {
+        if (lastError == null) lastError = 'Kayıt yazılamadı: $error';
+        _battleCheckpointWritePending = true;
+        notifyListeners();
+        return false;
+      }
+      notifyListeners();
+      return true;
     });
   }
 
@@ -508,31 +522,57 @@ class GameController extends ChangeNotifier {
     };
   }
 
-  String? performAction(BattleAction action) {
-    final engine = battle;
-    if (engine == null) return 'Aktif düello yok.';
-    final error = engine.perform(action);
-    if (error == null) {
-      final previousCheckpoint = _save.battleCheckpoint;
-      if (previousCheckpoint != null) {
-        final candidate = _save.copyWith(
-          battleCheckpoint: {
-            ...previousCheckpoint,
-            'engine': engine.toCheckpointJson(),
-          },
-        );
-        _save = candidate;
-        _enqueueMutation(() async {
-          if (_save.battleCheckpoint != null && battle == engine) {
-            try {
-              await _writeStorage(candidate);
-            } catch (_) {}
-          }
-        });
+  Future<String?> performAction(BattleAction action) {
+    final currentEngine = battle;
+    if (currentEngine == null) return Future.value('Aktif düello yok.');
+    return _enqueueMutation(() async {
+      final encounter = activeEncounter;
+      final checkpoint = _save.battleCheckpoint;
+      if (battle != currentEngine || encounter == null || checkpoint == null) {
+        return 'Aktif düello yok.';
       }
+
+      final candidateEngine = BattleEngine.restoreFromCheckpoint(
+        save: currentEngine.save,
+        encounter: encounter,
+        checkpoint: currentEngine.toCheckpointJson(),
+        opponentOverride: _opponentOverrideForCheckpoint(
+          checkpoint,
+          currentEngine.save,
+        ),
+      );
+      final actionError = candidateEngine.perform(action);
+      if (actionError != null) return actionError;
+
+      final candidateSave = _save.copyWith(
+        battleCheckpoint: {
+          ...checkpoint,
+          'engine': candidateEngine.toCheckpointJson(),
+        },
+      );
+      try {
+        await _writeStorage(candidateSave);
+      } catch (error) {
+        notifyListeners();
+        return lastError ?? 'Kayıt yazılamadı: $error';
+      }
+
+      battle = candidateEngine;
+      _save = candidateSave;
+      _battleCheckpointWritePending = false;
       notifyListeners();
-    }
-    return error;
+      return null;
+    });
+  }
+
+  Combatant? _opponentOverrideForCheckpoint(
+    Map<String, dynamic> checkpoint,
+    GameSave save,
+  ) {
+    if (checkpoint['mode'] != 'championsRoad') return null;
+    final stage = checkpoint['stage'];
+    if (stage is! num) return null;
+    return _buildChampionsRoadEncounter(stage.toInt(), save: save).mirror;
   }
 
   Future<BattleResolution?> resolveBattle() {
@@ -632,11 +672,12 @@ class GameController extends ChangeNotifier {
         );
       }
       final candidate = next.copyWith(clearBattleCheckpoint: true);
+      await _writeStorage(candidate);
       _save = candidate;
       _lastResolvedBattle = engine;
       _lastBattleResolution = result;
+      _battleCheckpointWritePending = false;
       notifyListeners();
-      await _writeStorage(_save);
       return result;
     });
   }
@@ -674,14 +715,15 @@ class GameController extends ChangeNotifier {
         recordedChoice = 'sponsorship';
       }
 
-      _save = updated.copyWith(
+      final candidate = updated.copyWith(
         intermissionChoices: {
-          ..._save.intermissionChoices,
+          ...updated.intermissionChoices,
           decision.id: recordedChoice,
         },
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -742,12 +784,13 @@ class GameController extends ChangeNotifier {
   Future<bool> spendStat(Stat stat) {
     return _enqueueMutation(() async {
       if (_save.unspentStatPoints <= 0 || _save.stats[stat] >= 20) return false;
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         stats: _save.stats.withStat(stat, _save.stats[stat] + 1),
         unspentStatPoints: _save.unspentStatPoints - 1,
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -765,14 +808,15 @@ class GameController extends ChangeNotifier {
         final item = shopItems.where((entry) => entry.id == itemId).firstOrNull;
         return item != null && !_meetsMinimumAttribute(item, resetStats);
       });
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         stats: const Stats(),
         equippedItems: equipped,
         unspentStatPoints: _save.unspentStatPoints + spent,
         rebirthCredits: _save.rebirthCredits - 1,
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -800,12 +844,13 @@ class GameController extends ChangeNotifier {
         final previous = '${id.substring(0, id.length - 1)}${tier - 1}';
         if (!_save.masteries.contains(previous)) return false;
       }
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         masteries: {..._save.masteries, id},
         unspentMasteryPoints: _save.unspentMasteryPoints - 1,
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return true;
     });
   }
@@ -913,12 +958,17 @@ class GameController extends ChangeNotifier {
               : 13)) {
         return 'Devre katalogu henüz açılmadı.';
       }
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         gold: _save.gold - price,
         ownedItems: {..._save.ownedItems, id},
       );
+      try {
+        await _writeStorage(candidate);
+      } catch (error) {
+        return lastError ?? 'Kayıt yazılamadı: $error';
+      }
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return null;
     });
   }
@@ -931,13 +981,18 @@ class GameController extends ChangeNotifier {
         return 'Bu sarf eşyasından en fazla 3 tane taşıyabilirsin.';
       }
       if (_save.gold < price) return 'Yeterli Sikke yok.';
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         gold: _save.gold - price,
         healingSalves: salve ? _save.healingSalves + 1 : _save.healingSalves,
         effortTonics: salve ? _save.effortTonics : _save.effortTonics + 1,
       );
+      try {
+        await _writeStorage(candidate);
+      } catch (error) {
+        return lastError ?? 'Kayıt yazılamadı: $error';
+      }
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return null;
     });
   }
@@ -948,11 +1003,18 @@ class GameController extends ChangeNotifier {
       final item = shopItems.where((entry) => entry.id == itemId).firstOrNull;
       if (item == null) return 'Bu eşya dükkân kataloğunda bulunamadı.';
       if (!_meetsMinimumAttribute(item)) return _minimumAttributeError(item);
-      _save = _save.copyWith(
+      if (_save.equippedItems[item.category] == itemId) return null;
+
+      final candidate = _save.copyWith(
         equippedItems: {..._save.equippedItems, item.category: itemId},
       );
+      try {
+        await _writeStorage(candidate);
+      } catch (error) {
+        return lastError ?? 'Kayıt yazılamadı: $error';
+      }
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
       return null;
     });
   }
@@ -966,30 +1028,38 @@ class GameController extends ChangeNotifier {
     double? sfxVolume,
     bool? vibrationEnabled,
     bool? reducedMotion,
+    bool? skipBattleAnimations,
+    double? textScale,
+    double? battleAnimationSpeed,
     String? language,
   }) {
     return _enqueueMutation(() async {
-      _save = _save.copyWith(
+      final candidate = _save.copyWith(
         sfxEnabled: sfxEnabled,
         musicVolume: musicVolume?.clamp(0.0, 1.0).toDouble(),
         sfxVolume: sfxVolume?.clamp(0.0, 1.0).toDouble(),
         vibrationEnabled: vibrationEnabled,
         reducedMotion: reducedMotion,
+        skipBattleAnimations: skipBattleAnimations,
+        textScale: textScale?.clamp(1.0, 2.0).toDouble(),
+        battleAnimationSpeed: battleAnimationSpeed?.clamp(1.0, 2.0).toDouble(),
         language: language,
       );
+      await _writeStorage(candidate);
+      _save = candidate;
       notifyListeners();
-      await _writeStorage(_save);
     });
   }
 
   Future<void> resetCampaign() {
     return _enqueueMutation(() async {
+      await _clearStorage();
       _save = const GameSave();
       battle = null;
       activeEncounter = null;
       activeContract = null;
+      _battleCheckpointWritePending = false;
       notifyListeners();
-      await _clearStorage();
     });
   }
 

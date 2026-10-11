@@ -83,87 +83,34 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // 1. Head option 1 (selected)
-          final head1Finder = find.bySemanticsLabel('Saç ve başlık, seçenek 1');
-          expect(head1Finder, findsOneWidget);
-          final head1Node = tester.getSemantics(head1Finder);
-          final head1Data = head1Node.getSemanticsData();
-          expect(head1Data.label, 'Saç ve başlık, seçenek 1');
-          expect(head1Data.flagsCollection.isButton, isTrue);
-          expect(head1Data.flagsCollection.isSelected, Tristate.isTrue);
-          expect(head1Data.flagsCollection.isEnabled, Tristate.isTrue);
-          expect(head1Data.hasAction(SemanticsAction.tap), isTrue);
-          expect(head1Node.childrenCount, 0);
-
-          // 2. Head option 2 (unselected)
-          final head2Finder = find.bySemanticsLabel('Saç ve başlık, seçenek 2');
-          expect(head2Finder, findsOneWidget);
-          final head2Node = tester.getSemantics(head2Finder);
-          final head2Data = head2Node.getSemanticsData();
-          expect(head2Data.label, 'Saç ve başlık, seçenek 2');
-          expect(head2Data.flagsCollection.isButton, isTrue);
-          expect(head2Data.flagsCollection.isSelected, Tristate.isFalse);
-          expect(head2Data.flagsCollection.isEnabled, Tristate.isTrue);
-          expect(head2Data.hasAction(SemanticsAction.tap), isTrue);
-          expect(head2Node.childrenCount, 0);
-
-          // 3. Other groups expose correct Turkish group label and single button node
-          final skin1Node = tester.getSemantics(
-            find.bySemanticsLabel('Ten tonu, seçenek 1'),
-          );
-          expect(
-            skin1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
-          );
-          expect(skin1Node.getSemanticsData().flagsCollection.isButton, isTrue);
-          expect(
-            skin1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            skin1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
-          expect(skin1Node.childrenCount, 0);
-
-          final body1Node = tester.getSemantics(
-            find.bySemanticsLabel('Yapı, seçenek 1'),
-          );
-          expect(
-            body1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
-          );
-          expect(body1Node.getSemanticsData().flagsCollection.isButton, isTrue);
-          expect(
-            body1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            body1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
+          // 1. Build option 1 (selected)
+          final body1Finder = find.bySemanticsLabel('Yapı, seçenek 1');
+          expect(body1Finder, findsOneWidget);
+          final body1Node = tester.getSemantics(body1Finder);
+          final body1Data = body1Node.getSemanticsData();
+          expect(body1Data.label, 'Yapı, seçenek 1');
+          expect(body1Data.flagsCollection.isButton, isTrue);
+          expect(body1Data.flagsCollection.isSelected, Tristate.isTrue);
+          expect(body1Data.flagsCollection.isEnabled, Tristate.isTrue);
+          expect(body1Data.hasAction(SemanticsAction.tap), isTrue);
           expect(body1Node.childrenCount, 0);
 
-          final facialHair1Node = tester.getSemantics(
-            find.bySemanticsLabel('Yüz kılı, seçenek 1'),
-          );
-          expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
-          );
-          expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isButton,
-            isTrue,
-          );
-          expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            facialHair1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
-          expect(facialHair1Node.childrenCount, 0);
+          // 2. Build option 2 (unselected)
+          final body2Finder = find.bySemanticsLabel('Yapı, seçenek 2');
+          expect(body2Finder, findsOneWidget);
+          final body2Node = tester.getSemantics(body2Finder);
+          final body2Data = body2Node.getSemanticsData();
+          expect(body2Data.label, 'Yapı, seçenek 2');
+          expect(body2Data.flagsCollection.isButton, isTrue);
+          expect(body2Data.flagsCollection.isSelected, Tristate.isFalse);
+          expect(body2Data.flagsCollection.isEnabled, Tristate.isTrue);
+          expect(body2Data.hasAction(SemanticsAction.tap), isTrue);
+          expect(body2Node.childrenCount, 0);
+
+          expect(find.bySemanticsLabel(RegExp(r'Yüz kılı')), findsNothing);
+          expect(find.bySemanticsLabel(RegExp(r'renk vurgusu')), findsNothing);
+          expect(find.bySemanticsLabel(RegExp(r'Saç ve başlık')), findsNothing);
+          expect(find.bySemanticsLabel(RegExp(r'Ten tonu')), findsNothing);
         } finally {
           handle.dispose();
           controller.dispose();
@@ -196,91 +143,37 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // 1. Head option 1 (selected)
-          final head1Finder = find.bySemanticsLabel(
-            'Hair and headwear, option 1',
-          );
-          expect(head1Finder, findsOneWidget);
-          final head1Node = tester.getSemantics(head1Finder);
-          final head1Data = head1Node.getSemanticsData();
-          expect(head1Data.label, 'Hair and headwear, option 1');
-          expect(head1Data.flagsCollection.isButton, isTrue);
-          expect(head1Data.flagsCollection.isSelected, Tristate.isTrue);
-          expect(head1Data.flagsCollection.isEnabled, Tristate.isTrue);
-          expect(head1Data.hasAction(SemanticsAction.tap), isTrue);
-          expect(head1Node.childrenCount, 0);
-
-          // 2. Head option 2 (unselected)
-          final head2Finder = find.bySemanticsLabel(
-            'Hair and headwear, option 2',
-          );
-          expect(head2Finder, findsOneWidget);
-          final head2Node = tester.getSemantics(head2Finder);
-          final head2Data = head2Node.getSemanticsData();
-          expect(head2Data.label, 'Hair and headwear, option 2');
-          expect(head2Data.flagsCollection.isButton, isTrue);
-          expect(head2Data.flagsCollection.isSelected, Tristate.isFalse);
-          expect(head2Data.flagsCollection.isEnabled, Tristate.isTrue);
-          expect(head2Data.hasAction(SemanticsAction.tap), isTrue);
-          expect(head2Node.childrenCount, 0);
-
-          // 3. Other groups expose correct English group label and single button node
-          final skin1Node = tester.getSemantics(
-            find.bySemanticsLabel('Skin tone, option 1'),
-          );
-          expect(
-            skin1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
-          );
-          expect(skin1Node.getSemanticsData().flagsCollection.isButton, isTrue);
-          expect(
-            skin1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            skin1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
-          expect(skin1Node.childrenCount, 0);
-
-          final body1Node = tester.getSemantics(
-            find.bySemanticsLabel('Build, option 1'),
-          );
-          expect(
-            body1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
-          );
-          expect(body1Node.getSemanticsData().flagsCollection.isButton, isTrue);
-          expect(
-            body1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            body1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
+          // 1. Build option 1 (selected)
+          final body1Finder = find.bySemanticsLabel('Build, option 1');
+          expect(body1Finder, findsOneWidget);
+          final body1Node = tester.getSemantics(body1Finder);
+          final body1Data = body1Node.getSemanticsData();
+          expect(body1Data.label, 'Build, option 1');
+          expect(body1Data.flagsCollection.isButton, isTrue);
+          expect(body1Data.flagsCollection.isSelected, Tristate.isTrue);
+          expect(body1Data.flagsCollection.isEnabled, Tristate.isTrue);
+          expect(body1Data.hasAction(SemanticsAction.tap), isTrue);
           expect(body1Node.childrenCount, 0);
 
-          final facialHair1Node = tester.getSemantics(
-            find.bySemanticsLabel('Facial hair, option 1'),
-          );
+          // 2. Build option 2 (unselected)
+          final body2Finder = find.bySemanticsLabel('Build, option 2');
+          expect(body2Finder, findsOneWidget);
+          final body2Node = tester.getSemantics(body2Finder);
+          final body2Data = body2Node.getSemanticsData();
+          expect(body2Data.label, 'Build, option 2');
+          expect(body2Data.flagsCollection.isButton, isTrue);
+          expect(body2Data.flagsCollection.isSelected, Tristate.isFalse);
+          expect(body2Data.flagsCollection.isEnabled, Tristate.isTrue);
+          expect(body2Data.hasAction(SemanticsAction.tap), isTrue);
+          expect(body2Node.childrenCount, 0);
+
+          expect(find.bySemanticsLabel(RegExp(r'Facial hair')), findsNothing);
+          expect(find.bySemanticsLabel(RegExp(r'color accent')), findsNothing);
           expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isSelected,
-            Tristate.isTrue,
+            find.bySemanticsLabel(RegExp(r'Hair and headwear')),
+            findsNothing,
           );
-          expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isButton,
-            isTrue,
-          );
-          expect(
-            facialHair1Node.getSemanticsData().flagsCollection.isEnabled,
-            Tristate.isTrue,
-          );
-          expect(
-            facialHair1Node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
-          expect(facialHair1Node.childrenCount, 0);
+          expect(find.bySemanticsLabel(RegExp(r'Skin tone')), findsNothing);
         } finally {
           handle.dispose();
           controller.dispose();
@@ -313,12 +206,12 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          final head1Finder = find.bySemanticsLabel('Saç ve başlık, seçenek 1');
-          final head2Finder = find.bySemanticsLabel('Saç ve başlık, seçenek 2');
+          final body1Finder = find.bySemanticsLabel('Yapı, seçenek 1');
+          final body2Finder = find.bySemanticsLabel('Yapı, seçenek 2');
 
           expect(
             tester
-                .getSemantics(head1Finder)
+                .getSemantics(body1Finder)
                 .getSemanticsData()
                 .flagsCollection
                 .isSelected,
@@ -326,7 +219,7 @@ void main() {
           );
           expect(
             tester
-                .getSemantics(head2Finder)
+                .getSemantics(body2Finder)
                 .getSemanticsData()
                 .flagsCollection
                 .isSelected,
@@ -335,19 +228,19 @@ void main() {
 
           // Perform semantic tap on option 2
           tester.semantics.performAction(
-            find.semantics.byLabel('Saç ve başlık, seçenek 2'),
+            find.semantics.byLabel('Yapı, seçenek 2'),
             SemanticsAction.tap,
           );
           await tester.pumpAndSettle();
 
           // Verify controller and storage persisted selection
-          expect(controller.save.headOptionId, 'head_02');
-          expect(storage.value?.headOptionId, 'head_02');
+          expect(controller.save.bodyProportionId, 'body_02');
+          expect(storage.value?.bodyProportionId, 'body_02');
 
           // Verify updated semantic state
           expect(
             tester
-                .getSemantics(head1Finder)
+                .getSemantics(body1Finder)
                 .getSemanticsData()
                 .flagsCollection
                 .isSelected,
@@ -355,58 +248,15 @@ void main() {
           );
           expect(
             tester
-                .getSemantics(head2Finder)
+                .getSemantics(body2Finder)
                 .getSemanticsData()
                 .flagsCollection
                 .isSelected,
             Tristate.isTrue,
           );
 
-          // Next test skin option selection via semantic tap
-          final skin1Finder = find.bySemanticsLabel('Ten tonu, seçenek 1');
-          final skin2Finder = find.bySemanticsLabel('Ten tonu, seçenek 2');
-
-          expect(
-            tester
-                .getSemantics(skin1Finder)
-                .getSemanticsData()
-                .flagsCollection
-                .isSelected,
-            Tristate.isTrue,
-          );
-          expect(
-            tester
-                .getSemantics(skin2Finder)
-                .getSemanticsData()
-                .flagsCollection
-                .isSelected,
-            Tristate.isFalse,
-          );
-
-          tester.semantics.performAction(
-            find.semantics.byLabel('Ten tonu, seçenek 2'),
-            SemanticsAction.tap,
-          );
-          await tester.pumpAndSettle();
-
-          expect(controller.save.skinToneId, 'skin_02');
-          expect(storage.value?.skinToneId, 'skin_02');
-          expect(
-            tester
-                .getSemantics(skin1Finder)
-                .getSemanticsData()
-                .flagsCollection
-                .isSelected,
-            Tristate.isFalse,
-          );
-          expect(
-            tester
-                .getSemantics(skin2Finder)
-                .getSemanticsData()
-                .flagsCollection
-                .isSelected,
-            Tristate.isTrue,
-          );
+          expect(controller.save.facialHairId, 'facial_hair_00');
+          expect(storage.value?.facialHairId, 'facial_hair_00');
         } finally {
           handle.dispose();
           controller.dispose();
@@ -442,12 +292,10 @@ void main() {
           final writeGate = Completer<void>();
           storage.writeCompleter = writeGate;
 
-          final targetFinder = find.bySemanticsLabel(
-            'Saç ve başlık, seçenek 2',
-          );
+          final targetFinder = find.bySemanticsLabel('Yapı, seçenek 2');
           // Invoke semantic tap to trigger asynchronous save
           tester.semantics.performAction(
-            find.semantics.byLabel('Saç ve başlık, seçenek 2'),
+            find.semantics.byLabel('Yapı, seçenek 2'),
             SemanticsAction.tap,
           );
           // Pump one frame to apply setState(() => _saving = true)
@@ -461,7 +309,7 @@ void main() {
           expect(savingTargetData.flagsCollection.isEnabled, Tristate.isFalse);
           expect(savingTargetData.hasAction(SemanticsAction.tap), isFalse);
 
-          final otherFinder = find.bySemanticsLabel('Saç ve başlık, seçenek 1');
+          final otherFinder = find.bySemanticsLabel('Yapı, seçenek 1');
           final otherData = tester.getSemantics(otherFinder).getSemanticsData();
           expect(otherData.flagsCollection.isButton, isTrue);
           expect(otherData.flagsCollection.isEnabled, Tristate.isFalse);
@@ -479,7 +327,7 @@ void main() {
           expect(settledData.flagsCollection.isEnabled, Tristate.isTrue);
           expect(settledData.hasAction(SemanticsAction.tap), isTrue);
           expect(settledData.flagsCollection.isSelected, Tristate.isTrue);
-          expect(controller.save.headOptionId, 'head_02');
+          expect(controller.save.bodyProportionId, 'body_02');
         } finally {
           handle.dispose();
           controller.dispose();

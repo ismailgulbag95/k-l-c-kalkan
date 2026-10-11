@@ -41,6 +41,8 @@ extension RangeLabel on RangeBand {
 
 enum StatusKind { stagger, bleed, burn, brokenGuard }
 
+enum CombatElement { ember, tide, wind }
+
 extension StatusLabel on StatusKind {
   String get label => switch (this) {
     StatusKind.stagger => 'Sendeleme',
@@ -168,7 +170,7 @@ class Stats {
 
 class GameSave {
   const GameSave({
-    this.schemaVersion = 9,
+    this.schemaVersion = 10,
     this.hasHero = false,
     this.heroName = 'Kıyı Dövüşçüsü',
     this.appearance = 'Kıyı',
@@ -176,6 +178,8 @@ class GameSave {
     this.skinToneId = 'skin_01',
     this.bodyProportionId = 'body_01',
     this.facialHairId = 'facial_hair_00',
+    this.primaryAccentId = 'accent_01',
+    this.secondaryAccentId = 'accent_02',
     this.level = 1,
     this.xp = 0,
     this.gold = GameBalance.startingGold,
@@ -201,6 +205,9 @@ class GameSave {
     this.sfxVolume = 0.75,
     this.vibrationEnabled = true,
     this.reducedMotion = false,
+    this.skipBattleAnimations = false,
+    this.textScale = 1.0,
+    this.battleAnimationSpeed = 1.0,
     this.language = 'tr',
     this.battleCheckpoint,
   });
@@ -209,10 +216,14 @@ class GameSave {
   final bool hasHero;
   final String heroName;
   final String appearance;
+  // Retained for legacy save compatibility; these cosmetics are not rendered.
   final String headOptionId;
   final String skinToneId;
   final String bodyProportionId;
+  // Retained for legacy save compatibility; these cosmetics are not rendered.
   final String facialHairId;
+  final String primaryAccentId;
+  final String secondaryAccentId;
   final int level;
   final int xp;
   final int gold;
@@ -238,6 +249,9 @@ class GameSave {
   final double sfxVolume;
   final bool vibrationEnabled;
   final bool reducedMotion;
+  final bool skipBattleAnimations;
+  final double textScale;
+  final double battleAnimationSpeed;
   final String language;
   final Map<String, dynamic>? battleCheckpoint;
 
@@ -258,6 +272,8 @@ class GameSave {
     String? skinToneId,
     String? bodyProportionId,
     String? facialHairId,
+    String? primaryAccentId,
+    String? secondaryAccentId,
     int? level,
     int? xp,
     int? gold,
@@ -283,6 +299,9 @@ class GameSave {
     double? sfxVolume,
     bool? vibrationEnabled,
     bool? reducedMotion,
+    bool? skipBattleAnimations,
+    double? textScale,
+    double? battleAnimationSpeed,
     String? language,
     Map<String, dynamic>? battleCheckpoint,
     bool clearBattleCheckpoint = false,
@@ -295,6 +314,8 @@ class GameSave {
     skinToneId: skinToneId ?? this.skinToneId,
     bodyProportionId: bodyProportionId ?? this.bodyProportionId,
     facialHairId: facialHairId ?? this.facialHairId,
+    primaryAccentId: primaryAccentId ?? this.primaryAccentId,
+    secondaryAccentId: secondaryAccentId ?? this.secondaryAccentId,
     level: level ?? this.level,
     xp: xp ?? this.xp,
     gold: gold ?? this.gold,
@@ -320,6 +341,9 @@ class GameSave {
     sfxVolume: sfxVolume ?? this.sfxVolume,
     vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
     reducedMotion: reducedMotion ?? this.reducedMotion,
+    skipBattleAnimations: skipBattleAnimations ?? this.skipBattleAnimations,
+    textScale: textScale ?? this.textScale,
+    battleAnimationSpeed: battleAnimationSpeed ?? this.battleAnimationSpeed,
     language: language ?? this.language,
     battleCheckpoint: clearBattleCheckpoint
         ? null
@@ -335,6 +359,8 @@ class GameSave {
     'skinToneId': skinToneId,
     'bodyProportionId': bodyProportionId,
     'facialHairId': facialHairId,
+    'primaryAccentId': primaryAccentId,
+    'secondaryAccentId': secondaryAccentId,
     'level': level,
     'xp': xp,
     'gold': gold,
@@ -363,6 +389,9 @@ class GameSave {
     'sfxVolume': sfxVolume,
     'vibrationEnabled': vibrationEnabled,
     'reducedMotion': reducedMotion,
+    'skipBattleAnimations': skipBattleAnimations,
+    'textScale': textScale,
+    'battleAnimationSpeed': battleAnimationSpeed,
     'language': language,
     if (battleCheckpoint != null) 'battleCheckpoint': battleCheckpoint,
   };
@@ -383,6 +412,12 @@ class GameSave {
       return value.toDouble().clamp(0.0, 1.0);
     }
 
+    double readScale(String key, double fallback, double min, double max) {
+      final value = json[key];
+      if (value is! num || !value.isFinite) return fallback;
+      return value.toDouble().clamp(min, max);
+    }
+
     return GameSave(
       schemaVersion: json['schemaVersion'] as int? ?? 1,
       hasHero: json['hasHero'] as bool? ?? false,
@@ -392,6 +427,8 @@ class GameSave {
       skinToneId: json['skinToneId'] as String? ?? 'skin_01',
       bodyProportionId: json['bodyProportionId'] as String? ?? 'body_01',
       facialHairId: json['facialHairId'] as String? ?? 'facial_hair_00',
+      primaryAccentId: json['primaryAccentId'] as String? ?? 'accent_01',
+      secondaryAccentId: json['secondaryAccentId'] as String? ?? 'accent_02',
       level: json['level'] as int? ?? 1,
       xp: json['xp'] as int? ?? 0,
       gold: json['gold'] as int? ?? 160,
@@ -426,6 +463,9 @@ class GameSave {
       sfxVolume: readVolume('sfxVolume', 0.75),
       vibrationEnabled: json['vibrationEnabled'] as bool? ?? true,
       reducedMotion: json['reducedMotion'] as bool? ?? false,
+      skipBattleAnimations: json['skipBattleAnimations'] as bool? ?? false,
+      textScale: readScale('textScale', 1.0, 1.0, 2.0),
+      battleAnimationSpeed: readScale('battleAnimationSpeed', 1.0, 1.0, 2.0),
       language: json['language'] as String? ?? 'tr',
       battleCheckpoint: json['battleCheckpoint'] is Map
           ? Map<String, dynamic>.from(json['battleCheckpoint'] as Map)

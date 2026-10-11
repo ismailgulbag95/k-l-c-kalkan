@@ -368,6 +368,9 @@ void main() {
         expect(mirror.stats.guard, expected.guard);
         expect(mirror.stats.stamina, expected.stamina);
         expect(mirror.stats.arcana, expected.arcana);
+        expect(mirror.maxHealth, player.maxHealth);
+        expect(mirror.maxEffort, player.maxEffort);
+        expect(mirror.maxMana, player.maxMana);
         expect(mirror.family, WeaponFamily.bow);
         expect(mirror.weaponPower, player.bowPower);
         expect(mirror.bowPower, player.bowPower);
@@ -598,13 +601,19 @@ void main() {
         expect(game.save.heroName, 'Kül Muhafızı');
         expect(game.save.level, 9);
         expect(game.save.gold, 1234);
-        expect(game.save.schemaVersion, 9);
+        expect(game.save.schemaVersion, 8);
+        expect(game.schemaMigrationPending, isTrue);
         expect(game.lastError, contains('Kayıt yazılamadı'));
+
+        expect(await game.retrySchemaMigration(), isTrue);
+        expect(game.save.schemaVersion, 10);
+        expect(game.schemaMigrationPending, isFalse);
+        expect(game.lastError, isNull);
 
         await game.updateSettings(reducedMotion: true);
 
         expect(storage.value?.heroName, 'Kül Muhafızı');
-        expect(storage.value?.schemaVersion, 9);
+        expect(storage.value?.schemaVersion, 10);
         expect(storage.value?.reducedMotion, isTrue);
         expect(game.lastError, isNull);
         game.dispose();
@@ -625,8 +634,9 @@ void main() {
       );
       await game.updateSettings(reducedMotion: true);
 
-      expect(storage.value?.hasHero, isTrue);
+      expect(storage.value?.hasHero, isFalse);
       expect(storage.value?.reducedMotion, isTrue);
+      expect(game.save.hasHero, isFalse);
       expect(game.lastError, isNull);
       game.dispose();
     });
@@ -675,7 +685,7 @@ void main() {
         ),
       );
       await game.startEncounter(1, seed: 8123);
-      expect(game.performAction(BattleAction.guard), isNull);
+      expect(await game.performAction(BattleAction.guard), isNull);
       await game.persistActiveBattleCheckpoint();
 
       final uninterrupted = game.battle!;
@@ -698,19 +708,24 @@ void main() {
         uninterrupted.snapshot.events.length,
       );
 
-      expect(game.performAction(BattleAction.guard), isNull);
-      expect(reloaded.performAction(BattleAction.guard), isNull);
-      expect(resumed.metrics.turn, uninterrupted.metrics.turn);
-      expect(resumed.player.health, uninterrupted.player.health);
-      expect(resumed.opponent.health, uninterrupted.opponent.health);
-      expect(resumed.snapshot.distance, uninterrupted.snapshot.distance);
+      expect(await game.performAction(BattleAction.guard), isNull);
+      expect(await reloaded.performAction(BattleAction.guard), isNull);
+      final uninterruptedAfter = game.battle!;
+      final resumedAfter = reloaded.battle!;
+      expect(resumedAfter.metrics.turn, uninterruptedAfter.metrics.turn);
+      expect(resumedAfter.player.health, uninterruptedAfter.player.health);
+      expect(resumedAfter.opponent.health, uninterruptedAfter.opponent.health);
       expect(
-        resumed.snapshot.opponentIntent,
-        uninterrupted.snapshot.opponentIntent,
+        resumedAfter.snapshot.distance,
+        uninterruptedAfter.snapshot.distance,
       );
       expect(
-        resumed.snapshot.events.map((event) => event.type).toList(),
-        uninterrupted.snapshot.events.map((event) => event.type).toList(),
+        resumedAfter.snapshot.opponentIntent,
+        uninterruptedAfter.snapshot.opponentIntent,
+      );
+      expect(
+        resumedAfter.snapshot.events.map((event) => event.type).toList(),
+        uninterruptedAfter.snapshot.events.map((event) => event.type).toList(),
       );
 
       game.dispose();
@@ -741,7 +756,7 @@ void main() {
         final contractGame = GameController(storage: contractStorage);
         await contractGame.initialize();
         await contractGame.startContract('C1-A', seed: 8125);
-        expect(contractGame.performAction(BattleAction.guard), isNull);
+        expect(await contractGame.performAction(BattleAction.guard), isNull);
         await contractGame.persistActiveBattleCheckpoint();
         final reloadedContract = GameController(storage: contractStorage);
         await reloadedContract.initialize();
@@ -756,7 +771,7 @@ void main() {
         final roadGame = GameController(storage: roadStorage);
         await roadGame.initialize();
         await roadGame.startChampionsRoad(1, seed: 8126);
-        expect(roadGame.performAction(BattleAction.guard), isNull);
+        expect(await roadGame.performAction(BattleAction.guard), isNull);
         await roadGame.persistActiveBattleCheckpoint();
         final reloadedRoad = GameController(storage: roadStorage);
         await reloadedRoad.initialize();

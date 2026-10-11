@@ -42,12 +42,13 @@ void main() {
     await tester.tap(quick);
     await tester.pumpAndSettle();
 
-    expect(engine.snapshot.done, isTrue);
-    expect(engine.snapshot.playerWon, isTrue);
+    final resolvedEngine = controller.battle!;
+    expect(resolvedEngine.snapshot.done, isTrue);
+    expect(resolvedEngine.snapshot.playerWon, isTrue);
     expect(find.text('Bu tekrar yeni bir ödül vermedi.'), findsOneWidget);
     expect(controller.save.gold, 250);
     expect(controller.save.xp, 90);
-    final impactEvent = engine.snapshot.events.lastWhere(
+    final impactEvent = resolvedEngine.snapshot.events.lastWhere(
       (event) => event.type == BattleEventType.attackHit,
     );
     final impact = tester.widget<BattleImpactEffect>(
@@ -84,7 +85,11 @@ void main() {
         ),
       );
       await _startBattle(tester);
-      for (var turn = 0; turn < 100 && !engine.snapshot.done; turn++) {
+      for (
+        var turn = 0;
+        turn < 100 && !controller.battle!.snapshot.done;
+        turn++
+      ) {
         final guard = find.text('Gard al').first;
         await tester.scrollUntilVisible(
           guard,
@@ -95,12 +100,13 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      expect(engine.snapshot.done, isTrue);
-      expect(engine.snapshot.playerWon, isFalse);
+      final resolvedEngine = controller.battle!;
+      expect(resolvedEngine.snapshot.done, isTrue);
+      expect(resolvedEngine.snapshot.playerWon, isFalse);
       expect(find.text('Bu tekrar yeni bir ödül vermedi.'), findsOneWidget);
       expect(find.text('Yeniden dene'), findsOneWidget);
       expect(find.text('Düelloyu bırak'), findsOneWidget);
-      final latestHitEvent = engine.snapshot.events.reversed.firstWhere(
+      final latestHitEvent = resolvedEngine.snapshot.events.reversed.firstWhere(
         (event) =>
             event.type == BattleEventType.attackHit ||
             event.type == BattleEventType.hazardHit ||

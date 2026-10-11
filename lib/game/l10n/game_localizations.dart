@@ -114,25 +114,10 @@ const gameMessages = <String, GameMessage>{
     'Changes are free, save instantly, and do not affect combat power.',
     'Explains post-creation appearance editing and its gameplay impact.',
   ),
-  'ui.appearance.head': GameMessage(
-    'Saç ve başlık',
-    'Hair and headwear',
-    'Appearance editor option group for head layers.',
-  ),
-  'ui.appearance.skin': GameMessage(
-    'Ten tonu',
-    'Skin tone',
-    'Appearance editor option group for skin tones.',
-  ),
   'ui.appearance.build': GameMessage(
     'Yapı',
     'Build',
     'Appearance editor option group for body proportions.',
-  ),
-  'ui.appearance.facialHair': GameMessage(
-    'Yüz kılı',
-    'Facial hair',
-    'Appearance editor option group for facial hair styles.',
   ),
   'ui.appearance.option': GameMessage(
     '{group}, seçenek {count}',
@@ -210,9 +195,9 @@ const gameMessages = <String, GameMessage>{
     'Help text for the Stamina attribute.',
   ),
   'ui.statHelp.arcana': GameMessage(
-    'Mana ve büyü',
-    'Mana and magic',
-    'Help text for the Arcana attribute.',
+    'Mana kapasitesi, büyü hasarı ve savunması. Ekipman Büyü bonusu mana kapasitesini artırmaz.',
+    'Mana capacity, spell damage and defense. Equipment Arcana bonuses do not increase mana capacity.',
+    'Help text for the Arcana attribute and equipment rule.',
   ),
   'ui.common.decrease': GameMessage(
     'Azalt',
@@ -558,6 +543,11 @@ const gameMessages = <String, GameMessage>{
     'Cancel',
     'Dialog action that dismisses without applying the change.',
   ),
+  'ui.common.back': GameMessage(
+    'Geri dön',
+    'Go back',
+    'Accessible label and tooltip for navigation back buttons.',
+  ),
   'ui.common.reset': GameMessage(
     'Sıfırla',
     'Reset',
@@ -567,6 +557,11 @@ const gameMessages = <String, GameMessage>{
     'Kullan',
     'Use',
     'Action to apply a selected item or attribute allocation.',
+  ),
+  'ui.mastery.unlock': GameMessage(
+    '{name} ustalığının kilidini aç',
+    'Unlock {name} mastery',
+    'Accessible label and tooltip for unlocking a mastery node.',
   ),
   'ui.fighter.pointsToSpend': GameMessage(
     '{count} dağıtılacak',
@@ -695,6 +690,11 @@ const gameMessages = <String, GameMessage>{
     '{armor} armor',
     'Item armor stat summary.',
   ),
+  'ui.shop.statusResistance': GameMessage(
+    '+{value}% durum direnci',
+    '+{value}% status resistance',
+    'Absolute percentage-point reduction to incoming status-effect proc chance.',
+  ),
   'ui.shop.itemLevelPrice': GameMessage(
     'Seviye {level}  ·  {price} Sikke',
     'Level {level}  ·  {price} coins',
@@ -746,6 +746,71 @@ const gameMessages = <String, GameMessage>{
     'Bu ekipman satılamadı.',
     'This gear could not be sold.',
     'Message shown when a sale is rejected.',
+  ),
+  'ui.shop.error.noHero': GameMessage(
+    'Önce dövüşçünü oluştur.',
+    'Create a fighter first.',
+    'Shown when a shop action requires a player fighter.',
+  ),
+  'ui.shop.error.level': GameMessage(
+    'Bu eşya için seviye {level} gerekli.',
+    'Level {level} is required for this item.',
+    'Minimum fighter level required to buy an item.',
+  ),
+  'ui.shop.error.catalogLocked': GameMessage(
+    'Bu katalog henüz açılmadı.',
+    'This catalog is still locked.',
+    'Shown when an item belongs to a locked act catalog.',
+  ),
+  'ui.shop.error.spellCatalogLocked': GameMessage(
+    'Büyü kataloğu henüz açılmadı.',
+    'The spell catalog is still locked.',
+    'Shown when a spell is not yet available.',
+  ),
+  'ui.shop.error.alreadyOwned': GameMessage(
+    'Bu eşya zaten envanterinde.',
+    'You already own this item.',
+    'Duplicate purchase error.',
+  ),
+  'ui.shop.error.notEnoughCoins': GameMessage(
+    'Yeterli Sikke yok.',
+    'You do not have enough coins.',
+    'Insufficient currency error.',
+  ),
+  'ui.shop.error.unknownItem': GameMessage(
+    'Bu eşya dükkân kataloğunda bulunamadı.',
+    'This item was not found in the shop catalog.',
+    'Unknown item error.',
+  ),
+  'ui.shop.error.notOwned': GameMessage(
+    'Eşya envanterinde değil.',
+    'You do not own this item.',
+    'Shown when equipping or selling an unowned item.',
+  ),
+  'ui.shop.error.cannotSellEquipped': GameMessage(
+    'Kuşanılmış eşya satılamaz.',
+    'Equipped items cannot be sold.',
+    'Sale error for the currently equipped item.',
+  ),
+  'ui.shop.error.alreadyLearned': GameMessage(
+    'Bu yetenek zaten öğrenildi.',
+    'You have already learned this skill.',
+    'Duplicate spell purchase error.',
+  ),
+  'ui.shop.error.consumableLimit': GameMessage(
+    'Bu sarf eşyasından en fazla 3 tane taşıyabilirsin.',
+    'You can carry at most 3 of this supply.',
+    'Consumable inventory cap error.',
+  ),
+  'ui.shop.error.minimumAttribute': GameMessage(
+    'Bu eşya için {attribute} {value} gerekli.',
+    '{attribute} {value} is required for this item.',
+    'Minimum attribute requirement error.',
+  ),
+  'ui.shop.error.saveFailed': GameMessage(
+    'Kayıt yazılamadı. İşlem uygulanmadı; güvenle yeniden deneyebilirsin.',
+    'The save could not be written. The action was not applied; retry safely.',
+    'Shown when a shop operation cannot be persisted; the retry repeats the uncommitted operation.',
   ),
   'ui.shop.spellCost': GameMessage(
     '{description} · {cost} mana',
@@ -892,6 +957,26 @@ const gameMessages = <String, GameMessage>{
     'Simplifies battle transitions',
     'Reduced-motion setting explanation.',
   ),
+  'ui.settings.textScale': GameMessage(
+    'Metin boyutu',
+    'Text size',
+    'App-wide user-controlled text scaling.',
+  ),
+  'ui.settings.battleSpeed': GameMessage(
+    'Savaş animasyon hızı',
+    'Battle animation speed',
+    'Controls the playback speed of combat animations.',
+  ),
+  'ui.settings.skipBattleAnimations': GameMessage(
+    'Savaş animasyonlarını atla',
+    'Skip battle animations',
+    'Accessibility option that removes combat animation delays while preserving battle results and event text.',
+  ),
+  'ui.settings.skipBattleAnimationsDescription': GameMessage(
+    'Hamle sonuçları ve savaş kaydı değişmez.',
+    'Battle results and the combat log remain unchanged.',
+    'Explains the animation skip option.',
+  ),
   'ui.settings.language': GameMessage(
     'Dil',
     'Language',
@@ -1020,6 +1105,36 @@ const gameMessages = <String, GameMessage>{
     'Retry',
     'Button to replay a duel after a loss or incomplete objective.',
   ),
+  'ui.error.saveTitle': GameMessage(
+    'Kayıt sorunu',
+    'Save problem',
+    'Title shown when a save operation fails.',
+  ),
+  'ui.error.saveFailed': GameMessage(
+    'Kayıt yazılamadı. İşlem uygulanmadı; güvenle yeniden deneyebilirsin.',
+    'The save could not be written. The action was not applied; retry safely.',
+    'Actionable message shown when a save write fails before in-memory commit.',
+  ),
+  'ui.error.checkpointSavePending': GameMessage(
+    'Son dövüş ilerlemesi henüz kaydedilmedi. Çıkmadan önce yeniden dene.',
+    'The latest fight progress is not saved yet. Retry before leaving.',
+    'Message shown when a live battle checkpoint needs a persistence retry.',
+  ),
+  'ui.error.schemaMigrationPending': GameMessage(
+    'Kayıt biçimi güncellenemedi. Mevcut ilerlemen korunuyor.',
+    'The save format could not be updated. Your current progress is intact.',
+    'Home warning shown when upgrading an older save format could not be persisted.',
+  ),
+  'ui.result.saveFailed': GameMessage(
+    'Düello sonucu kaydedilemedi. Aynı sonuç ve ödüller güvenle yeniden kaydedilecek.',
+    'The duel result could not be saved. Retry will save the same result and rewards safely.',
+    'Actionable message shown when persisting a completed duel result fails.',
+  ),
+  'ui.settings.resetSaveFailed': GameMessage(
+    'Kayıt temizlenemedi. Kampanya sıfırlanmadı; tekrar deneyebilirsin.',
+    'The save could not be cleared. The campaign was not reset; you can retry.',
+    'Actionable error shown when campaign reset storage cleanup fails.',
+  ),
   'ui.result.returnLeague': GameMessage(
     'Lige dön',
     'Return to league',
@@ -1034,6 +1149,11 @@ const gameMessages = <String, GameMessage>{
     'Düellodan ayrıl?',
     'Leave the duel?',
     'Confirmation dialog title when leaving an active duel.',
+  ),
+  'ui.battle.leave': GameMessage(
+    'Maçtan ayrıl',
+    'Leave duel',
+    'Accessible label and tooltip for closing an active battle screen.',
   ),
   'ui.battle.leaveBody': GameMessage(
     'Bu maçtan çıkarsan savaş yeniden başlar. Kampanya ilerlemen etkilenmez.',
@@ -1150,6 +1270,11 @@ const gameMessages = <String, GameMessage>{
     'Move or guard.',
     'Instruction displayed when an arena hazard is telegraphed.',
   ),
+  'ui.battle.hazardCountdown': GameMessage(
+    'İşaretli alan {turns} tur sonra etkili olacak. Yer değiştir veya gard al.',
+    'Marked area impact in {turns, plural, one{# turn} other{# turns}}. Move or guard.',
+    'Countdown and response options for a telegraphed arena hazard.',
+  ),
   'ui.battle.chooseAction': GameMessage(
     'Hamleni seç',
     'Choose your action',
@@ -1179,6 +1304,21 @@ const gameMessages = <String, GameMessage>{
     'T{turn}',
     'T{turn}',
     'Compact turn counter in the battle header.',
+  ),
+  'ui.battle.status.turns': GameMessage(
+    '{turns, plural, one {# tur} other {# tur}}',
+    '{turns, plural, one {# turn} other {# turns}}',
+    'Remaining turn count displayed on combat status badge.',
+  ),
+  'ui.battle.status.semantics.full': GameMessage(
+    '{status}, {stacks, plural, one {# kademe} other {# kademe}}, {turns, plural, one {# tur kaldı} other {# tur kaldı}}',
+    '{status}, {stacks, plural, one {# stack} other {# stacks}}, {turns, plural, one {# turn remaining} other {# turns remaining}}',
+    'Screen-reader label for a combat status badge with both stack count and remaining turns.',
+  ),
+  'ui.battle.status.semantics.turns': GameMessage(
+    '{status}, {turns, plural, one {# tur kaldı} other {# tur kaldı}}',
+    '{status}, {turns, plural, one {# turn remaining} other {# turns remaining}}',
+    'Screen-reader label for a combat status badge with remaining turns.',
   ),
   'ui.battle.error.done': GameMessage(
     'Düello tamamlandı.',
@@ -1308,8 +1448,8 @@ const gameMessages = <String, GameMessage>{
     'Combat log line when a fighter guards.',
   ),
   'battle.log.hazardApproaching': GameMessage(
-    'Arena tehlikesi yaklaşmakta: sonraki turda yer değiştir veya gard al.',
-    'The arena hazard is approaching: move or guard next turn.',
+    'Arena tehlikesi {turns, plural, one {# eylem sonra} other {# eylem sonra}} etkili olacak: yer değiştir veya gard al.',
+    'Arena hazard triggers in {turns, plural, one {# action} other {# actions}}; move or guard before it hits.',
     'Combat log warning before an arena hazard triggers.',
   ),
   'battle.log.closeDistance': GameMessage(
@@ -1358,9 +1498,9 @@ const gameMessages = <String, GameMessage>{
     'Combat log line for a missed action.',
   ),
   'battle.log.ashBurstHit': GameMessage(
-    '{actor}, {action} ile {damage} hasar ve yanma uyguladı.',
-    '{actor} deals {damage} damage and applies Burn with {action}.',
-    'Combat log line for Ash Burst.',
+    '{actor}, {action} ile {damage} hasar verdi ve yanmayı denedi.',
+    '{actor} deals {damage} damage with {action} and attempts to apply Burn.',
+    'Combat log line for Ash Burst; status resistance may prevent Burn.',
   ),
   'battle.log.hit': GameMessage(
     '{actor}, {action} ile {damage} hasar verdi (%{chance}).',
@@ -1381,6 +1521,16 @@ const gameMessages = <String, GameMessage>{
     '{target} kanama etkisi aldı.',
     '{target} is bleeding.',
     'Combat log line when a fighter gains Bleed.',
+  ),
+  'battle.log.statusResisted': GameMessage(
+    '{target}, {status} etkisine direndi (%{resistance} direnç).',
+    '{target} resists {status} ({resistance}% resistance).',
+    'Combat log line when resistance prevents an otherwise successful status roll.',
+  ),
+  'battle.log.statusImmune': GameMessage(
+    '{target}, {element} etkisine bağışık; {status} uygulanmadı.',
+    '{target} is immune to {element}; {status} is not applied.',
+    'Combat log line when a listed elemental immunity prevents a status effect.',
   ),
   'battle.log.shieldAbsorb': GameMessage(
     '{target} siperi {amount} hasar emdi.',
@@ -1411,6 +1561,11 @@ const gameMessages = <String, GameMessage>{
     '{opponent} {phase}. faza geçti. İpucu: {archetype} saldırıları güçleniyor.',
     '{opponent} enters phase {phase}. Hint: {archetype} attacks are growing stronger.',
     'Combat log line when a rival enters a new phase.',
+  ),
+  'battle.log.phaseTactics': GameMessage(
+    'Yeni rakip taktiği: {tactics}.',
+    'New rival tactics: {tactics}.',
+    'Combat log line listing the tactics taught by the rival phase.',
   ),
   'battle.log.opponentRangeChange': GameMessage(
     '{opponent} mesafeyi değiştirdi: {range}.',
@@ -1505,6 +1660,9 @@ const gameMessages = <String, GameMessage>{
   ),
   'label.status.bleed': GameMessage('Kanama', 'Bleed', 'Combat status label.'),
   'label.status.burn': GameMessage('Yanma', 'Burn', 'Combat status label.'),
+  'label.element.ember': GameMessage('Köz', 'Ember', 'Combat element label.'),
+  'label.element.tide': GameMessage('Gelgit', 'Tide', 'Combat element label.'),
+  'label.element.wind': GameMessage('Rüzgâr', 'Wind', 'Combat element label.'),
   'label.status.brokenGuard': GameMessage(
     'Kırık gard',
     'Broken guard',
@@ -1751,6 +1909,11 @@ const gameMessages = <String, GameMessage>{
     'Sulfur Matron',
     'Rival name for encounter M15.',
   ),
+  'content.encounter.M15.hazard': GameMessage(
+    'Önceden ilan edilen alan etkisi',
+    'Telegraphed area effect',
+    'Arena hazard label for encounter M15.',
+  ),
   'content.encounter.M16.name': GameMessage(
     'Pirinç Muhafız',
     'Brass Guardian',
@@ -1786,6 +1949,11 @@ const gameMessages = <String, GameMessage>{
     'Storm Hunter',
     'Rival name for encounter M20.',
   ),
+  'content.encounter.M20.hazard': GameMessage(
+    'Tek seferlik işaretli çevre olayı',
+    'One-time marked arena event',
+    'Arena hazard label for encounter M20.',
+  ),
   'content.encounter.M21.name': GameMessage(
     'Rüzgâr Seyircisi',
     'Windwatcher',
@@ -1795,6 +1963,11 @@ const gameMessages = <String, GameMessage>{
     'Kıyı Orakçısı',
     'Coast Reaper',
     'Rival name for encounter M22.',
+  ),
+  'content.encounter.M22.hazard': GameMessage(
+    'Bir tur önce işaretlenen alan etkisi',
+    'Area effect marked one turn ahead',
+    'Arena hazard label for encounter M22.',
   ),
   'content.encounter.M23.name': GameMessage(
     'Gelgit Yargıcı',
@@ -1836,6 +2009,11 @@ const gameMessages = <String, GameMessage>{
     'Iron Executioner',
     'Rival name for encounter M28.',
   ),
+  'content.encounter.M28.hazard': GameMessage(
+    'Darbe alanı önceden işaretlenir',
+    'Strike zone marked in advance',
+    'Arena hazard label for encounter M28.',
+  ),
   'content.encounter.M29.name': GameMessage(
     'Tahtsız Varis',
     'Heir Without a Throne',
@@ -1862,6 +2040,31 @@ const gameMessages = <String, GameMessage>{
     'Encounter M32 story briefing.',
   ),
 
+  'content.tactic.striker': GameMessage(
+    'vurucu baskı',
+    'striking pressure',
+    'Champion phase tactic label.',
+  ),
+  'content.tactic.shielded': GameMessage(
+    'kalkanlı savunma',
+    'shielded defense',
+    'Champion phase tactic label.',
+  ),
+  'content.tactic.ranged': GameMessage(
+    'menzilli baskı',
+    'ranged pressure',
+    'Champion phase tactic label.',
+  ),
+  'content.tactic.agile': GameMessage(
+    'çevik mesafe oyunu',
+    'agile range play',
+    'Champion phase tactic label.',
+  ),
+  'content.tactic.seal': GameMessage(
+    'mühür büyüsü',
+    'seal magic',
+    'Champion phase tactic label.',
+  ),
   'content.archetype.vurucu': GameMessage(
     'vurucu',
     'striker',
@@ -2653,6 +2856,11 @@ const gameMessages = <String, GameMessage>{
     'Seviye {level}',
     'Level {level}',
     'Encounter level in a list card.',
+  ),
+  'ui.encounter.immunity': GameMessage(
+    'Durum etkisi bağışıklığı',
+    'Status-effect immunity',
+    'Explicit elemental status-effect immunity listed on an encounter card.',
   ),
   'ui.encounter.shortChampion': GameMessage(
     'ŞAMPİYON',

@@ -3,6 +3,55 @@ import '../domain/balance.dart';
 
 enum EncounterKind { regular, elite, intermediateFinal, champion, postgame }
 
+enum TaughtTactic { striker, shielded, ranged, agile, seal }
+
+class ChampionPhaseTactics {
+  const ChampionPhaseTactics({
+    required this.taughtTactics,
+    required this.intentSequence,
+  });
+
+  final List<TaughtTactic> taughtTactics;
+  final List<BattleAction> intentSequence;
+}
+
+class ArenaHazardSchedule {
+  const ArenaHazardSchedule({
+    required this.warningTurns,
+    this.firstImpactTurn = 3,
+    this.repeatEveryTurns,
+  }) : assert(warningTurns > 0),
+       assert(firstImpactTurn > 0),
+       assert(repeatEveryTurns == null || repeatEveryTurns > 0);
+
+  final int warningTurns;
+  final int firstImpactTurn;
+  final int? repeatEveryTurns;
+
+  bool impactsAfterTurn(int completedTurn) {
+    if (completedTurn < firstImpactTurn) return false;
+    final cadence = repeatEveryTurns;
+    if (cadence == null) return completedTurn == firstImpactTurn;
+    return (completedTurn - firstImpactTurn) % cadence == 0;
+  }
+
+  int? nextImpactOnOrAfter(int actionTurn) {
+    if (actionTurn <= firstImpactTurn) return firstImpactTurn;
+    final cadence = repeatEveryTurns;
+    if (cadence == null) return null;
+    final elapsed = actionTurn - firstImpactTurn;
+    final intervals = (elapsed + cadence - 1) ~/ cadence;
+    return firstImpactTurn + intervals * cadence;
+  }
+
+  int? warningTurnsRemainingOn(int actionTurn) {
+    final impactTurn = nextImpactOnOrAfter(actionTurn);
+    if (impactTurn == null) return null;
+    final turnsRemaining = impactTurn - actionTurn + 1;
+    return turnsRemaining <= warningTurns ? turnsRemaining : null;
+  }
+}
+
 class Encounter {
   const Encounter({
     required this.id,
@@ -26,6 +75,9 @@ class Encounter {
     this.phaseCount = 1,
     this.phaseRecoveryFraction,
     this.hazard = '',
+    this.hazardSchedule,
+    this.elementalImmunities = const {},
+    this.phaseTactics = const [],
     this.story = '',
   });
 
@@ -50,7 +102,17 @@ class Encounter {
   final int phaseCount;
   final double? phaseRecoveryFraction;
   final String hazard;
+  final ArenaHazardSchedule? hazardSchedule;
+  final Set<CombatElement> elementalImmunities;
+  final List<ChampionPhaseTactics> phaseTactics;
   final String story;
+
+  ChampionPhaseTactics? tacticsForPhase(int phase) {
+    if (phase < 1 || phase > phaseCount || phase > phaseTactics.length) {
+      return null;
+    }
+    return phaseTactics[phase - 1];
+  }
 
   String get key => 'M${id.toString().padLeft(2, '0')}';
   int get maxHealth => GameBalance.maxHealth(vitality, level);
@@ -202,6 +264,7 @@ const mainEncounters = <Encounter>[
     weaponPower: 7,
     weaponFamily: WeaponFamily.spear,
     hazard: 'Önceden işaretlenmiş dalga',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1),
   ),
   Encounter(
     id: 5,
@@ -260,6 +323,7 @@ const mainEncounters = <Encounter>[
     weaponPower: 10,
     weaponFamily: WeaponFamily.maul,
     hazard: 'İşaretli alan',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 2, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 8,
@@ -280,6 +344,26 @@ const mainEncounters = <Encounter>[
     weaponPower: 12,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
+    phaseTactics: [
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.striker],
+        intentSequence: [
+          BattleAction.heavy,
+          BattleAction.quick,
+          BattleAction.heavy,
+          BattleAction.guard,
+        ],
+      ),
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.shielded],
+        intentSequence: [
+          BattleAction.guard,
+          BattleAction.quick,
+          BattleAction.sweep,
+          BattleAction.guard,
+        ],
+      ),
+    ],
     story: 'İlk şampiyon, lig kayıtlarındaki tutarsızlığı fark etmiş.',
   ),
   Encounter(
@@ -301,6 +385,7 @@ const mainEncounters = <Encounter>[
     weaponPower: 13,
     weaponFamily: WeaponFamily.maul,
     hazard: 'Önceden işaretlenen buhar',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 10,
@@ -378,6 +463,7 @@ const mainEncounters = <Encounter>[
     weaponPower: 15,
     weaponFamily: WeaponFamily.shortSword,
     hazard: 'Önceden işaretlenen buhar',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 2, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 14,
@@ -398,6 +484,8 @@ const mainEncounters = <Encounter>[
     weaponPower: 16,
     weaponFamily: WeaponFamily.maul,
     hazard: 'İşaretli buhar',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 2, repeatEveryTurns: 4),
+    elementalImmunities: {CombatElement.ember},
   ),
   Encounter(
     id: 15,
@@ -418,6 +506,8 @@ const mainEncounters = <Encounter>[
     weaponPower: 14,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
+    hazard: 'Önceden ilan edilen alan etkisi',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 2, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 16,
@@ -438,6 +528,25 @@ const mainEncounters = <Encounter>[
     weaponPower: 18,
     weaponFamily: WeaponFamily.maul,
     phaseCount: 2,
+    phaseTactics: [
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.shielded],
+        intentSequence: [
+          BattleAction.guard,
+          BattleAction.sweep,
+          BattleAction.quick,
+          BattleAction.guard,
+        ],
+      ),
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.striker],
+        intentSequence: [
+          BattleAction.heavy,
+          BattleAction.quick,
+          BattleAction.heavy,
+        ],
+      ),
+    ],
     story: 'Ocak işçileri, sonuçların yönetim tarafından değiştirildiğini kanıtlayan defteri verir.',
   ),
   Encounter(
@@ -497,6 +606,7 @@ const mainEncounters = <Encounter>[
     weaponPower: 16,
     weaponFamily: WeaponFamily.spear,
     hazard: 'İşaretli gelgit alanı',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 2, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 20,
@@ -517,6 +627,9 @@ const mainEncounters = <Encounter>[
     weaponPower: 18,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
+    phaseRecoveryFraction: .25,
+    hazard: 'Tek seferlik işaretli çevre olayı',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1),
   ),
   Encounter(
     id: 21,
@@ -556,6 +669,8 @@ const mainEncounters = <Encounter>[
     weaponPower: 19,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
+    hazard: 'Bir tur önce işaretlenen alan etkisi',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 23,
@@ -577,6 +692,7 @@ const mainEncounters = <Encounter>[
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
     hazard: 'Açıklanan gelgit sırası',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 24,
@@ -597,6 +713,26 @@ const mainEncounters = <Encounter>[
     weaponPower: 20,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 2,
+    phaseTactics: [
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.ranged],
+        intentSequence: [
+          BattleAction.openDistance,
+          BattleAction.emberSpear,
+          BattleAction.closeDistance,
+          BattleAction.guard,
+        ],
+      ),
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.seal],
+        intentSequence: [
+          BattleAction.ashBurst,
+          BattleAction.openDistance,
+          BattleAction.emberSpear,
+          BattleAction.guard,
+        ],
+      ),
+    ],
     story: 'Şampiyonlar da aynı düzenin baskısı altında. Kanıtlar final turnuvasına taşınıyor.',
   ),
   Encounter(
@@ -674,6 +810,8 @@ const mainEncounters = <Encounter>[
     arcana: 6,
     weaponPower: 22,
     weaponFamily: WeaponFamily.maul,
+    hazard: 'Darbe alanı önceden işaretlenir',
+    hazardSchedule: ArenaHazardSchedule(warningTurns: 1, repeatEveryTurns: 4),
   ),
   Encounter(
     id: 29,
@@ -753,6 +891,36 @@ const mainEncounters = <Encounter>[
     weaponPower: 26,
     weaponFamily: WeaponFamily.spear,
     phaseCount: 3,
+    phaseRecoveryFraction: .25,
+    phaseTactics: [
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.striker],
+        intentSequence: [
+          BattleAction.heavy,
+          BattleAction.quick,
+          BattleAction.heavy,
+          BattleAction.guard,
+        ],
+      ),
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.seal],
+        intentSequence: [
+          BattleAction.emberSpear,
+          BattleAction.ashBurst,
+          BattleAction.guard,
+          BattleAction.openDistance,
+        ],
+      ),
+      ChampionPhaseTactics(
+        taughtTactics: [TaughtTactic.striker, TaughtTactic.seal],
+        intentSequence: [
+          BattleAction.heavy,
+          BattleAction.emberSpear,
+          BattleAction.quick,
+          BattleAction.ashBurst,
+        ],
+      ),
+    ],
     story: 'Final şampiyonu lig yönetimiyle bağını kesiyor. Çember artık oyuncuların.',
   ),
 ];
@@ -969,6 +1137,7 @@ class ShopItem {
     required this.price,
     required this.weaponPower,
     required this.armor,
+    this.statusResistance = 0,
     required this.might,
     required this.agility,
     this.precision = 0,
@@ -986,6 +1155,7 @@ class ShopItem {
   final int price;
   final int weaponPower;
   final int armor;
+  final int statusResistance;
   final int might;
   final int agility;
   final int precision;
@@ -1139,6 +1309,7 @@ const shopItems = <ShopItem>[
     price: 80,
     weaponPower: 0,
     armor: 2,
+    statusResistance: 3,
     might: 0,
     agility: 0,
     arcana: 0,
@@ -1267,6 +1438,7 @@ const shopItems = <ShopItem>[
     price: 220,
     weaponPower: 0,
     armor: 5,
+    statusResistance: 5,
     might: 0,
     agility: 0,
     arcana: 0,
@@ -1397,6 +1569,7 @@ const shopItems = <ShopItem>[
     price: 480,
     weaponPower: 0,
     armor: 8,
+    statusResistance: 7,
     might: 0,
     agility: 0,
     arcana: 1,
@@ -1527,6 +1700,7 @@ const shopItems = <ShopItem>[
     price: 950,
     weaponPower: 0,
     armor: 12,
+    statusResistance: 9,
     might: 0,
     agility: 0,
     arcana: 1,
