@@ -24,7 +24,8 @@ void main() {
     expect(find.text('KÜL'), findsOneWidget);
     expect(find.text('ÇEMBERİ'), findsOneWidget);
     await tester.tap(find.text('Dövüşçünü oluştur'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Dövüşçü yarat'), findsOneWidget);
     expect(find.text('6 puan'), findsOneWidget);
@@ -34,7 +35,8 @@ void main() {
       matching: find.byType(Scrollable),
     );
     await tester.drag(creatorScroll.first, const Offset(0, -700));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Kıyı Ligi’ne katıl'), findsOneWidget);
     controller.dispose();
   });
@@ -148,7 +150,8 @@ void main() {
             .first,
       );
       await tester.tap(startDuel);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       final guardAction = find.text('Gard al').last;
       await tester.scrollUntilVisible(
@@ -162,7 +165,9 @@ void main() {
             .first,
       );
       await tester.tap(guardAction);
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
 
       expect(find.text('RAKİBİN NİYETİ'), findsOneWidget);
       expect(find.text('ARENA TEHLİKESİ'), findsOneWidget);
@@ -211,7 +216,8 @@ void main() {
       expect(find.text('SEYİRCİ NOTU · 3 AÇIK KOŞUL'), findsOneWidget);
       expect(find.text('Mesafeyi en az bir kez değiştir'), findsOneWidget);
       await tester.tap(find.text('Düelloya başla'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('HAMLENİ SEÇ'), findsOneWidget);
       expect(find.text('RAKİBİN NİYETİ'), findsOneWidget);
@@ -248,7 +254,8 @@ void main() {
         home: GameHub(controller: reloaded),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(BattlePage), findsOneWidget);
     expect(find.text('HAMLENİ SEÇ'), findsOneWidget);
@@ -289,7 +296,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('Düelloya başla'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     final quickAction = find.text('Hızlı vuruş').first;
     await tester.scrollUntilVisible(
@@ -301,7 +309,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
     await tester.tap(quickAction);
 
-    await tester.pumpAndSettle();
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
     expect(controller.battle!.metrics.turn, 1);
     expect(tester.takeException(), isNull);
     controller.dispose();
@@ -546,7 +556,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(HeroCustomizationArt), findsOneWidget);
     expect(tester.takeException(), isNull);

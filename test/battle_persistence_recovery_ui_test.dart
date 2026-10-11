@@ -40,7 +40,8 @@ void main() {
     await tester.pumpWidget(_battleApp(controller, resume: true));
     storage.failNextWrite = true;
     expect(await controller.persistActiveBattleCheckpoint(), isFalse);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     const message =
         'The latest fight progress is not saved yet. Retry before leaving.';
@@ -48,7 +49,8 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Retry'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, 'Retry'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.battleCheckpointWritePending, isFalse);
     expect(find.text(message), findsNothing);
@@ -92,7 +94,8 @@ void main() {
       storage.failOnWriteNumber = storage.writeCount + 1;
 
       await tester.pumpWidget(_battleApp(controller, resume: true));
-      await tester.pumpAndSettle();
+      await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
       const failureMessage =
           'The duel result could not be saved. Retry will save the same result and rewards safely.';
@@ -103,7 +106,8 @@ void main() {
       expect(controller.save.battleCheckpoint, isNotNull);
 
       await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
       expect(controller.save.completedMatches, contains(encounter.key));
       expect(controller.save.gold, initial.gold + encounter.gold);

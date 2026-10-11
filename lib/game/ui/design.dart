@@ -264,29 +264,43 @@ class BattleEffectMotifPainter extends CustomPainter {
     switch (motif) {
       case BattleWeaponEffectMotif.blade:
         final slash = Path()
-          ..moveTo(20, 68)
-          ..cubicTo(33, 47, 58, 31, 81, 25);
+          ..moveTo(18, 72)
+          ..cubicTo(32, 48, 58, 31, 82, 24);
         canvas.drawPath(slash, paint);
-        canvas.drawLine(const Offset(31, 72), const Offset(76, 38), paint);
+        canvas.drawLine(const Offset(28, 74), const Offset(76, 38), paint);
+        final crossSlash = Path()
+          ..moveTo(30, 26)
+          ..cubicTo(45, 42, 62, 58, 74, 76);
+        canvas.drawPath(crossSlash, paint..strokeWidth = 1.1);
+        paint.strokeWidth = 1.7;
       case BattleWeaponEffectMotif.impact:
         for (final shard in const <(Offset, Offset)>[
           (Offset(20, 31), Offset(28, 23)),
           (Offset(78, 30), Offset(70, 22)),
           (Offset(17, 67), Offset(26, 73)),
           (Offset(82, 65), Offset(74, 73)),
+          (Offset(50, 16), Offset(50, 26)),
+          (Offset(50, 84), Offset(50, 74)),
         ]) {
           canvas.drawLine(shard.$1, shard.$2, paint);
         }
+        canvas.drawCircle(const Offset(50, 50), 12, paint..strokeWidth = 1.2);
+        paint.strokeWidth = 1.7;
       case BattleWeaponEffectMotif.thrust:
-        canvas.drawLine(const Offset(13, 50), const Offset(82, 50), paint);
-        canvas.drawLine(const Offset(72, 42), const Offset(84, 50), paint);
-        canvas.drawLine(const Offset(72, 58), const Offset(84, 50), paint);
+        canvas.drawLine(const Offset(13, 50), const Offset(85, 50), paint);
+        canvas.drawLine(const Offset(72, 40), const Offset(86, 50), paint);
+        canvas.drawLine(const Offset(72, 60), const Offset(86, 50), paint);
+        canvas.drawLine(const Offset(54, 44), const Offset(66, 50), paint);
+        canvas.drawLine(const Offset(54, 56), const Offset(66, 50), paint);
       case BattleWeaponEffectMotif.volley:
-        canvas.drawLine(const Offset(16, 52), const Offset(82, 52), paint);
-        canvas.drawLine(const Offset(70, 45), const Offset(83, 52), paint);
-        canvas.drawLine(const Offset(70, 59), const Offset(83, 52), paint);
-        canvas.drawLine(const Offset(21, 46), const Offset(13, 52), paint);
-        canvas.drawLine(const Offset(21, 58), const Offset(13, 52), paint);
+        canvas.drawLine(const Offset(16, 52), const Offset(84, 52), paint);
+        canvas.drawLine(const Offset(70, 44), const Offset(85, 52), paint);
+        canvas.drawLine(const Offset(70, 60), const Offset(85, 52), paint);
+        canvas.drawLine(const Offset(22, 45), const Offset(14, 52), paint);
+        canvas.drawLine(const Offset(22, 59), const Offset(14, 52), paint);
+        canvas.drawLine(const Offset(24, 34), const Offset(74, 34), paint..strokeWidth = 1.1);
+        canvas.drawLine(const Offset(62, 28), const Offset(74, 34), paint);
+        paint.strokeWidth = 1.7;
       case BattleWeaponEffectMotif.neutral:
         canvas.drawLine(const Offset(34, 50), const Offset(43, 50), paint);
         canvas.drawLine(const Offset(57, 50), const Offset(66, 50), paint);
@@ -809,23 +823,51 @@ class _ArenaFinalPhaseLightingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
+    final baseArena = _lookupArenaColor(arenaId);
     final light = Color.lerp(
-      _lookupArenaColor(arenaId),
+      baseArena,
       GamePalette.gold,
-      .28,
+      .35,
     )!;
+
+    // 1. Üst odaklanmış sinematik tepe ışığı
     final lightPaint = Paint()
       ..shader = ui.Gradient.radial(
-        Offset(size.width * .5, size.height * .08),
-        size.width * .82,
+        Offset(size.width * .5, size.height * .06),
+        size.width * .85,
         [
-          light.withValues(alpha: .075),
-          light.withValues(alpha: .035),
+          light.withValues(alpha: .18),
+          light.withValues(alpha: .07),
           light.withValues(alpha: 0),
         ],
-        const [0, .48, 1],
+        const [0, .52, 1],
       );
     canvas.drawRect(Offset.zero & size, lightPaint);
+
+    // 2. Alt zemin atmosferik arena parıltısı
+    final bottomGlow = Paint()
+      ..shader = ui.Gradient.linear(
+        Offset(size.width * .5, size.height),
+        Offset(size.width * .5, size.height * .55),
+        [
+          baseArena.withValues(alpha: .14),
+          baseArena.withValues(alpha: 0),
+        ],
+      );
+    canvas.drawRect(Offset.zero & size, bottomGlow);
+
+    // 3. Kenar odaklayıcı sinematik vinyet
+    final vignette = Paint()
+      ..shader = ui.Gradient.radial(
+        Offset(size.width * .5, size.height * .5),
+        size.width * .75,
+        [
+          Colors.transparent,
+          Colors.black.withValues(alpha: .22),
+        ],
+        const [.65, 1],
+      );
+    canvas.drawRect(Offset.zero & size, vignette);
   }
 
   @override
@@ -1081,31 +1123,41 @@ class ValuePill extends StatelessWidget {
     required this.icon,
     required this.value,
     this.color = GamePalette.gold,
+    this.semanticsLabel,
   });
   final IconData icon;
   final String value;
   final Color color;
+  final String? semanticsLabel;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-    decoration: BoxDecoration(
-      color: GamePalette.panelLight,
-      borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: GamePalette.line),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 15, color: color),
-        const SizedBox(width: 6),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: GamePalette.panelLight,
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: GamePalette.line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 6),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+    final label = semanticsLabel;
+    if (label == null || label.isEmpty) return pill;
+    return Semantics(
+      label: label,
+      child: ExcludeSemantics(child: pill),
+    );
+  }
 }
 
 enum FighterMotion {

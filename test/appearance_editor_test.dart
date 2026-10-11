@@ -152,7 +152,8 @@ void main() {
       final editButton = find.text('Görünüşü düzenle');
       await tester.ensureVisible(editButton);
       await tester.tap(editButton);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(AppearanceEditorPage), findsOneWidget);
       for (final removedOption in [
         'Saç',
@@ -185,7 +186,8 @@ void main() {
       final bodyChoice = find.byKey(const ValueKey('appearance.body.body_03'));
       await reveal(bodyChoice, 240);
       await tester.tap(bodyChoice);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(controller.save.bodyProportionId, 'body_03');
       expect(storage.value?.bodyProportionId, 'body_03');
       await reveal(previewFinder, -240);
@@ -193,12 +195,14 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.tap(find.byIcon(Icons.arrow_back));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
       expect(find.byType(AppearanceEditorPage), findsNothing);
       expect(find.byType(FighterPage), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.drag(find.byType(ListView).first, const Offset(0, 900));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(tester.widget<FighterArt>(find.byType(FighterArt)).origin, 'Kıyı');
 
       controller.dispose();
@@ -223,7 +227,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         for (final removedOption in [
           'Saç',
@@ -265,7 +270,8 @@ void main() {
           'assets/art/characters/hero_kiyi_combat_atlas_v2.png',
         );
         await tester.tap(originChoice);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
         final selectedFighter = tester.widget<FighterArt>(
           find.byType(FighterArt),
         );

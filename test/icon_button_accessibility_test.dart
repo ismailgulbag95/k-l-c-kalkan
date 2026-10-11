@@ -34,13 +34,15 @@ void main() {
       await tester.pumpWidget(
         _localizedHome(CharacterCreator(controller: controller), 'tr'),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.bySemanticsLabel('Geri dön'), findsOneWidget);
 
       await tester.pumpWidget(
         _localizedHome(AppearanceEditorPage(controller: controller), 'en'),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.bySemanticsLabel('Go back'), findsOneWidget);
     } finally {
       semantics.dispose();
@@ -76,7 +78,8 @@ void main() {
         180,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       final unlock = find.bySemanticsLabel(
         'Sağlam duruş ustalığının kilidini aç',
@@ -111,13 +114,15 @@ void main() {
       await tester.pumpWidget(
         _localizedHome(BattlePage(controller: controller), 'en'),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.bySemanticsLabel('Go back'), findsOneWidget);
 
       final startDuel = find.text('Start duel');
       await tester.ensureVisible(startDuel);
       await tester.tap(startDuel);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.bySemanticsLabel('Leave duel'), findsOneWidget);
     } finally {
       semantics.dispose();

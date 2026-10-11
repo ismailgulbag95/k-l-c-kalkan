@@ -33,7 +33,8 @@ void main() {
               ),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           expect(find.byType(CharacterCreator), findsOneWidget);
           expect(tester.takeException(), isNull, reason: 'width=$width');
@@ -69,7 +70,8 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       final hero = tester.widget<FighterArt>(find.byType(FighterArt).first);
       expect(hero.customization?.isDefault, isTrue);
       expect(tester.takeException(), isNull);

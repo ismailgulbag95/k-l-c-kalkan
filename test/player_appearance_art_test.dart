@@ -153,9 +153,18 @@ void main() {
             ),
           ),
         );
-        final preview = find.byType(CustomPaint);
+        final preview = find.descendant(
+          of: find.byType(HeroAppearanceOptionPreview),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is CustomPaint &&
+                w.painter != null &&
+                w.painter.runtimeType.toString().contains('HeroAppearanceOptionPainter'),
+          ),
+        );
         await _waitForCustomPaint(tester, preview);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
         expect(preview, findsOneWidget, reason: '$origin/$id');
         expect(tester.takeException(), isNull, reason: '$origin/$id');
       }
@@ -235,10 +244,16 @@ Future<List<String>> _renderSelections(
     );
     final composedArt = find.descendant(
       of: find.byKey(key),
-      matching: find.byType(CustomPaint),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is CustomPaint &&
+            w.painter != null &&
+            w.painter.runtimeType.toString().contains('HeroCustomizationPainter'),
+      ),
     );
     await _waitForCustomPaint(tester, composedArt);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     expect(tester.takeException(), isNull, reason: '$origin/$selection');
     final boundary =
         tester.renderObject(find.byKey(key)) as RenderRepaintBoundary;

@@ -1,0 +1,9 @@
+# Store Release Keystore Configuration Template
+# Copy this file to 'key.properties' in the same directory and fill with your actual values.
+# NEVER commit your production keystore or production 'key.properties' to version control!
+
+storeApplicationId=com.ismailgulbag.ashcircuit
+storeFile=../upload-keystore.jks
+keyAlias=upload
+storePassword=YourKeystorePasswordHere
+keyPassword=YourKeyPasswordHere

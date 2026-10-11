@@ -196,7 +196,7 @@ _runRoad(_RoadBuild build) async {
     gold: controller.save.gold,
     salves: controller.save.healingSalves,
     tonics: controller.save.effortTonics,
-    log: <String>['gold before ${originalGold}, after ${controller.save.gold}'],
+    log: <String>['gold before $originalGold, after ${controller.save.gold}'],
   );
   controller.dispose();
   return result;

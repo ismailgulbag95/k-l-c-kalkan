@@ -11,8 +11,7 @@ const _platformPrimaryKey = 'flutter.$_primaryKey';
 const _platformBackupKey = 'flutter.$_backupKey';
 
 class _ClearControlledStore extends InMemorySharedPreferencesStore {
-  _ClearControlledStore(Map<String, Object> initialData)
-    : super.withData(initialData);
+  _ClearControlledStore(super.data) : super.withData();
 
   bool rejectPrimaryRemovalOnce = false;
   bool rejectBackupRemovalOnce = false;

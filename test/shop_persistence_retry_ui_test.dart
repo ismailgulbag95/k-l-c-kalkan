@@ -36,9 +36,11 @@ void main() {
 
     await _openShop(tester, controller);
     await tester.tap(find.text('Spells'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.widgetWithText(FilledButton, 'Learn').first);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(
       find.text(
@@ -64,9 +66,11 @@ void main() {
 
     await _openShop(tester, controller);
     await tester.tap(find.text('Supplies'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.widgetWithText(FilledButton, 'Purchase').first);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(SnackBarAction), findsOneWidget);
     await _tapRetry(tester);
@@ -95,9 +99,11 @@ void main() {
 
     await _openShop(tester, controller);
     await tester.tap(find.text('Weapons'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.widgetWithText(FilledButton, 'Equip').first);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(SnackBarAction), findsOneWidget);
     await _tapRetry(tester);
@@ -121,9 +127,11 @@ void main() {
 
     await _openShop(tester, controller);
     await tester.tap(find.text('Weapons'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.widgetWithText(FilledButton, 'Buy').first);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(SnackBarAction), findsOneWidget);
     expect(controller.save.ownedItems, isNot(contains('sword_1')));
@@ -137,14 +145,16 @@ void main() {
 
 Future<void> _openShop(WidgetTester tester, GameController controller) async {
   await tester.pumpWidget(GameRoot(controller: controller));
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
   await tester.tap(find.text('Shop').first);
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 }
 
 Future<void> _tapRetry(WidgetTester tester) async {
   expect(find.byType(SnackBarAction), findsOneWidget);
   await tester.tap(find.byType(SnackBarAction));
   await tester.pump();
-  await tester.pumpAndSettle();
+  await tester.pump(const Duration(milliseconds: 300));
 }

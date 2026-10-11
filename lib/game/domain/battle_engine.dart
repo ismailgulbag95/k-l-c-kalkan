@@ -967,16 +967,20 @@ class BattleEngine {
     if (defender.evasionReady) chance -= 10;
     if (action != BattleAction.bow && !_isSpell(action)) {
       if (attacker.family == WeaponFamily.shortSword &&
-          distance == RangeBand.close)
+          distance == RangeBand.close) {
         chance += 8;
+      }
       if ((attacker.family == WeaponFamily.shortSword ||
               attacker.family == WeaponFamily.maul) &&
-          distance == RangeBand.far)
+          distance == RangeBand.far) {
         chance -= 30;
-      if (attacker.family == WeaponFamily.spear && distance == RangeBand.far)
+      }
+      if (attacker.family == WeaponFamily.spear && distance == RangeBand.far) {
         chance += 8;
-      if (attacker.family == WeaponFamily.spear && distance == RangeBand.close)
+      }
+      if (attacker.family == WeaponFamily.spear && distance == RangeBand.close) {
         chance -= 5;
+      }
     }
     if (action == BattleAction.bow && distance == RangeBand.far) chance += 5;
     return GameBalance.hitChance(chance);
@@ -1126,8 +1130,9 @@ class BattleEngine {
         (_intent == BattleAction.emberSpear ||
             _intent == BattleAction.ashBurst ||
             _intent == BattleAction.tideWard);
-    if (_spellGuardedThisTurn && action == BattleAction.guard)
+    if (_spellGuardedThisTurn && action == BattleAction.guard) {
       metrics.spellGuards++;
+    }
     if (!player.alive) {
       _finish(false);
       return null;
@@ -1343,8 +1348,9 @@ class BattleEngine {
     if (playerAction && _isAttack(action) && _hasRangePenalty(actor, action)) {
       metrics.rangePenaltyAttacks++;
     }
-    if (playerAction && (action == BattleAction.sweep || _isSpell(action)))
+    if (playerAction && (action == BattleAction.sweep || _isSpell(action))) {
       metrics.usedSweepOrSpell = true;
+    }
     final chance = hitChance(actor, target, action);
     if (_isSpell(action)) actor.firstSpellUsed = true;
     final roll = _random.nextInt(100);
@@ -1574,8 +1580,9 @@ class BattleEngine {
 
   bool _hasRangePenalty(Combatant attacker, BattleAction action) {
     if (action == BattleAction.bow) return distance == RangeBand.close;
-    if (attacker.family == WeaponFamily.spear)
+    if (attacker.family == WeaponFamily.spear) {
       return distance == RangeBand.close;
+    }
     if (attacker.family == WeaponFamily.shortSword ||
         attacker.family == WeaponFamily.maul) {
       return distance == RangeBand.far;
@@ -1663,8 +1670,9 @@ class BattleEngine {
     };
     if (!_isSpell(action) &&
         attacker.family == WeaponFamily.maul &&
-        distance == RangeBand.close)
+        distance == RangeBand.close) {
       base += 3;
+    }
     if (attacker.aiStyle && attacker.phase > 1) {
       base *= 1 + .12 * (attacker.phase - 1);
     }
@@ -1907,34 +1915,41 @@ class BattleEngine {
     }
 
     if (_hazardWarningTurnsRemaining == 1) return BattleAction.guard;
-    if (opponent.health < opponent.maxHealth * .28 && _random.nextInt(100) < 38)
+    if (opponent.health < opponent.maxHealth * .28 && _random.nextInt(100) < 38) {
       return BattleAction.guard;
+    }
     if (opponent.aiStyle &&
         encounter.archetype.contains('menzil') &&
         opponent.ammo > 0 &&
-        distance != RangeBand.close)
+        distance != RangeBand.close) {
       return BattleAction.bow;
+    }
     if (opponent.aiStyle &&
         (encounter.archetype.contains('büyü') ||
             encounter.archetype.contains('mühür') ||
             encounter.isChampion) &&
         opponent.mana >= 16 &&
-        _random.nextInt(100) < 28)
+        _random.nextInt(100) < 28) {
       return BattleAction.ashBurst;
-    if (encounter.archetype.contains('kalkan') && _random.nextInt(100) < 48)
+    }
+    if (encounter.archetype.contains('kalkan') && _random.nextInt(100) < 48) {
       return BattleAction.guard;
-    if (encounter.archetype.contains('çevik') && distance == RangeBand.far)
+    }
+    if (encounter.archetype.contains('çevik') && distance == RangeBand.far) {
       return BattleAction.closeDistance;
+    }
     if (encounter.archetype.contains('ağır') ||
         encounter.archetype.contains('vurucu')) {
       if (opponent.effort >= 12) return BattleAction.heavy;
     }
     if (distance == RangeBand.far &&
         opponent.family != WeaponFamily.spear &&
-        opponent.family != WeaponFamily.bow)
+        opponent.family != WeaponFamily.bow) {
       return BattleAction.closeDistance;
-    if (distance == RangeBand.close && opponent.family == WeaponFamily.spear)
+    }
+    if (distance == RangeBand.close && opponent.family == WeaponFamily.spear) {
       return BattleAction.openDistance;
+    }
     if (opponent.effort < 5) return BattleAction.guard;
     return _random.nextInt(100) < 24 ? BattleAction.sweep : BattleAction.quick;
   }

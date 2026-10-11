@@ -9,11 +9,11 @@ const _backupKey = 'ash_circuit.save.backup.v1';
 
 class _ControlledPreferencesStore extends InMemorySharedPreferencesStore {
   _ControlledPreferencesStore(
-    Map<String, Object> initialData, {
+    super.data, {
     this.rejectedKeySuffix,
     this.thrownKeySuffix,
     this.writeException,
-  }) : super.withData(initialData);
+  }) : super.withData();
 
   final String? rejectedKeySuffix;
   final String? thrownKeySuffix;

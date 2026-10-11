@@ -528,6 +528,11 @@ const gameMessages = <String, GameMessage>{
   ),
   'ui.resource.effort': GameMessage('EFOR', 'EFFORT', 'Effort resource label.'),
   'ui.resource.mana': GameMessage('MANA', 'MANA', 'Mana resource label.'),
+  'ui.currency.coins': GameMessage(
+    'Sikke',
+    'Coins',
+    'Accessible label for the in-game coin balance.',
+  ),
   'ui.fighter.resetStats.title': GameMessage(
     'Özellikleri sıfırla?',
     'Reset attributes?',

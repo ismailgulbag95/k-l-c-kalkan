@@ -156,7 +156,8 @@ void main() {
           matching: find.byType(CustomPaint),
         );
         await _waitForCustomPaint(tester, emptyArt);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         expect(find.byType(HeroCustomizationArt), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -322,7 +323,8 @@ void main() {
           matching: find.byType(CustomPaint),
         );
         await _waitForCustomPaint(tester, customArt);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         expect(find.byType(HeroCustomizationArt), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -342,7 +344,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
         expect(find.byType(HeroCustomizationArt), findsNothing);
         expect(tester.takeException(), isNull);
       },
@@ -384,7 +387,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         // Find the player FighterArt
         final playerArtFinder = find.byWidgetPredicate(
@@ -438,7 +442,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final playerArtFinder = find.byWidgetPredicate(
           (widget) => widget is FighterArt && widget.isPlayer,
@@ -492,7 +497,8 @@ Future<String> _captureArt(
     matching: find.byType(CustomPaint),
   );
   await _waitForCustomPaint(tester, composedArt);
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
 
   expect(tester.takeException(), isNull);
   final boundary =

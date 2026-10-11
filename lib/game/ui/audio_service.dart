@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
@@ -135,17 +136,26 @@ class GameAudioService {
     final cue = sfxForBattleEvent(event);
     if (cue != null) unawaited(_playSfx(cue));
 
-    if (!_save.vibrationEnabled || kIsWeb) return;
+    if (!_save.vibrationEnabled || kIsWeb || isInTest) return;
     final haptic = switch (event.type) {
+      BattleEventType.hazardHit ||
+      BattleEventType.phaseChanged => HapticFeedback.heavyImpact,
       BattleEventType.attackHit ||
-      BattleEventType.hazardHit => HapticFeedback.mediumImpact,
-      BattleEventType.attackMiss => HapticFeedback.selectionClick,
+      BattleEventType.damageTaken => event.actor == BattleActor.player &&
+              (event.action == BattleAction.heavy ||
+                  event.action == BattleAction.sweep)
+          ? HapticFeedback.heavyImpact
+          : HapticFeedback.mediumImpact,
+      BattleEventType.spellCast => HapticFeedback.mediumImpact,
+      BattleEventType.attackMiss ||
+      BattleEventType.hazardAvoided => HapticFeedback.selectionClick,
+      BattleEventType.battleWon => HapticFeedback.heavyImpact,
+      BattleEventType.battleLost => HapticFeedback.mediumImpact,
       BattleEventType.guardRaised ||
       BattleEventType.shieldRaised ||
       BattleEventType.statusApplied ||
       BattleEventType.healed ||
-      BattleEventType.battleWon ||
-      BattleEventType.battleLost => HapticFeedback.lightImpact,
+      BattleEventType.resourceRestored => HapticFeedback.lightImpact,
       _ => null,
     };
     if (haptic != null) {
@@ -157,8 +167,11 @@ class GameAudioService {
     }
   }
 
+  static bool get isInTest =>
+      !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
+
   Future<void> playIntermissionStinger(int chapter) async {
-    if (_disposed || !_foreground || _save.musicVolume <= 0) return;
+    if (_disposed || isInTest || !_foreground || _save.musicVolume <= 0) return;
     final player = _stingerPlayer ??= AudioPlayer();
     final cue = ((chapter - 1) % 4) + 1;
     try {
@@ -176,6 +189,7 @@ class GameAudioService {
 
   Future<void> _playSfx(String cue) async {
     if (_disposed ||
+        isInTest ||
         !_foreground ||
         !_save.sfxEnabled ||
         _save.sfxVolume <= 0) {
@@ -217,7 +231,7 @@ class GameAudioService {
   }
 
   Future<void> _applyDesiredAudio() async {
-    if (_disposed) return;
+    if (_disposed || isInTest) return;
     final encounter = _activeEncounter;
     final track = musicTrackFor(
       hasHero: _hasHero,

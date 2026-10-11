@@ -11,7 +11,7 @@ abstract interface class SaveStorage {
 }
 
 class PreferencesSaveStorage implements SaveStorage {
-  PreferencesSaveStorage({SharedPreferences? this._preferences});
+  PreferencesSaveStorage({this._preferences});
 
   static const _key = 'ash_circuit.save.v1';
   static const _backupKey = 'ash_circuit.save.backup.v1';

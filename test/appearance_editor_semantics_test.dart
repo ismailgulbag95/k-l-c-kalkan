@@ -81,7 +81,8 @@ void main() {
           await tester.pumpWidget(
             buildEditor(controller: controller, languageCode: 'tr'),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           // 1. Build option 1 (selected)
           final body1Finder = find.bySemanticsLabel('Yapı, seçenek 1');
@@ -141,7 +142,8 @@ void main() {
           await tester.pumpWidget(
             buildEditor(controller: controller, languageCode: 'en'),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           // 1. Build option 1 (selected)
           final body1Finder = find.bySemanticsLabel('Build, option 1');
@@ -204,7 +206,8 @@ void main() {
           await tester.pumpWidget(
             buildEditor(controller: controller, languageCode: 'tr'),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           final body1Finder = find.bySemanticsLabel('Yapı, seçenek 1');
           final body2Finder = find.bySemanticsLabel('Yapı, seçenek 2');
@@ -231,7 +234,8 @@ void main() {
             find.semantics.byLabel('Yapı, seçenek 2'),
             SemanticsAction.tap,
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           // Verify controller and storage persisted selection
           expect(controller.save.bodyProportionId, 'body_02');
@@ -287,7 +291,8 @@ void main() {
           await tester.pumpWidget(
             buildEditor(controller: controller, languageCode: 'tr'),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           final writeGate = Completer<void>();
           storage.writeCompleter = writeGate;
@@ -317,7 +322,8 @@ void main() {
 
           // Resume save completion
           writeGate.complete();
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           // Once saving is settled, node is re-enabled, has tap action, and is selected
           final settledData = tester

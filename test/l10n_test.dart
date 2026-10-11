@@ -186,12 +186,14 @@ void main() {
     final controller = GameController(storage: storage);
     await controller.initialize();
     await tester.pumpWidget(GameRoot(controller: controller));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.save.language, 'tr');
     expect(find.text('Dövüşçünü oluştur'), findsOneWidget);
     await controller.updateSettings(language: 'en');
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Create your fighter'), findsOneWidget);
     expect(controller.save.language, 'en');
     expect(storage.value?.language, 'en');
@@ -223,7 +225,8 @@ void main() {
     final portrait = find.byType(FighterArt);
     expect(tester.widget<FighterArt>(portrait).origin, 'Kıyı');
     await tester.tap(find.widgetWithText(ChoiceChip, 'Ocak'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(tester.widget<FighterArt>(portrait).origin, 'Ocak');
     for (final removedOption in [
       'Saç',
@@ -278,7 +281,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('Start duel'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('CHOOSE YOUR ACTION'), findsOneWidget);
     await tester.scrollUntilVisible(

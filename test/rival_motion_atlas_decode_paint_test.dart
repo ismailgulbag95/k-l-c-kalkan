@@ -187,7 +187,7 @@ Future<void> _paintAndExpectFrame(
 }) async {
   final reason = stateName == null
       ? 'encounter $encounterId: $asset'
-      : 'encounter $encounterId ${stateName}: $asset';
+      : 'encounter $encounterId $stateName: $asset';
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(

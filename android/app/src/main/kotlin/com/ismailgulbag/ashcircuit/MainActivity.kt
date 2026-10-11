@@ -1,4 +1,4 @@
-package com.example.ash_circuit
+package com.ismailgulbag.ashcircuit
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -73,7 +73,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         // 1. Usable action: Hızlı vuruş (Quick strike)
         final quickFinder = find.bySemanticsLabel(RegExp(r'^Hızlı vuruş'));
@@ -129,7 +130,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final closeFinder = find.bySemanticsLabel(RegExp(r'^Yaklaş'));
         expect(closeFinder, findsOneWidget);
@@ -196,7 +198,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         // 1. Usable action: Quick strike
         final quickFinder = find.bySemanticsLabel(RegExp(r'^Quick strike'));
@@ -252,7 +255,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final closeFinder = find.bySemanticsLabel(RegExp(r'^Move closer'));
         expect(closeFinder, findsOneWidget);
@@ -319,7 +323,8 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         // The exact expected order of action buttons rendered in the Wrap list:
         // [quick, heavy, guard, sweep, bow, closeDistance, openDistance, shoreStep]

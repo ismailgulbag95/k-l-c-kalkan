@@ -465,9 +465,9 @@ class GameController extends ChangeNotifier {
       battleCheckpoint: {
         'version': 1,
         'mode': mode,
-        if (encounterId != null) 'encounterId': encounterId,
-        if (contractId != null) 'contractId': contractId,
-        if (stage != null) 'stage': stage,
+        'encounterId': ?encounterId,
+        'contractId': ?contractId,
+        'stage': ?stage,
         'battleSave': engine.save
             .copyWith(clearBattleCheckpoint: true)
             .toJson(),
@@ -497,7 +497,7 @@ class GameController extends ChangeNotifier {
           _battleCheckpointWritePending = false;
         }
       } on Object catch (error) {
-        if (lastError == null) lastError = 'Kayıt yazılamadı: $error';
+        lastError ??= 'Kayıt yazılamadı: $error';
         _battleCheckpointWritePending = true;
         notifyListeners();
         return false;

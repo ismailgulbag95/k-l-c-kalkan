@@ -40,7 +40,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(quick);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     final resolvedEngine = controller.battle!;
     expect(resolvedEngine.snapshot.done, isTrue);
@@ -97,7 +98,8 @@ void main() {
           scrollable: find.byType(Scrollable).first,
         );
         await tester.tap(guard);
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
       }
 
       final resolvedEngine = controller.battle!;
@@ -119,7 +121,8 @@ void main() {
       expect(impact.alignment, Alignment.centerLeft);
 
       await tester.tap(find.text('Yeniden dene'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('HAMLENİ SEÇ'), findsOneWidget);
       expect(controller.activeContract?.id, 'C1-A');
       expect(controller.battle!.snapshot.done, isFalse);
@@ -160,5 +163,6 @@ Future<void> _startBattle(WidgetTester tester) async {
     scrollable: find.byType(Scrollable).first,
   );
   await tester.tap(find.text('Düelloya başla'));
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
 }

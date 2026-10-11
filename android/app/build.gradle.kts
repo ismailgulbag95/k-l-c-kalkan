@@ -57,7 +57,7 @@ if (storeReleaseRequested) {
 }
 
 android {
-    namespace = "com.example.ash_circuit"
+    namespace = "com.ismailgulbag.ashcircuit"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -67,8 +67,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = if (storeReleaseRequested) storeApplicationId!! else "com.example.ash_circuit"
+        // Unique Application ID for store publishing.
+        applicationId = if (storeReleaseRequested) storeApplicationId!! else "com.ismailgulbag.ashcircuit"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

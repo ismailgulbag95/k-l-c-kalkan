@@ -172,7 +172,8 @@ void main() {
             home: GameHub(controller: controller),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         final hubElement = tester.element(find.byType(GameHub));
         final leagueLabel = gameText(hubElement, 'ui.nav.league');
@@ -255,7 +256,8 @@ void main() {
 
         // Switching tabs updates the selected destination without regression.
         await tester.tap(find.text(fighterLabel));
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
         expect(find.byType(FighterPage), findsOneWidget);
 
@@ -293,7 +295,8 @@ void main() {
               home: GameHub(controller: controller),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
 
           // Glyph instances inside NavigationBar must be excluded from semantics
           // to avoid duplicate announcements against authoritative destination labels.

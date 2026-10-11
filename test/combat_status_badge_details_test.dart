@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> _startBattle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
   final startButton = find.byWidgetPredicate(
     (w) => w is Text && (w.data == 'Düelloya başla' || w.data == 'Start duel'),
   );
@@ -24,7 +26,8 @@ Future<void> _startBattle(WidgetTester tester) async {
   }
   if (startButton.evaluate().isNotEmpty) {
     await tester.tap(startButton.first);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
   }
 }
 

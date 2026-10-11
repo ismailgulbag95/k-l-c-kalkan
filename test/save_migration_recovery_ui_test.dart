@@ -36,13 +36,15 @@ void main() {
 
     expect(controller.schemaMigrationPending, isTrue);
     await tester.pumpWidget(GameRoot(controller: controller));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     const message =
         'The save format could not be updated. Your current progress is intact.';
     expect(find.text(message), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, 'Retry'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(controller.schemaMigrationPending, isFalse);
     expect(controller.save.schemaVersion, 10);
