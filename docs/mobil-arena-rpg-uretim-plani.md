@@ -128,7 +128,7 @@ Dövüşçü yarat
 | Ekran | İçerik ve temel eylem |
 |---|---|
 | Açılış / devam | Devam et, yeni dövüşçü, ayarlar; son kayıt durumu |
-| Dövüşçü yaratma | İsim, vücut yapısı, yüz kılı ve renk vurgusu seçimi (kesilmiş saç ve ten maskesi sanat kapısında ertelenmiştir; eski kayıt kimlikleri korunur); başlangıç özellik puanları ve kısa yapı önerileri |
+| Dövüşçü yaratma | İsim, dört sabit köken görünüşü (Kıyı, Ocak, Fırtına, Taç) ve üç vücut oranı; başlangıç özellik puanları ve kısa yapı önerileri. Saç/yüz kılı, ten ve renk seçenekleri aktif akışta yoktur. |
 | Lig merkezi | Sıradaki düello, turnuva ağacı, dövüşçü durumu, altı arena rotası, dükkân ve antrenman girişleri |
 | Rakip kartı | Rakip silüeti/portresi, davranış ipucu, önerilen seviye, ödül ve arena kuralı |
 | Maç | Rakip ve oyuncu, sağlık/kaynak çubukları, rakip niyeti, hamle kartları, genişletilebilir savaş günlüğü |
@@ -585,11 +585,11 @@ Renk, tek başına sağlık, nadirlik veya durum anlamı taşımaz; simge, etike
 
 Tam yayın için içerik kilidine girecek sanat varlık listesi:
 
-- 1 katmanlı oyuncu dövüşçüsü: 3 gövde oranı (`body_01`–`body_03`), 5 yüz kılı durumu (`facial_hair_00`–`facial_hair_04`), 8+8 renk vurgusu ve tüm ekipman yuvaları için eşleşen sprite katmanları (kesilmiş saç/başlık katmanları ve kalibre ten rengi maskeleri sanat kapısında ertelenmiş varlıklardır);
-- 32 ana rakip portresi (8 turnuva finali bunun alt kümesi), 16 sözleşme kartı illüstrasyonu, 4 ara seçim kartı görseli, 20 tekrar kullanılabilir rakip animasyon rig’i, 8 elit varyantı, 7 Şampiyonlar Yolu görünüş varyantı (aynı rig üstünde donanım/renk/efekt değişimi), oyuncu dövüşçü sprite’ından üretilen 1 Ayna Dövüşçü ve 8 final rakibine özgü giriş/zafer/yenilgi vuruşu; her rakibin rolü/imza silahı küçük ikonla tanınır, zırh/özellik verisiyle silüeti tutarlıdır;
+- 4 sabit oyuncu köken görünüşü × 3 vücut oranı; seçilen köken ve vücut oranı yaratma, düzenleme, dövüşçü ve savaş ekranlarında aynı sanatı kullanır. Saç/yüz kılı, ten tonu ve serbest renk kontrolleri üretilmez. Ekipman yuvaları yalnızca görsel olarak doğrulanmış sprite/katmanlarla gösterilir;
+- 32 ana rakip portresi ve her karşılaşmaya bağlı altı pozlu hareket atlası (8 turnuva finali bunun alt kümesi), 16 sözleşme kartı illüstrasyonu, 4 ara seçim kartı görseli, 8 elit görünüş varyantı, 7 Şampiyonlar Yolu görünüş varyantı (aynı atlas üstünde donanım/renk/efekt değişimi), oyuncu dövüşçü sanatından üretilen 1 Ayna Dövüşçü ve 8 final rakibine özgü giriş/zafer/yenilgi vuruşu; her rakibin rolü/imza silahı küçük ikonla tanınır, zırh/özellik verisiyle silüeti tutarlıdır;
 - Dört dükkân kategorisini tanıtan özgün simge/tezgâh işaretleri; üç Seyirci Notu göstergesi, dört devreye ait kozmetik arma ve sonuç ekranı kalabalık tepkisi; mevcut arena sanat yönüyle uyumlu, oyunun kendine ait görsel tasarımı;
 - Dört özgün hikâye izi kayıt kartı/nesne illüstrasyonu (ödül tutarsızlığı, ikinci kaynak, örüntü kanıtı ve halka açık açıklama); aynı mobil kart bileşeninde kullanılır, metinler görselden ayrı yerelleştirilir ve dört hikâye bölümünde birer kez gösterilir;
-- 6 arena arka planı (Kül Rıhtımı, Kor Ocağı, Fırtına Gözlemevi, Gelgit Amfitiyatrosu, Taç Kalesi, Taç Halkası), her biri en az 4 ön/arka plan prop varyantı ve farklı ışık/atmosfer katmanlarıyla;
+- 6 arena arka planı (Kül Rıhtımı, Kor Ocağı, Fırtına Gözlemevi, Gelgit Amfitiyatrosu, Taç Kalesi, Taç Halkası), her biri en az 4 prop varyantı ve sahne okunaklılığını bozmayan kendine özgü ışık/atmosfer katmanlarıyla;
 - 4 silah ailesi × 4 güç seviyesi, 3 zırh yuvası × 4 devre basamağı, 4 tılsım varyantı, 6 büyü kartı ve iki sarf eşyası ikonu;
 - oyuncu animasyon durumları: bekleme, hazırlık, hızlı saldırı, güçlü saldırı, yay germe/atış, gard, sarf kullanımı, isabet, sendeleme, büyü, zafer, yenilgi;
 - dört ana UI durum seti: normal, basılı, devre dışı, odak; efor/sağlık/durum ikonları;
@@ -778,7 +778,7 @@ Tek kişi birden çok rol üstlenebilir; ancak tasarım kartı, asset manifesti 
 
 ### 13.4 Tam oyun çıkış kapısı
 
-- İçerik manifestinin %100’ü yayındaki sürüme bağlıdır: 32 ana karşılaşma, 16 sözleşme kaydı, 8 oyun sonu karşılaşma kaydı ve 4 ara-turnuva seçimi; toplam 60 üretim kartı. Bunların 40’ı savaş ayarı, 16’sı sözleşme kuralı ve 4’ü seçim olayıdır. #1 öğretici maçıdır, ayrıca bir maç sayılmaz; #32 finaldir. Sözleşmeler ana kadroyu yeniden kullanır; Şampiyonlar Yolu sekiz rakip varyantıdır. Toplamda 32 temel rakip tasarımı, 4 ara final, 4 bölüm şampiyonu, 6 arena, 16 silah, 12 zırh, 4 tılsım, 6 büyü, 2 sarf ailesi, katmanlı oyuncu görünüşü (aktif: 3 gövde oranı, 5 yüz kılı durumu, 8+8 renk vurgusu; kesilmiş saç/başlık ve ten maskesi sanat kapısında ertelenmiştir, eski kayıt kimlikleri korunur), 4 Seyirci Notu kozmetik arması ve 4 hikâye izi kartı tamamlanır.
+- İçerik manifestinin %100’ü yayındaki sürüme bağlıdır: 32 ana karşılaşma, 16 sözleşme kaydı, 8 oyun sonu karşılaşma kaydı ve 4 ara-turnuva seçimi; toplam 60 üretim kartı. Bunların 40’ı savaş ayarı, 16’sı sözleşme kuralı ve 4’ü seçim olayıdır. #1 öğretici maçıdır, ayrıca bir maç sayılmaz; #32 finaldir. Sözleşmeler ana kadroyu yeniden kullanır; Şampiyonlar Yolu sekiz rakip varyantıdır. Toplamda 32 temel rakip tasarımı, 4 ara final, 4 bölüm şampiyonu, 6 arena, 16 silah, 12 zırh, 4 tılsım, 6 büyü, 2 sarf ailesi, dört ayırt edilebilir köken görünüşü ve üç vücut oranı tamamlanır. Saç/yüz kılı, ten ve renk seçenekleri aktif ürün kapsamı değildir; eski kayıt alanları yalnız geriye dönük uyumluluk için saklanır ve çizimde kullanılmaz. Dört Seyirci Notu kozmetik arması ve dört hikâye izi kartı da tamamlanır.
 - Her dört maçlık turnuva üç eleme/lig düellosu ve bir finalle kapanır; #4/#12/#20/#28 ara final, #8/#16/#24/#32 bölüm şampiyonudur. Her bölüm dört normal, iki elit, bir ara final ve bir bölüm şampiyonu içerir; arka arkaya rakip dalgası yoktur. Maç sonuçları, ara seçim ve sıradaki turnuva adımı güvenli kaydedilir.
 - Temiz kurulumla karakter yaratmadan 8 turnuva finali, 4 ara seçim, epilog ve oyun sonu meydan okumasına kadar ilerleme tamamlanır; kapalı test kayıtları güncelleme sonrası da açılır.
 - Eksik/yer tutucu ekran, metin, sanat/ses varlığı, çalışmayan düğme veya sonradan tamamlanacak içerik yoktur.

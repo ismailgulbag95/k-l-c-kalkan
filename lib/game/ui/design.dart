@@ -714,6 +714,74 @@ class ArenaPropSprite extends StatelessWidget {
       AtlasCellSprite(atlas: atlas, index: index, columns: 2, rows: 2);
 }
 
+class ArenaAtmosphereOverlay extends StatelessWidget {
+  const ArenaAtmosphereOverlay({super.key, required this.arenaId});
+
+  final String arenaId;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: ExcludeSemantics(
+      child: CustomPaint(painter: _ArenaAtmospherePainter(arenaId)),
+    ),
+  );
+}
+
+class _ArenaAtmospherePainter extends CustomPainter {
+  const _ArenaAtmospherePainter(this.arenaId);
+
+  final String arenaId;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final arenaKey = arenaId.trim().toLowerCase();
+    final accent = _lookupArenaColor(arenaKey);
+    final focalPoint = switch (arenaKey) {
+      'kul' => Offset(size.width * .2, size.height * .38),
+      'kor' => Offset(size.width * .78, size.height * .6),
+      'firtina' => Offset(size.width * .72, size.height * .26),
+      'gelgit' => Offset(size.width * .5, size.height * .72),
+      'tac' => Offset(size.width * .22, size.height * .28),
+      'halka' => Offset(size.width * .5, size.height * .24),
+      _ => Offset(size.width * .5, size.height * .36),
+    };
+    final focalRadius = size.width * .78;
+    final light = Paint()
+      ..blendMode = BlendMode.screen
+      ..shader = ui.Gradient.radial(
+        focalPoint,
+        focalRadius,
+        [
+          accent.withValues(alpha: .075),
+          accent.withValues(alpha: .032),
+          accent.withValues(alpha: 0),
+        ],
+        const [0, .44, 1],
+      );
+    canvas.drawRect(Offset.zero & size, light);
+
+    final horizonMist = Paint()
+      ..blendMode = BlendMode.screen
+      ..shader = ui.Gradient.linear(
+        Offset(0, size.height * .36),
+        Offset(0, size.height),
+        [
+          accent.withValues(alpha: 0),
+          accent.withValues(alpha: .022),
+          accent.withValues(alpha: .045),
+        ],
+        const [0, .48, 1],
+      );
+    canvas.drawRect(Offset.zero & size, horizonMist);
+  }
+
+  @override
+  bool shouldRepaint(_ArenaAtmospherePainter oldDelegate) =>
+      arenaId != oldDelegate.arenaId;
+}
+
 class ArenaFinalPhaseLighting extends StatelessWidget {
   const ArenaFinalPhaseLighting({
     super.key,
@@ -1456,6 +1524,31 @@ String heroCombatBaseAssetForOrigin(String origin) =>
       _ => heroCombatBaseAsset,
     };
 
+Widget _heroAtlasPlaceholder({required bool failed}) => ExcludeSemantics(
+  child: DecoratedBox(
+    decoration: BoxDecoration(
+      color: GamePalette.panel.withValues(alpha: .84),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: GamePalette.line.withValues(alpha: .7)),
+    ),
+    child: Center(
+      child: failed
+          ? const Icon(
+              Icons.person_outline_rounded,
+              color: GamePalette.muted,
+              size: 28,
+            )
+          : const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: GamePalette.gold,
+              ),
+            ),
+    ),
+  ),
+);
+
 enum HeroAppearanceOptionKind { body }
 
 class HeroAppearanceOptionPreview extends StatelessWidget {
@@ -1480,7 +1573,9 @@ class HeroAppearanceOptionPreview extends StatelessWidget {
     ),
     builder: (context, snapshot) {
       final image = snapshot.data;
-      if (image == null) return const SizedBox.expand();
+      if (image == null) {
+        return _heroAtlasPlaceholder(failed: snapshot.hasError);
+      }
       return CustomPaint(
         painter: _HeroAppearanceOptionPainter(image, kind, optionId),
       );
@@ -1547,7 +1642,9 @@ class HeroCustomizationArt extends StatelessWidget {
       ),
       builder: (context, bodySnapshot) {
         final body = bodySnapshot.data;
-        if (body == null) return const SizedBox.expand();
+        if (body == null) {
+          return _heroAtlasPlaceholder(failed: bodySnapshot.hasError);
+        }
         return CustomPaint(
           painter: _HeroCustomizationPainter(body, selection, gear, family),
         );

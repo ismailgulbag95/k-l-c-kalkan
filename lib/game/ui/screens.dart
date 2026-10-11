@@ -130,90 +130,105 @@ class GameTitle extends StatelessWidget {
     body: GameBackdrop(
       image: arenas.first.art,
       child: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Padding(
-              padding: const EdgeInsets.all(26),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Spacer(flex: 4),
-                  const Text(
-                    'KÜL',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: GamePalette.parchment,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 8,
-                    ),
-                  ),
-                  Text(
-                    'ÇEMBERİ',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: GamePalette.gold,
-                      fontSize: 44,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 3,
-                      shadows: const [
-                        Shadow(color: Colors.black54, blurRadius: 18),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    gameText(context, 'ui.title.tagline'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: GamePalette.parchment,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (controller.schemaMigrationPending) ...[
-                    const SizedBox(height: 14),
-                    _SchemaMigrationNotice(controller: controller),
-                  ],
-                  const Spacer(flex: 3),
-                  GamePanel(
-                    color: const Color(0xD8172021),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 560,
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(26),
+                  child: IntrinsicHeight(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SectionHeading(
-                          localizedHeading(context, 'ui.title.panel.heading'),
+                        const Spacer(flex: 4),
+                        const Text(
+                          'KÜL',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: GamePalette.parchment,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 8,
+                          ),
+                        ),
+                        Text(
+                          'ÇEMBERİ',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: GamePalette.gold,
+                            fontSize: 44,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 3,
+                            shadows: const [
+                              Shadow(color: Colors.black54, blurRadius: 18),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          gameText(context, 'ui.title.tagline'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: GamePalette.parchment,
+                            fontSize: 16,
+                          ),
+                        ),
+                        if (controller.schemaMigrationPending) ...[
+                          const SizedBox(height: 14),
+                          _SchemaMigrationNotice(controller: controller),
+                        ],
+                        const Spacer(flex: 3),
+                        GamePanel(
+                          color: const Color(0xD8172021),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SectionHeading(
+                                localizedHeading(
+                                  context,
+                                  'ui.title.panel.heading',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                gameText(context, 'ui.title.panel.body'),
+                                style: const TextStyle(
+                                  color: GamePalette.parchment,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        GameButton(
+                          label: gameText(context, 'ui.title.createFighter'),
+                          icon: Icons.sports_martial_arts,
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  CharacterCreator(controller: controller),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          gameText(context, 'ui.title.panel.body'),
-                          style: const TextStyle(
-                            color: GamePalette.parchment,
-                            height: 1.45,
+                          gameText(context, 'ui.title.footer'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: GamePalette.muted,
+                            fontSize: 11,
                           ),
                         ),
+                        const Spacer(),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  GameButton(
-                    label: gameText(context, 'ui.title.createFighter'),
-                    icon: Icons.sports_martial_arts,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            CharacterCreator(controller: controller),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    gameText(context, 'ui.title.footer'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: GamePalette.muted, fontSize: 11),
-                  ),
-                  const Spacer(),
-                ],
+                ),
               ),
             ),
           ),
@@ -660,9 +675,15 @@ class _GameHubState extends State<GameHub> {
         Padding(
           padding: const EdgeInsets.only(right: 14),
           child: Center(
-            child: ValuePill(
-              icon: Icons.monetization_on_outlined,
-              value: '${widget.controller.save.gold}',
+            child: Semantics(
+              label: gameText(context, 'ui.shop.resalePrice', {
+                'price': widget.controller.save.gold,
+              }),
+              excludeSemantics: true,
+              child: ValuePill(
+                icon: Icons.monetization_on_outlined,
+                value: '${widget.controller.save.gold}',
+              ),
             ),
           ),
         ),
@@ -1055,21 +1076,25 @@ class CampaignPage extends StatelessWidget {
                               ),
                               if (current != null)
                                 SizedBox(
-                                  width: 12,
-                                  child: FighterArt(
-                                    seed: 3,
-                                    name: '',
-                                    isPlayer: false,
-                                    family: 'spear',
-                                    portraitAsset: characterArtForEncounter(
-                                      current.id,
+                                  width: constraints.maxWidth < 360 ? 96 : 120,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.bottomRight,
+                                    child: FighterArt(
+                                      seed: 3,
+                                      name: '',
+                                      isPlayer: false,
+                                      family: 'spear',
+                                      portraitAsset: characterArtForEncounter(
+                                        current.id,
+                                      ),
+                                      atlasAsset: rivalAtlasForEncounter(
+                                        current.id,
+                                      )?.asset,
+                                      atlasIndex: rivalAtlasForEncounter(
+                                        current.id,
+                                      )?.index,
                                     ),
-                                    atlasAsset: rivalAtlasForEncounter(
-                                      current.id,
-                                    )?.asset,
-                                    atlasIndex: rivalAtlasForEncounter(
-                                      current.id,
-                                    )?.index,
                                   ),
                                 ),
                             ],
@@ -2436,36 +2461,33 @@ class _ShopPageState extends State<ShopPage> {
           style: const TextStyle(color: GamePalette.muted, fontSize: 12),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              for (final choice in [
-                'all',
-                'weapon',
-                'armor',
-                'talisman',
-                'magic',
-                'supplies',
-              ])
-                Padding(
-                  padding: const EdgeInsets.only(right: 7),
-                  child: ChoiceChip(
-                    label: Text(gameText(context, 'ui.filter.$choice')),
-                    selected: filter == choice,
-                    onSelected: (_) => setState(() => filter = choice),
-                    selectedColor: GamePalette.gold,
-                    labelStyle: TextStyle(
-                      color: filter == choice
-                          ? GamePalette.ink
-                          : GamePalette.parchment,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final choice in [
+              'all',
+              'weapon',
+              'armor',
+              'talisman',
+              'magic',
+              'supplies',
+            ])
+              ChoiceChip(
+                label: Text(gameText(context, 'ui.filter.$choice')),
+                selected: filter == choice,
+                onSelected: (_) => setState(() => filter = choice),
+                selectedColor: GamePalette.gold,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+                visualDensity: VisualDensity.standard,
+                labelStyle: TextStyle(
+                  color: filter == choice
+                      ? GamePalette.ink
+                      : GamePalette.parchment,
+                  fontWeight: FontWeight.w800,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
         const SizedBox(height: 10),
         for (final item in visibleItems)
@@ -4304,6 +4326,7 @@ class _BattlePageState extends State<BattlePage> {
     _resultShown = true;
     _working = true;
     final previousLevel = widget.controller.save.level;
+    final previousStatPoints = widget.controller.save.unspentStatPoints;
     final encounter = widget.controller.activeEncounter!;
     final contract = widget.controller.activeContract;
     final previousGold = widget.controller.save.gold;
@@ -4354,6 +4377,8 @@ class _BattlePageState extends State<BattlePage> {
     final BattleResolution battleResult = result;
     final goldAwarded = widget.controller.save.gold - previousGold;
     final xpAwarded = widget.controller.save.xp - previousXp;
+    final statPointsEarned =
+        widget.controller.save.unspentStatPoints - previousStatPoints;
     final audio = GameAudioScope.maybeOf(context);
     if (battleResult.won && audio != null) {
       unawaited(audio.playUiCue(contract == null ? 'reward' : 'contract'));
@@ -4496,6 +4521,29 @@ class _BattlePageState extends State<BattlePage> {
                   height: 1.4,
                 ),
               ),
+              if (widget.controller.save.level > previousLevel) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    ValuePill(
+                      icon: Icons.arrow_upward,
+                      value: gameText(context, 'ui.fighter.level', {
+                        'level': widget.controller.save.level,
+                      }),
+                    ),
+                    if (statPointsEarned > 0)
+                      ValuePill(
+                        icon: Icons.add_circle_outline,
+                        value: '+${gameText(context, 'ui.campaign.points', {
+                          'count': statPointsEarned,
+                        })}',
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 13),
               GamePanel(
                 padding: const EdgeInsets.all(10),
@@ -5637,7 +5685,13 @@ class _BattleActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final preview = engine.preview(action);
     final isEnabled = preview.canUse && onTap != null;
-    final width = (MediaQuery.sizeOf(context).width - 44) / 2;
+    final media = MediaQuery.of(context);
+    final availableWidth = media.size.width.clamp(0.0, 760.0) - 28;
+    final textScale = media.textScaler.scale(14) / 14;
+    final fitsTwo = textScale < 1.35 && availableWidth >= 288;
+    final tileWidth = fitsTwo
+        ? ((availableWidth - 8) / 2).clamp(138.0, 360.0)
+        : availableWidth;
     final actionName = gameText(context, 'label.action.${action.name}');
     final costText = gameText(context, preview.costMessage.id, {
       ...preview.costMessage.arguments,
@@ -5654,9 +5708,12 @@ class _BattleActionTile extends StatelessWidget {
     ];
     final semanticLabel = semanticParts.join(', ');
 
-    return SizedBox(
-      width: width.clamp(145, 340),
-      height: 73,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: tileWidth,
+        maxWidth: tileWidth,
+        minHeight: 73,
+      ),
       child: Semantics(
         button: true,
         enabled: isEnabled,
@@ -5664,7 +5721,7 @@ class _BattleActionTile extends StatelessWidget {
         onTap: isEnabled ? onTap : null,
         excludeSemantics: true,
         child: Material(
-          color: preview.canUse
+          color: isEnabled
               ? (spell ? const Color(0xE1243041) : const Color(0xE1242D2F))
               : const Color(0xD9151C1E),
           borderRadius: BorderRadius.circular(14),
@@ -5672,63 +5729,77 @@ class _BattleActionTile extends StatelessWidget {
             excludeFromSemantics: true,
             onTap: isEnabled ? onTap : null,
             borderRadius: BorderRadius.circular(14),
-            child: Padding(
+            child: Container(
+              alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Text(
                           actionName,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
-                            color: preview.canUse
+                            color: isEnabled
                                 ? GamePalette.parchment
                                 : GamePalette.muted,
                             fontSize: 12,
                           ),
                         ),
                       ),
-                      if (badge != null)
+                      if (badge != null) ...[
+                        const SizedBox(width: 4),
                         Text(
                           badge!,
-                          style: const TextStyle(
-                            color: GamePalette.gold,
+                          style: TextStyle(
+                            color: isEnabled
+                                ? GamePalette.gold
+                                : GamePalette.muted,
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
+                      ],
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 6),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
                         child: Text(
                           costText,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: GamePalette.muted,
+                          style: TextStyle(
+                            color: isEnabled
+                                ? GamePalette.muted
+                                : GamePalette.muted.withValues(alpha: .6),
                             fontSize: 9,
                           ),
                         ),
                       ),
-                      if (statsText != null)
+                      if (statsText != null) ...[
+                        const SizedBox(width: 4),
                         Text(
                           statsText,
                           style: TextStyle(
-                            color: preview.hitChance >= 70
-                                ? GamePalette.teal
-                                : GamePalette.gold,
+                            color: isEnabled
+                                ? (preview.hitChance >= 70
+                                    ? GamePalette.teal
+                                    : GamePalette.gold)
+                                : GamePalette.muted,
                             fontWeight: FontWeight.w900,
                             fontSize: 9,
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ],
