@@ -226,7 +226,15 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
-        for (final (lang, playerStatusText, playerDetailsText, playerSemantics, opponentStatusText, opponentDetailsText, opponentSemantics)
+        for (final (
+              lang,
+              playerStatusText,
+              playerDetailsText,
+              playerSemantics,
+              opponentStatusText,
+              opponentDetailsText,
+              opponentSemantics,
+            )
             in [
               (
                 'tr',
@@ -274,7 +282,10 @@ void main() {
                 languageCode: lang,
                 child: MaterialApp(
                   theme: buildGameTheme(),
-                  home: BattlePage(controller: controller),
+                  home: BattlePage(
+                    key: ValueKey('battle-$lang'),
+                    controller: controller,
+                  ),
                 ),
               ),
             );

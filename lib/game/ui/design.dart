@@ -1445,13 +1445,14 @@ class EquippedGearAppearance {
       'EquippedGearAppearance(head: $head, body: $body, boots: $boots)';
 }
 
-const heroCombatBaseAsset = 'assets/art/characters/hero_combat_base_layers.png';
+const heroCombatBaseAsset =
+    'assets/art/characters/hero_kiyi_combat_atlas_v2.png';
 
 String heroCombatBaseAssetForOrigin(String origin) =>
     switch (origin.trim().toLowerCase()) {
-      'ocak' => 'assets/art/characters/hero_ocak_combat_base_layers.png',
-      'fırtına' => 'assets/art/characters/hero_firtina_combat_base_layers.png',
-      'taç' => 'assets/art/characters/hero_tac_combat_base_layers.png',
+      'ocak' => 'assets/art/characters/hero_ocak_combat_atlas_v2.png',
+      'fırtına' => 'assets/art/characters/hero_firtina_combat_atlas_v2.png',
+      'taç' => 'assets/art/characters/hero_tac_combat_atlas_v2.png',
       _ => heroCombatBaseAsset,
     };
 

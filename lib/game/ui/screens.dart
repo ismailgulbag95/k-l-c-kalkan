@@ -260,10 +260,10 @@ class _CharacterCreatorState extends State<CharacterCreator> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(gameText(context, 'ui.creator.title')),
-      leading: IconButton(
-        tooltip: gameText(context, 'ui.common.back'),
+      leading: _labelledIconButton(
+        label: gameText(context, 'ui.common.back'),
         onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back),
+        icon: Icons.arrow_back,
       ),
     ),
     body: SafeArea(
@@ -333,6 +333,15 @@ class _CharacterCreatorState extends State<CharacterCreator> {
                 children: [
                   for (final choice in ['Kıyı', 'Ocak', 'Fırtına', 'Taç'])
                     ChoiceChip(
+                      avatar: SizedBox(
+                        width: 25,
+                        height: 38,
+                        child: HeroAppearanceOptionPreview(
+                          kind: HeroAppearanceOptionKind.body,
+                          optionId: 'body_02',
+                          origin: choice,
+                        ),
+                      ),
                       label: Text(
                         gameText(context, switch (choice) {
                           'Kıyı' => 'ui.origin.coast',
@@ -2120,10 +2129,10 @@ class _AppearanceEditorPageState extends State<AppearanceEditorPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(gameText(context, 'ui.appearance.title')),
-        leading: IconButton(
-          tooltip: gameText(context, 'ui.common.back'),
+        leading: _labelledIconButton(
+          label: gameText(context, 'ui.common.back'),
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
+          icon: Icons.arrow_back,
         ),
       ),
       body: SafeArea(
@@ -2327,6 +2336,10 @@ class _MasteryTile extends StatelessWidget {
         controller.save.masteries.contains(
           '${item.id.substring(0, item.id.length - 1)}${tier - 1}',
         );
+    final canUnlock = previous && controller.save.unspentMasteryPoints > 0;
+    final unlockLabel = gameText(context, 'ui.mastery.unlock', {
+      'name': localizedContent(context, 'mastery', item.id, 'name'),
+    });
     return ListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
@@ -2353,14 +2366,12 @@ class _MasteryTile extends StatelessWidget {
       ),
       trailing: unlocked
           ? const Icon(Icons.check, color: GamePalette.teal)
-          : IconButton(
-              tooltip: gameText(context, 'ui.mastery.unlock', {
-                'name': localizedContent(context, 'mastery', item.id, 'name'),
-              }),
-              onPressed: previous && controller.save.unspentMasteryPoints > 0
+          : _labelledIconButton(
+              label: unlockLabel,
+              onPressed: canUnlock
                   ? () => controller.unlockMastery(item.id)
                   : null,
-              icon: const Icon(Icons.add_circle_outline),
+              icon: Icons.add_circle_outline,
             ),
     );
   }
@@ -3857,9 +3868,9 @@ class CombatStatusBadge extends StatelessWidget {
   const CombatStatusBadge({
     super.key,
     required this.status,
-    this.stacks,
+    int? stacks,
     int? stackCount,
-    this.remainingTurns,
+    int? remainingTurns,
     int? turnsRemaining,
   }) : stacks = stacks ?? stackCount,
        remainingTurns = remainingTurns ?? turnsRemaining;
@@ -4702,10 +4713,10 @@ class _BattlePageState extends State<BattlePage> {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        tooltip: gameText(context, 'ui.common.back'),
+                      _labelledIconButton(
+                        label: gameText(context, 'ui.common.back'),
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back),
+                        icon: Icons.arrow_back,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -4968,10 +4979,10 @@ class _BattlePageState extends State<BattlePage> {
                     ),
                   Row(
                     children: [
-                      IconButton(
-                        tooltip: gameText(context, 'ui.battle.leave'),
+                      _labelledIconButton(
+                        label: gameText(context, 'ui.battle.leave'),
                         onPressed: _working ? null : _leave,
-                        icon: const Icon(Icons.close),
+                        icon: Icons.close,
                       ),
                       Expanded(
                         child: Column(
@@ -5843,3 +5854,19 @@ void _showMessage(
     ),
   );
 }
+
+Widget _labelledIconButton({
+  required String label,
+  required IconData icon,
+  required VoidCallback? onPressed,
+}) => Semantics(
+  container: true,
+  explicitChildNodes: true,
+  label: label,
+  button: true,
+  enabled: onPressed != null,
+  onTap: onPressed,
+  child: ExcludeSemantics(
+    child: IconButton(tooltip: label, onPressed: onPressed, icon: Icon(icon)),
+  ),
+);

@@ -5,7 +5,6 @@ import 'package:ash_circuit/game/l10n/game_localizations.dart';
 import 'package:ash_circuit/game/ui/design.dart';
 import 'package:ash_circuit/game/ui/screens.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void _setTestViewport(WidgetTester tester) {

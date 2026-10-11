@@ -9,6 +9,6 @@ void main() {
     final font = await rootBundle.load('assets/fonts/NotoSans-Variable.ttf');
 
     expect(font.lengthInBytes, greaterThan(100000));
-    expect(buildGameTheme().fontFamily, 'Noto Sans');
+    expect(buildGameTheme().textTheme.bodyMedium?.fontFamily, 'Noto Sans');
   });
 }

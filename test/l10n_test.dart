@@ -203,7 +203,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('fighter preview follows the selected appearance', (
+  testWidgets('fighter preview reflects origin and hides failed options', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1000, 2000);
@@ -221,55 +221,26 @@ void main() {
     );
 
     final portrait = find.byType(FighterArt);
+    expect(tester.widget<FighterArt>(portrait).origin, 'Kıyı');
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Ocak'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<FighterArt>(portrait).origin, 'Ocak');
+    for (final removedOption in [
+      'Saç',
+      'Saç biçimi',
+      'Sakal',
+      'Ten tonu',
+      'Ten rengi',
+      'Yüz kılı',
+      'Renk vurgusu',
+      'Ana renk vurgusu',
+      'İkincil renk vurgusu',
+    ]) {
+      expect(find.text(removedOption), findsNothing, reason: removedOption);
+    }
     expect(
-      tester.widget<FighterArt>(portrait).portraitAsset,
-      heroArtForAppearance('Kıyı'),
-    );
-    await tester.tap(find.text('Ocak'));
-    await tester.pump();
-    expect(
-      tester.widget<FighterArt>(portrait).portraitAsset,
-      heroArtForAppearance('Ocak'),
-    );
-
-    final primaryAccent = find.byKey(
-      const ValueKey('creator.primaryAccent.accent_05'),
-    );
-    await tester.scrollUntilVisible(
-      primaryAccent,
-      240,
-      scrollable: find
-          .descendant(
-            of: find.byType(CharacterCreator),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    await tester.tap(primaryAccent);
-    await tester.pump();
-    expect(
-      tester.widget<FighterArt>(portrait).customization?.primaryAccentId,
-      'accent_05',
-    );
-
-    final secondaryAccent = find.byKey(
-      const ValueKey('creator.secondaryAccent.accent_08'),
-    );
-    await tester.scrollUntilVisible(
-      secondaryAccent,
-      240,
-      scrollable: find
-          .descendant(
-            of: find.byType(CharacterCreator),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    await tester.tap(secondaryAccent);
-    await tester.pump();
-    expect(
-      tester.widget<FighterArt>(portrait).customization?.secondaryAccentId,
-      'accent_08',
+      find.byKey(const ValueKey('creator.facialHair.facial_hair_00')),
+      findsNothing,
     );
     expect(find.text('İsabet'), findsOneWidget);
     controller.dispose();

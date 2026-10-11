@@ -154,9 +154,19 @@ void main() {
       await tester.tap(editButton);
       await tester.pumpAndSettle();
       expect(find.byType(AppearanceEditorPage), findsOneWidget);
-      expect(find.text('Yüz kılı'), findsNothing);
-      expect(find.text('Ana renk vurgusu'), findsNothing);
-      expect(find.text('İkincil renk vurgusu'), findsNothing);
+      for (final removedOption in [
+        'Saç',
+        'Saç biçimi',
+        'Sakal',
+        'Ten tonu',
+        'Ten rengi',
+        'Yüz kılı',
+        'Renk vurgusu',
+        'Ana renk vurgusu',
+        'İkincil renk vurgusu',
+      ]) {
+        expect(find.text(removedOption), findsNothing, reason: removedOption);
+      }
 
       final previewFinder = find.byKey(const ValueKey('appearance.preview'));
       Finder editorScrollable() => find
@@ -215,9 +225,19 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Yüz kılı'), findsNothing);
-        expect(find.text('Ana renk vurgusu'), findsNothing);
-        expect(find.text('İkincil renk vurgusu'), findsNothing);
+        for (final removedOption in [
+          'Saç',
+          'Saç biçimi',
+          'Sakal',
+          'Ten tonu',
+          'Ten rengi',
+          'Yüz kılı',
+          'Renk vurgusu',
+          'Ana renk vurgusu',
+          'İkincil renk vurgusu',
+        ]) {
+          expect(find.text(removedOption), findsNothing, reason: removedOption);
+        }
 
         expect(
           find.byKey(const ValueKey('creator.body.body_01')),
@@ -226,11 +246,33 @@ void main() {
 
         final originChoice = find.widgetWithText(ChoiceChip, 'Ocak');
         expect(originChoice, findsOneWidget);
+        for (final origin in ['Kıyı', 'Ocak', 'Fırtına', 'Taç']) {
+          final choice = find.widgetWithText(ChoiceChip, origin);
+          expect(choice, findsOneWidget, reason: origin);
+          expect(
+            find.descendant(
+              of: choice,
+              matching: find.byType(HeroAppearanceOptionPreview),
+            ),
+            findsOneWidget,
+            reason: '$origin has a character preview',
+          );
+        }
+        expect(
+          heroCombatBaseAssetForOrigin(
+            tester.widget<FighterArt>(find.byType(FighterArt)).origin,
+          ),
+          'assets/art/characters/hero_kiyi_combat_atlas_v2.png',
+        );
         await tester.tap(originChoice);
         await tester.pumpAndSettle();
+        final selectedFighter = tester.widget<FighterArt>(
+          find.byType(FighterArt),
+        );
+        expect(selectedFighter.origin, 'Ocak');
         expect(
-          tester.widget<FighterArt>(find.byType(FighterArt)).origin,
-          'Ocak',
+          heroCombatBaseAssetForOrigin(selectedFighter.origin),
+          'assets/art/characters/hero_ocak_combat_atlas_v2.png',
         );
 
         controller.dispose();

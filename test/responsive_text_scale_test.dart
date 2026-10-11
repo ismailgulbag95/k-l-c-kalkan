@@ -46,12 +46,16 @@ void main() {
     },
   );
 
-  testWidgets('default hero appearance has no artificial skin color overlay', (
+  testWidgets('legacy skin tone values do not enter the active art selection', (
     tester,
   ) async {
     final controller = GameController(
       storage: MemorySaveStorage()
-        ..value = const GameSave(hasHero: true, language: 'en'),
+        ..value = const GameSave(
+          hasHero: true,
+          skinToneId: 'skin_08',
+          language: 'en',
+        ),
     );
     await controller.initialize();
 
@@ -67,7 +71,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final hero = tester.widget<FighterArt>(find.byType(FighterArt).first);
-      expect(hero.customization?.skinToneId, 'skin_01');
+      expect(hero.customization?.isDefault, isTrue);
       expect(tester.takeException(), isNull);
     } finally {
       controller.dispose();

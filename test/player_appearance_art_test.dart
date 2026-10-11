@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  tearDown(clearDecodedImagesCache);
 
   test('body proportion IDs map to unique in-bounds atlas cells', () {
     const atlasSize = Size(1536, 1024);
@@ -67,18 +68,24 @@ void main() {
 
   testWidgets('origin selection paints distinct character art', (tester) async {
     final origins = ['Kıyı', 'Ocak', 'Fırtına', 'Taç'];
-    final renders = <String>[];
-    for (final origin in origins) {
-      renders.addAll(
-        await _renderSelections(
-          tester,
-          const [HeroAppearanceSelection()],
-          origin: origin,
-          size: const Size(180, 190),
-        ),
+    for (final size in [const Size(126, 156), const Size(180, 190)]) {
+      final renders = <String>[];
+      for (final origin in origins) {
+        renders.addAll(
+          await _renderSelections(
+            tester,
+            const [HeroAppearanceSelection()],
+            origin: origin,
+            size: size,
+          ),
+        );
+      }
+      _expectDistinctRenders(
+        renders,
+        origins,
+        'origin at ${size.width}x${size.height}',
       );
     }
-    _expectDistinctRenders(renders, origins, 'origin');
   });
 
   testWidgets('body proportions paint distinctly for each origin', (
@@ -177,9 +184,9 @@ void _expectDistinctRenders(
 }
 
 Future<void> _waitForCustomPaint(WidgetTester tester, Finder finder) async {
-  for (var attempt = 0; attempt < 25 && finder.evaluate().isEmpty; attempt++) {
+  for (var attempt = 0; attempt < 100 && finder.evaluate().isEmpty; attempt++) {
     await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
     await tester.pump();
   }

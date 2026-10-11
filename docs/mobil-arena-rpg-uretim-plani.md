@@ -909,11 +909,11 @@ Tek kişi birden çok rol üstlenebilir; ancak tasarım kartı, asset manifesti 
 
 ### 13.14 Köken görünüşleri ve başarısız seçeneklerin kaldırılması (11 Ekim 2026)
 
-- Manuel testte dört kökenin seçilebildiği, ancak aynı oyuncu çizimini kullandığı ve sakal/renk seçeneklerinin görsel olarak başarısız olduğu bildirildi. Karakter yaratma ve görünüş düzenleyici artık sakal/yüz kılı, serbest saç, ten tonu ve renk vurgusu seçeneklerini göstermiyor.
-- `HeroAppearanceSelection` yalnızca gövde oranını taşır. `_HeroCustomizationPainter` ayrı yüz kılı atlası ve renk vurgusu vektörlerini çizmez; entegre baş/saç ve giyim rengi seçilen köken atlasında sabittir. Kuşanılmış ekipman ve `HeroWeaponArt` silahları çalışmaya devam eder.
-- Kıyı, Ocak, Fırtına ve Taç artık ayrı 1536×1024 saydam, 3×1 karakter atlaslarına eşlenir. Gövde oranı her atlasın üç hücresinden seçilir. Köken değeri yaratıcıda önizlemeye aktarılır, kayıt alanına yazılır ve dövüşçü, görünüş düzenleyici ve savaş görsellerinde aynı eşleme kullanılır.
+- Manuel testte dört kökenin seçilebildiği, ancak aynı oyuncu çizimini kullandığı ve sakal/renk seçeneklerinin görsel olarak başarısız olduğu bildirildi. Karakter yaratma ve görünüş düzenleyici artık sakal/yüz kılı, saç biçimi, ten tonu ve renk vurgusu seçeneklerini göstermiyor.
+- `HeroAppearanceSelection` yalnızca gövde oranını taşır. `_HeroCustomizationPainter` ayrı yüz kılı atlası ve renk vurgusu vektörlerini çizmez; her sabit karakterin yüzü, saç biçimi ve kıyafeti kendi sanatında tamamlanmış durumdadır. Kuşanılmış ekipman ve `HeroWeaponArt` silahları çalışmaya devam eder.
+- İlk dört atlas turu küçük önizlemede yeterince ayırt edilmediği için v2 çizimleri üretildi. Karakter yaratma ekranındaki dört köken seçeneği Kıyı, Ocak, Fırtına ve Taç için farklı yüz, beden silueti ve kıyafet kimliği taşıyan ayrı 1536×1024 saydam 3×1 atlaslara bağlanır; her atlasın üç hücresi ince, dengeli ve güçlü beden oranını gösterir. Köken yaratıcıdaki seçime ve önizlemeye bağlanır, kayıt alanına yazılır; dövüşçü, görünüş düzenleyici ve savaş ekranında aynı eşleme kullanılır. Görünüş düzenleyici yalnızca beden oranını değiştirir.
 - `GameSave` içindeki eski saç/ten/yüz kılı/renk alanları eski kayıtların açılabilmesi için tutulur; hiçbirinin çizim etkisi yoktur. Yeni dövüşçüler varsayılan değerlerle yazılır. Görünüş düzenleyicide gövde oranı kaydedildiğinde eski alanlar varsayılanlara temizlenir.
-- Test kapsamı dört atlasın benzersiz eşlenmesini, saydam ölçülerini, köken başına farklı çizim üretmesini, gövde oranlarını ve kaldırılmış kontrol gruplarının yokluğunu kapsar. Bu kapsam son toplu doğrulamada çalıştırılacaktır.
+- Test kapsamı dört v2 atlasının benzersiz eşlenmesini, saydam ölçülerini, köken ve beden seçimi başına farklı çizim üretmesini, yaratıcı seçiminden atlas eşlemesine geçişi ve kaldırılmış kontrol gruplarının yokluğunu kapsar. Bu kapsam son toplu doğrulamada çalıştırılacaktır.
 
 ## 14. Riskler ve azaltma planı
 
